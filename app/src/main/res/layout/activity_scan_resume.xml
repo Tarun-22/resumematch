@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/back_arrow_black"
+                android:contentDescription="Back"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan Resume"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Take a photo or upload a resume"
+            android:textSize="14sp"
+            android:textColor="#777777"
+            android:layout_marginBottom="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/buttonCamera"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Use Camera"
+                android:drawableStart="@android:drawable/ic_menu_camera"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1976D2"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/buttonUpload"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Upload Image"
+                android:drawableStart="@android:drawable/ic_menu_gallery"
+                android:textColor="#1976D2"
+                android:backgroundTint="#EEEEEE" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textOCRPreview"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:text="OCR preview will appear here..."
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:padding="12dp"
+            android:layout_marginTop="24dp"
+            android:background="@android:drawable/editbox_background_normal"
+            android:gravity="top"
+            android:layout_marginBottom="16dp" />
+    </LinearLayout>
+</ScrollView>
