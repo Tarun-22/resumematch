@@ -31,7 +31,7 @@ public class ResumeAdapter extends RecyclerView.Adapter<ResumeAdapter.ResumeView
         Resume resume = resumeList.get(position);
         holder.textResumeId.setText(resume.getId());
         holder.textResumeDate.setText(resume.getDate());
-        holder.textMatchScore.setText(resume.getMatch());
+        holder.textMatchScore.setText(String.valueOf(resume.getMatch()));
     }
 
     @Override

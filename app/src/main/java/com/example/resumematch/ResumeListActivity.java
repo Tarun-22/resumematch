@@ -33,9 +33,9 @@ public class ResumeListActivity extends AppCompatActivity {
         backArrow.setOnClickListener(v -> finish());
 
         resumeList = new ArrayList<>();
-        resumeList.add(new Resume("RES-001", "2024-01-15", "85% Match"));
-        resumeList.add(new Resume("RES-002", "2024-01-14", "72% Match"));
-        resumeList.add(new Resume("RES-003", "2024-01-13", "91% Match"));
+        resumeList.add(new Resume("RES-001", "2024-01-15", "85% Match", "60078"));
+        resumeList.add(new Resume("RES-002", "2024-01-14", "72% Match", "60054"));
+        resumeList.add(new Resume("RES-003", "2024-01-13", "91% Match", "60091"));
 
         resumeAdapter = new ResumeAdapter(resumeList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
