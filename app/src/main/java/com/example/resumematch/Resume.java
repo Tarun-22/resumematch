@@ -1,12 +1,18 @@
 package com.example.resumematch;
 
-public class Resume {
-    String id, date, match;
+import java.util.List;
 
-    public Resume(String id, String date, String match) {
+public class Resume {
+    private String id;
+    private String date;
+    private String match;
+    private String jobId;
+
+    public Resume(String id, String date, String match, String jobId) {
         this.id = id;
         this.date = date;
         this.match = match;
+        this.jobId = jobId;
     }
 
     public String getId() {
@@ -19,5 +25,9 @@ public class Resume {
 
     public String getMatch() {
         return match;
+    }
+
+    public String getJobId() {
+        return jobId;
     }
 }

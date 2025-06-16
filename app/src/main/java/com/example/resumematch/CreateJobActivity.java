@@ -7,6 +7,9 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 public class CreateJobActivity extends AppCompatActivity {
 
     EditText jobTitleInput, jobDescriptionInput;
@@ -34,9 +37,10 @@ public class CreateJobActivity extends AppCompatActivity {
             String desc = jobDescriptionInput.getText().toString().trim();
 
             if (!title.isEmpty()) {
-                JobPost newJob = new JobPost(title, 0);
-
+                JobPost newJob = new JobPost(UUID.randomUUID().toString(), title, desc, new ArrayList<String>(), new ArrayList<Resume>());
+                JobStorage.addJob(newJob);
                 finish(); // Go back to previous screen
+
             } else {
                 jobTitleInput.setError("Job title required");
             }
