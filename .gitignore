@@ -1,74 +1,15 @@
-# Built application files
-*.apk
-*.ap_
-*.aab
-
-# Files for the Dalvik VM
-*.dex
-
-# Java class files
-*.class
-
-# Generated files
-gen/
-bin/
-out/
-build/
-
-# Gradle files
-.gradle/
-build/
-
-# Local configuration file (sdk path etc)
-local.properties
-
-# Log files
-*.log
-
-# Android Studio/IntelliJ
-.idea/
 *.iml
-*.ipr
-*.iws
-*.jks
-
-# Keystore files
-*.keystore
-*.jks
-
-# Gradle cache and wrapper logs
-.gradle/
-gradle-app.setting
-gradlew
-gradlew.bat
-
-# NDK
-obj/
-
-# Proguard
-proguard/
-
-# Misc
-*.swp
-*.swo
-*.tmp
-*.DS_Store
-
-# Coverage reports
-*.ec
-
-# Crashlytics/ Firebase
-crashlytics-build.properties
-fabric.properties
-
-# Fastlane
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots
-
-# IDE config folders
-.idea/
-*.iml
-
-# MacOS specific
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 .DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
