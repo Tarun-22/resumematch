@@ -69,18 +69,25 @@
                 android:textColor="#1976D2"
                 android:backgroundTint="#EEEEEE" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/textOCRPreview"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:text="OCR preview will appear here..."
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:padding="12dp"
-            android:layout_marginTop="24dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:gravity="top"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/textOCRPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="160dp"
+                android:maxHeight="400dp"
+                android:scrollbars="vertical"
+                android:text="OCR preview will appear here..."
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:padding="12dp"
+                android:layout_marginTop="24dp"
+                android:background="@android:drawable/editbox_background_normal"
+                android:gravity="top"
+                android:layout_marginBottom="16dp" />
+
+        </ScrollView>
     </LinearLayout>
 </ScrollView>

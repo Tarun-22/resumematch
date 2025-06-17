@@ -1,6 +1,7 @@
 package com.example.resumematch;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ public class ScanResumeActivity extends AppCompatActivity {
     TextView textOCRPreview;
 
     ActivityResultLauncher<Intent> imagePickerLauncher;
+
     Uri selectedImageUri;
 
     @Override
@@ -56,6 +58,9 @@ public class ScanResumeActivity extends AppCompatActivity {
             imagePickerLauncher.launch(intent);
         });
 
+        textOCRPreview.setMovementMethod(new android.text.method.ScrollingMovementMethod());
+
+
         buttonCamera.setOnClickListener(v ->
                 textOCRPreview.setText("📷 Camera scanning coming soon..."));
     }
@@ -77,6 +82,10 @@ public class ScanResumeActivity extends AppCompatActivity {
                     .addOnSuccessListener(visionText -> {
                         String resultText = visionText.getText();
                         textOCRPreview.setText(resultText.isEmpty() ? "No text found." : resultText);
+//                        String ocrText = "📷 Scanned via Camera (mock text)..."; // Replace with actual OCR text later
+//                        textOCRPreview.setText(ocrText);
+                        Log.d("OCR_RESULT", resultText); // This will print to Logcat
+
                     })
                     .addOnFailureListener(e -> {
                         textOCRPreview.setText("❌ OCR failed: " + e.getMessage());
