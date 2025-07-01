@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ScanResumeActivity extends AppCompatActivity {
 
+    //here we are creating the varibables
     ImageView backButton;
     Button buttonCamera, buttonUpload;
     TextView textOCRPreview;
@@ -54,6 +55,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                     }
                 });
 
+        //setting the onclick listener for this button which helps to upload the image
         buttonUpload.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent);
@@ -61,11 +63,12 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         textOCRPreview.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 
-
+        // as of now we didnt connected camera, so we just set the demo text in preview
         buttonCamera.setOnClickListener(v ->
                 textOCRPreview.setText("Camera scanning coming soon..."));
     }
 
+    //From gpt, we got this function to run the OCR by connecting ML Kit
     private void runOCR(Uri imageUri) {
         try {
             Bitmap bitmap;
@@ -78,6 +81,7 @@ public class ScanResumeActivity extends AppCompatActivity {
             InputImage image = InputImage.fromBitmap(bitmap, 0);
             TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
+            //here we are setting the text preview with text "Scanning"
             textOCRPreview.setText("Scanning...");
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
@@ -92,6 +96,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                     });
 
         } catch (Exception e) {
+            //if anything wrong happens, we are displaying the error message
             textOCRPreview.setText("Error loading image: " + e.getMessage());
         }
     }
