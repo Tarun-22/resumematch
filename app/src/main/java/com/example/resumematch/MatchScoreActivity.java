@@ -17,6 +17,7 @@ import android.graphics.Color;
 
 public class MatchScoreActivity extends AppCompatActivity {
 
+    //creating the variables for button,score and containers
     ImageView backArrow;
     TextView textScore;
     FlowLayout matchedContainer, missingContainer;
@@ -27,21 +28,24 @@ public class MatchScoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_score);
 
+        //connecting the variables to ui elements from xml using id's
         backArrow = findViewById(R.id.backArrow);
         textScore = findViewById(R.id.textScore);
         matchedContainer = findViewById(R.id.matchedKeywordsContainer);
         missingContainer = findViewById(R.id.missingKeywordsContainer);
         buttonBack = findViewById(R.id.buttonBack);
 
+        //setting the onclick events with a function to these buttons
         backArrow.setOnClickListener(v -> finish());
         buttonBack.setOnClickListener(v -> finish());
 
-
-        setKeywordChips(matchedContainer, new String[]{"React", "TypeScript", "Node.js", "REST APIs", "Agile"}, true);
-        setKeywordChips(missingContainer, new String[]{"Docker", "Kubernetes", "AWS"}, false);
+        //added some demo keywords to get the matching score
+        settingkeywordchips(matchedContainer, new String[]{"React", "TypeScript", "Node.js", "REST APIs", "Agile"}, true);
+        settingkeywordchips(missingContainer, new String[]{"Docker", "Kubernetes", "AWS"}, false);
     }
 
-    private void setKeywordChips(FlowLayout container, String[] keywords, boolean matched) {
+    // Got this function from gpt on how to set the chips
+    private void settingkeywordchips(FlowLayout container, String[] keywords, boolean matched) {
         container.removeAllViews();
         for (String keyword : keywords) {
             TextView chip = new TextView(this);
