@@ -14,6 +14,7 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.JobViewH
 
     private List<JobPost> jobList;
 
+    //used gpt to know how to create the adapter
     public JobPostAdapter(List<JobPost> jobList) {
         this.jobList = jobList;
     }

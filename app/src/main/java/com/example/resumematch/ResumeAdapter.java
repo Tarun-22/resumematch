@@ -14,6 +14,7 @@ public class ResumeAdapter extends RecyclerView.Adapter<ResumeAdapter.ResumeView
 
     List<Resume> resumeList;
 
+    //used gpt to get to know for this adapter
     public ResumeAdapter(List<Resume> resumeList) {
         this.resumeList = resumeList;
     }
