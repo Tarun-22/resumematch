@@ -36,7 +36,7 @@ public class MatchScoreActivity extends AppCompatActivity {
         backArrow.setOnClickListener(v -> finish());
         buttonBack.setOnClickListener(v -> finish());
 
-        // Hardcoded for now (replace with intent data if needed)
+
         setKeywordChips(matchedContainer, new String[]{"React", "TypeScript", "Node.js", "REST APIs", "Agile"}, true);
         setKeywordChips(missingContainer, new String[]{"Docker", "Kubernetes", "AWS"}, false);
     }

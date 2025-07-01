@@ -39,7 +39,7 @@ public class CreateJobActivity extends AppCompatActivity {
             if (!title.isEmpty()) {
                 JobPost newJob = new JobPost(UUID.randomUUID().toString(), title, desc, new ArrayList<String>(), new ArrayList<Resume>());
                 JobStorage.addJob(newJob);
-                finish(); // Go back to previous screen
+                finish();
 
             } else {
                 jobTitleInput.setError("Job title required");

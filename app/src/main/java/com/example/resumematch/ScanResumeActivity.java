@@ -36,6 +36,7 @@ public class ScanResumeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_resume);
 
+        // here we are declaring the variables for button, camera, and the text for preview
         backButton = findViewById(R.id.backButton);
         buttonCamera = findViewById(R.id.buttonCamera);
         buttonUpload = findViewById(R.id.buttonUpload);
@@ -43,7 +44,7 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> finish());
 
-        // Register image picker launcher
+        //creating the launcher to pick the image
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -62,7 +63,7 @@ public class ScanResumeActivity extends AppCompatActivity {
 
 
         buttonCamera.setOnClickListener(v ->
-                textOCRPreview.setText("📷 Camera scanning coming soon..."));
+                textOCRPreview.setText("Camera scanning coming soon..."));
     }
 
     private void runOCR(Uri imageUri) {
@@ -77,23 +78,21 @@ public class ScanResumeActivity extends AppCompatActivity {
             InputImage image = InputImage.fromBitmap(bitmap, 0);
             TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
-            textOCRPreview.setText("🔍 Scanning...");
+            textOCRPreview.setText("Scanning...");
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
                         String resultText = visionText.getText();
                         textOCRPreview.setText(resultText.isEmpty() ? "No text found." : resultText);
-//                        String ocrText = "📷 Scanned via Camera (mock text)..."; // Replace with actual OCR text later
-//                        textOCRPreview.setText(ocrText);
-                        Log.d("OCR_RESULT", resultText); // This will print to Logcat
+                        Log.d("OCR_RESULT", resultText);
 
                     })
                     .addOnFailureListener(e -> {
-                        textOCRPreview.setText("❌ OCR failed: " + e.getMessage());
+                        textOCRPreview.setText("OCR failed: " + e.getMessage());
                         Toast.makeText(this, "OCR failed", Toast.LENGTH_SHORT).show();
                     });
 
         } catch (Exception e) {
-            textOCRPreview.setText("❌ Error loading image: " + e.getMessage());
+            textOCRPreview.setText("Error loading image: " + e.getMessage());
         }
     }
 }
