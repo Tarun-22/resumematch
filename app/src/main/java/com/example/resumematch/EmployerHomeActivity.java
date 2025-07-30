@@ -2,10 +2,14 @@ package com.example.resumematch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 public class EmployerHomeActivity extends AppCompatActivity {
 
@@ -23,6 +27,28 @@ public class EmployerHomeActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerJobPosts);
         buttonCreateJob = findViewById(R.id.buttonCreateJob);
 
+        // Add some sample data if the list is empty
+        if (JobStorage.jobList.isEmpty()) {
+            JobPost sampleJob1 = new JobPost(
+                UUID.randomUUID().toString(),
+                "Senior Software Engineer",
+                "We are looking for a senior software engineer...",
+                new ArrayList<>(),
+                new ArrayList<>()
+            );
+            JobPost sampleJob2 = new JobPost(
+                UUID.randomUUID().toString(),
+                "Product Manager",
+                "We are looking for a product manager...",
+                new ArrayList<>(),
+                new ArrayList<>()
+            );
+            JobStorage.addJob(sampleJob1);
+            JobStorage.addJob(sampleJob2);
+        }
+
+        Log.d("EmployerHome", "Job list size: " + JobStorage.jobList.size());
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         jobAdapter = new JobPostAdapter(JobStorage.jobList);
         recyclerView.setAdapter(jobAdapter);
@@ -37,6 +63,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("EmployerHome", "onResume - Job list size: " + JobStorage.jobList.size());
         jobAdapter.notifyDataSetChanged();
     }
 }

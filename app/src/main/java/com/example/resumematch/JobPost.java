@@ -12,12 +12,12 @@ public class JobPost {
 
 
     public JobPost(String id, String title, String description, List<String> keywords, List<Resume> resumes) {
-        this.title = title;
-        this.resumeCount = resumeCount;
         this.id = id;
+        this.title = title;
         this.description = description;
         this.keywords = keywords;
         this.resumes = resumes;
+        this.resumeCount = resumes != null ? resumes.size() : 0;
     }
 
     public String getTitle() {
@@ -27,9 +27,12 @@ public class JobPost {
     public String getDescription() { return description; }
     public List<String> getKeywords() { return keywords; }
 
-
     public int getResumeCount() {
         return resumeCount;
+    }
+
+    public void setResumeCount(int resumeCount) {
+        this.resumeCount = resumeCount;
     }
 
     public List<Resume> getResumes() {
