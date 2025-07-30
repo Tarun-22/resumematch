@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_jobs"
+        android:icon="@drawable/ic_work"
+        android:title="Jobs"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_resumes"
+        android:icon="@drawable/ic_resume"
+        android:title="Resumes"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_create_job"
+        android:icon="@drawable/ic_add_job"
+        android:title="Create Job"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_scan_resume"
+        android:icon="@drawable/ic_camera"
+        android:title="Scan Resume"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_help"
+        android:icon="@drawable/ic_help"
+        android:title="Help"
+        app:showAsAction="never" />
+
+</menu> 
