@@ -15,30 +15,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResumeMatch"
         tools:targetApi="31">
-        <activity android:name=".EmployerHomeActivity" />
-        <activity android:name=".CreateJobActivity" />
-
-        <activity android:name=".ScanResumeActivity"
+        
+        <activity android:name=".MainActivity"
             android:exported="true">
-
-        </activity>
-
-        <activity android:name=".ResumeListActivity" />
-        <activity android:name=".MatchScoreActivity" />
-
-        <activity
-            android:name=".WelcomeActivity"
-            android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" />
+        
+        <activity android:name=".EmployerHomeActivity" />
+        <activity android:name=".CreateJobActivity" />
+        <activity android:name=".ScanResumeActivity" />
+        <activity android:name=".ResumeListActivity" />
+        <activity android:name=".MatchScoreActivity" />
+        <activity android:name=".WelcomeActivity" />
     </application>
 
 </manifest>
