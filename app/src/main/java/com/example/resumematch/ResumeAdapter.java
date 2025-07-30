@@ -45,9 +45,20 @@ public class ResumeAdapter extends RecyclerView.Adapter<ResumeAdapter.ResumeView
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MatchScoreActivity.class);
             intent.putExtra("resumeId", resume.getId());
-            intent.putExtra("matchScore", resume.getMatch());
+            intent.putExtra("matchScore", extractScoreFromMatch(resume.getMatch()));
+            intent.putExtra("resumeDate", resume.getDate());
             context.startActivity(intent);
         });
+    }
+
+    private int extractScoreFromMatch(String matchString) {
+        try {
+            // Extract number from "85% Match" format
+            String numberStr = matchString.replaceAll("[^0-9]", "");
+            return Integer.parseInt(numberStr);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override

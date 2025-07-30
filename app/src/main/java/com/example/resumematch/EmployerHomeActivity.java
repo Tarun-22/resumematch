@@ -32,14 +32,14 @@ public class EmployerHomeActivity extends AppCompatActivity {
             JobPost sampleJob1 = new JobPost(
                 UUID.randomUUID().toString(),
                 "Senior Software Engineer",
-                "We are looking for a senior software engineer...",
+                "We are looking for a senior software engineer with experience in Java, Spring Boot, React, and REST APIs. The ideal candidate should have knowledge of microservices architecture, Docker, and AWS. Experience with Agile methodologies and Git is required.",
                 new ArrayList<>(),
                 new ArrayList<>()
             );
             JobPost sampleJob2 = new JobPost(
                 UUID.randomUUID().toString(),
                 "Product Manager",
-                "We are looking for a product manager...",
+                "We are seeking a product manager with strong leadership skills and experience in project management. The candidate should have excellent communication skills and experience working with cross-functional teams. Knowledge of Agile and Scrum methodologies is essential.",
                 new ArrayList<>(),
                 new ArrayList<>()
             );

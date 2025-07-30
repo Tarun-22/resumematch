@@ -66,10 +66,11 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <FlowLayout
+        <LinearLayout
             android:id="@+id/matchedKeywordsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginBottom="16dp" />
 
         <!-- Missing Keywords -->
@@ -80,10 +81,11 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <FlowLayout
+        <LinearLayout
             android:id="@+id/missingKeywordsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginBottom="24dp" />
 
 

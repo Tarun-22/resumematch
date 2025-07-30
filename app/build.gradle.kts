@@ -32,7 +32,6 @@ android {
 }
 
 dependencies {
-    implementation("com.nex3z:flow-layout:1.3.3")
     implementation("com.google.mlkit:text-recognition:16.0.0")
     implementation(libs.appcompat)
     implementation(libs.material)

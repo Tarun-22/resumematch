@@ -45,6 +45,7 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.JobViewH
             Intent intent = new Intent(context, ResumeListActivity.class);
             intent.putExtra("jobId", job.getId());
             intent.putExtra("jobTitle", job.getTitle());
+            intent.putExtra("jobDescription", job.getDescription());
             context.startActivity(intent);
         });
     }
