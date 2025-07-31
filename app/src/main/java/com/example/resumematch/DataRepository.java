@@ -49,6 +49,10 @@ public class DataRepository {
         new GetJobCountAsyncTask(jobDao, callback).execute();
     }
 
+    public void deleteAllJobs(DatabaseCallback<Void> callback) {
+        new DeleteAllJobsAsyncTask(jobDao, callback).execute();
+    }
+
     // Resume operations with AsyncTask
     public void insertResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
         new InsertResumeAsyncTask(resumeDao, callback).execute(resume);
@@ -72,6 +76,10 @@ public class DataRepository {
 
     public void deleteResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
         new DeleteResumeAsyncTask(resumeDao, callback).execute(resume);
+    }
+
+    public void deleteAllResumes(DatabaseCallback<Void> callback) {
+        new DeleteAllResumesAsyncTask(resumeDao, callback).execute();
     }
 
     public void getResumeCount(DatabaseCallback<Integer> callback) {
@@ -543,6 +551,52 @@ public class DataRepository {
 
         @Override
         protected void onPostExecute(Integer result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class DeleteAllJobsAsyncTask extends AsyncTask<Void, Void, Void> {
+        private JobDao jobDao;
+        private DatabaseCallback<Void> callback;
+
+        DeleteAllJobsAsyncTask(JobDao jobDao, DatabaseCallback<Void> callback) {
+            this.jobDao = jobDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            jobDao.deleteAllJobs();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class DeleteAllResumesAsyncTask extends AsyncTask<Void, Void, Void> {
+        private ResumeDao resumeDao;
+        private DatabaseCallback<Void> callback;
+
+        DeleteAllResumesAsyncTask(ResumeDao resumeDao, DatabaseCallback<Void> callback) {
+            this.resumeDao = resumeDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            resumeDao.deleteAllResumes();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
             if (callback != null) {
                 callback.onResult(result);
             }

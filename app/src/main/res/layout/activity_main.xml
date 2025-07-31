@@ -173,8 +173,17 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
+    <!-- Fragment Container -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
     <!-- Activity List Section -->
     <LinearLayout
+        android:id="@+id/activity_list_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -230,17 +239,13 @@
         <!-- Scan Resume -->
         <Button
             android:id="@+id/btnScanResume"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/activity_button_background"
-            android:padding="16dp"
-            android:gravity="start|center_vertical"
+            android:layout_weight="1"
             android:text="Scan New Resume"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:drawableStart="@drawable/ic_camera_blue"
-            android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF9800"
+            android:layout_marginStart="8dp" />
 
     </LinearLayout>
 

@@ -32,6 +32,9 @@ public interface ResumeDao {
     @Query("DELETE FROM resumes WHERE id = :resumeId")
     void deleteResumeById(String resumeId);
 
+    @Query("DELETE FROM resumes")
+    void deleteAllResumes();
+
     @Query("SELECT COUNT(*) FROM resumes")
     int getResumeCount();
 

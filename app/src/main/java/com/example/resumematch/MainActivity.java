@@ -9,6 +9,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ImageView helpButton;
     private DataRepository dataRepository;
+    private View fragmentContainer;
+    private View activityListSection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         // Initialize progress bar and help button
         progressBar = findViewById(R.id.progressBar);
         helpButton = findViewById(R.id.helpButton);
+        
+        // Initialize fragment container and activity list section
+        fragmentContainer = findViewById(R.id.fragment_container);
+        activityListSection = findViewById(R.id.activity_list_section);
         
         // Set up navigation icon click listeners
         setupNavigationIcons();
@@ -105,22 +114,19 @@ public class MainActivity extends AppCompatActivity {
         // Posted Jobs
         ivPostedJobs.setOnClickListener(v -> {
             highlightNavigationIcon(ivPostedJobs, tvPostedJobs);
-            Intent intent = new Intent(MainActivity.this, EmployerHomeActivity.class);
-            startActivity(intent);
+            loadFragment(new JobListingsFragment());
         });
         
         // Recent Resumes
         ivRecentResumes.setOnClickListener(v -> {
             highlightNavigationIcon(ivRecentResumes, tvRecentResumes);
-            Intent intent = new Intent(MainActivity.this, RecentResumesActivity.class);
-            startActivity(intent);
+            loadFragment(new ResumeListFragment());
         });
         
         // Create Job
         ivCreateJob.setOnClickListener(v -> {
             highlightNavigationIcon(ivCreateJob, tvCreateJob);
-            Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
-            startActivity(intent);
+            loadFragment(new CreateJobFragment());
         });
         
         // Scan Resume
@@ -134,20 +140,17 @@ public class MainActivity extends AppCompatActivity {
     private void setupMainPageSections() {
         // Posted Jobs
         btnPostedJobs.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EmployerHomeActivity.class);
-            startActivity(intent);
+            loadFragment(new JobListingsFragment());
         });
         
         // Recent Resumes
         btnRecentResumes.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RecentResumesActivity.class);
-            startActivity(intent);
+            loadFragment(new ResumeListFragment());
         });
         
         // Create New Job
         btnCreateJob.setOnClickListener(v -> {
-            // Show options for job creation
-            showJobCreationOptions();
+            loadFragment(new CreateJobFragment());
         });
         
         // Scan New Resume
@@ -155,6 +158,25 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
+    }
+    
+    private void loadFragment(Fragment fragment) {
+        // Show fragment container and hide activity list section
+        fragmentContainer.setVisibility(View.VISIBLE);
+        activityListSection.setVisibility(View.GONE);
+        
+        // Load the fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+    
+    private void showMainContent() {
+        // Show activity list section and hide fragment container
+        fragmentContainer.setVisibility(View.GONE);
+        activityListSection.setVisibility(View.VISIBLE);
     }
     
     private void highlightNavigationIcon(ImageView selectedIcon, TextView selectedText) {
@@ -222,6 +244,19 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("Close", (dialog, which) -> {})
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show();
+    }
+    
+    @Override
+    public void onBackPressed() {
+        // Check if there are fragments in the back stack
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            // Pop the fragment and show main content
+            getSupportFragmentManager().popBackStack();
+            showMainContent();
+            resetNavigationIcons();
+        } else {
+            super.onBackPressed();
+        }
     }
     
     @Override
