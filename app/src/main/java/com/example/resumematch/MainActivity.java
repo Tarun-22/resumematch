@@ -2,16 +2,18 @@ package com.example.resumematch;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AlertDialog;
+
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
 
     private ImageView ivPostedJobs, ivRecentResumes, ivCreateJob, ivScanResume;
     private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
@@ -20,10 +22,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageView helpButton;
     private DataRepository dataRepository;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         
         // Initialize DataRepository
         dataRepository = new DataRepository(this);
@@ -41,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
         tvScanResume = findViewById(R.id.tvScanResume);
         
         // Initialize main page section buttons
+
         btnPostedJobs = findViewById(R.id.btnPostedJobs);
         btnRecentResumes = findViewById(R.id.btnRecentResumes);
         btnCreateJob = findViewById(R.id.btnCreateJob);
         btnScanResume = findViewById(R.id.btnScanResume);
+
         
         // Initialize progress bar and help button
         progressBar = findViewById(R.id.progressBar);
@@ -96,9 +102,11 @@ public class MainActivity extends AppCompatActivity {
     private void hideProgressBar() {
         // Hide progress bar after both counts are loaded
         progressBar.setVisibility(View.GONE);
+
     }
-    
+
     private void setupNavigationIcons() {
+
         // Posted Jobs
         ivPostedJobs.setOnClickListener(v -> {
             highlightNavigationIcon(ivPostedJobs, tvPostedJobs);
@@ -125,43 +133,40 @@ public class MainActivity extends AppCompatActivity {
             highlightNavigationIcon(ivScanResume, tvScanResume);
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
+
         });
     }
-    
-    private void setupMainPageSections() {
-        // Posted Jobs
+
+    private void setupMainButtons() {
         btnPostedJobs.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EmployerHomeActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, EmployerHomeActivity.class));
         });
-        
-        // Recent Resumes
+
         btnRecentResumes.setOnClickListener(v -> {
+
             Intent intent = new Intent(MainActivity.this, RecentResumesActivity.class);
             startActivity(intent);
+
         });
-        
-        // Create New Job
+
         btnCreateJob.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, CreateJobActivity.class));
         });
-        
-        // Scan New Resume
+
         btnScanResume.setOnClickListener(v -> {
+
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
+
         });
     }
-    
-    private void highlightNavigationIcon(ImageView selectedIcon, TextView selectedText) {
-        // Reset all icons to default state
-        resetNavigationIcons();
-        
-        // Highlight selected icon and text
+
+    private void updateActiveNavigation(ImageView selectedIcon, TextView selectedText) {
+        resetNavigationUI();
         selectedIcon.setAlpha(1.0f);
         selectedText.setTextColor(getResources().getColor(R.color.primary_blue));
     }
+
     
     private void resetNavigationIcons() {
         // Reset all icons to default state
@@ -212,5 +217,6 @@ public class MainActivity extends AppCompatActivity {
         if (dataRepository != null) {
             dataRepository.shutdown();
         }
+
     }
 }
