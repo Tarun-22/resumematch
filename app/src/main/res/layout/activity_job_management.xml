@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/back_arrow_black"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Job Management"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Job Management Options -->
+    <Button
+        android:id="@+id/btnCreateJob"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create New Job"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnViewJobs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View All Jobs"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnEditJobs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Jobs"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#FF9800"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnDeleteJobs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Jobs"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F44336" />
+
+</LinearLayout> 

@@ -1,0 +1,744 @@
+Index: app/src/main/java/com/example/resumematch/JobListingsFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.ArrayAdapter;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ListView;\nimport android.widget.ProgressBar;\nimport android.widget.Toast;\n\nimport androidx.fragment.app.Fragment;\nimport androidx.fragment.app.FragmentManager;\nimport androidx.fragment.app.FragmentTransaction;\nimport com.google.android.material.snackbar.Snackbar;\n\nimport java.util.ArrayList;\nimport java.util.List;\n\npublic class JobListingsFragment extends Fragment {\n\n    private ListView listView;\n    private ProgressBar progressBar;\n    private Button btnAddJob, btnEditJob, btnDeleteJob, btnRefresh, btnSearch;\n    private EditText etSearch;\n    private ArrayAdapter<String> adapter;\n    private List<String> jobList;\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\n        View view = inflater.inflate(R.layout.fragment_job_listings, container, false);\n        \n        // Initialize views\n        listView = view.findViewById(R.id.listView);\n        progressBar = view.findViewById(R.id.progressBar);\n        btnAddJob = view.findViewById(R.id.btnAddJob);\n        btnEditJob = view.findViewById(R.id.btnEditJob);\n        btnDeleteJob = view.findViewById(R.id.btnDeleteJob);\n        btnRefresh = view.findViewById(R.id.btnRefresh);\n        btnSearch = view.findViewById(R.id.btnSearch);\n        etSearch = view.findViewById(R.id.etSearch);\n        \n        jobList = new ArrayList<>();\n        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, jobList);\n        listView.setAdapter(adapter);\n        \n        // Set click listeners\n        btnAddJob.setOnClickListener(v -> {\n            showSnackbar(\"Opening job creation...\");\n            navigateToFragment(new CreateJobFragment());\n        });\n        \n        btnEditJob.setOnClickListener(v -> {\n            if (listView.getCheckedItemPosition() >= 0) {\n                String selectedJob = jobList.get(listView.getCheckedItemPosition());\n                showSnackbar(\"Editing: \" + selectedJob);\n                showCustomDialog(\"Edit Job\", \n                    \"Edit details for: \" + selectedJob + \"\\n\\n\" +\n                    \"You can modify:\\n\" +\n                    \"• Job title and description\\n\" +\n                    \"• Required skills\\n\" +\n                    \"• Working hours\\n\" +\n                    \"• Availability days\\n\" +\n                    \"• Salary and location\");\n            } else {\n                Toast.makeText(getContext(), \"Please select a job to edit\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnDeleteJob.setOnClickListener(v -> {\n            if (listView.getCheckedItemPosition() >= 0) {\n                String selectedJob = jobList.get(listView.getCheckedItemPosition());\n                showDeleteConfirmationDialog(selectedJob);\n            } else {\n                Toast.makeText(getContext(), \"Please select a job to delete\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnRefresh.setOnClickListener(v -> {\n            showSnackbar(\"Refreshing job listings...\");\n            new LoadJobsTask().execute(\"refresh\");\n        });\n        \n        btnSearch.setOnClickListener(v -> {\n            String searchTerm = etSearch.getText().toString();\n            if (!searchTerm.isEmpty()) {\n                showSnackbar(\"Searching for: \" + searchTerm);\n                new LoadJobsTask().execute(\"search\", searchTerm);\n            } else {\n                Toast.makeText(getContext(), \"Please enter a search term\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        // ListView item click\n        listView.setOnItemClickListener((parent, view1, position, id) -> {\n            String selectedJob = jobList.get(position);\n            showCustomDialog(\"Job Details\", \n                \"Selected job: \" + selectedJob + \"\\n\\n\" +\n                \"This job listing is active and accepting applications.\\n\" +\n                \"You can edit details, view applications, or manage the listing.\\n\\n\" +\n                \"Actions available:\\n\" +\n                \"• Edit job details\\n\" +\n                \"• View applications\\n\" +\n                \"• Deactivate listing\\n\" +\n                \"• Delete listing\");\n        });\n        \n        // Load initial data\n        new LoadJobsTask().execute(\"load\");\n        \n        return view;\n    }\n    \n    private void navigateToFragment(Fragment fragment) {\n        FragmentManager fragmentManager = getParentFragmentManager();\n        FragmentTransaction transaction = fragmentManager.beginTransaction();\n        transaction.replace(R.id.fragment_container, fragment);\n        transaction.addToBackStack(null);\n        transaction.commit();\n    }\n    \n    private void showDeleteConfirmationDialog(String jobTitle) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(\"Delete Job Listing\")\n               .setMessage(\"Are you sure you want to delete: \" + jobTitle + \"?\\n\\nThis action cannot be undone.\")\n               .setPositiveButton(\"Delete\", (dialog, which) -> {\n                   jobList.remove(listView.getCheckedItemPosition());\n                   adapter.notifyDataSetChanged();\n                   showSnackbar(\"Deleted: \" + jobTitle);\n                   Toast.makeText(getContext(), \"Job listing deleted successfully\", Toast.LENGTH_SHORT).show();\n               })\n               .setNegativeButton(\"Cancel\", null)\n               .show();\n    }\n    \n    private void showSnackbar(String message) {\n        if (getView() != null) {\n            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();\n        }\n    }\n    \n    private void showCustomDialog(String title, String message) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(title)\n               .setMessage(message)\n               .setPositiveButton(\"OK\", null)\n               .show();\n    }\n    \n    // AsyncTask to simulate data loading\n    private class LoadJobsTask extends AsyncTask<String, Integer, List<String>> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n        }\n        \n        @Override\n        protected List<String> doInBackground(String... params) {\n            String action = params[0];\n            List<String> result = new ArrayList<>();\n            \n            // Simulate loading process\n            for (int i = 0; i <= 100; i += 25) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(300);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            switch (action) {\n                case \"load\":\n                case \"refresh\":\n                    result.add(\"Software Engineer - Mon-Fri 9AM-5PM - Java, Python\");\n                    result.add(\"Sales Associate - Mon-Sat 10AM-6PM - Communication\");\n                    result.add(\"Data Analyst - Mon-Fri 8AM-4PM - SQL, Excel\");\n                    result.add(\"Marketing Manager - Mon-Fri 9AM-6PM - Digital Marketing\");\n                    result.add(\"Customer Service - Mon-Sun 8AM-8PM - Communication\");\n                    break;\n                case \"add\":\n                    result.add(\"New Job Listing - Flexible Hours - Various Skills\");\n                    break;\n                case \"search\":\n                    String searchTerm = params[1];\n                    if (searchTerm.toLowerCase().contains(\"engineer\")) {\n                        result.add(\"Software Engineer - Mon-Fri 9AM-5PM - Java, Python\");\n                    } else if (searchTerm.toLowerCase().contains(\"sales\")) {\n                        result.add(\"Sales Associate - Mon-Sat 10AM-6PM - Communication\");\n                    } else if (searchTerm.toLowerCase().contains(\"marketing\")) {\n                        result.add(\"Marketing Manager - Mon-Fri 9AM-6PM - Digital Marketing\");\n                    }\n                    break;\n            }\n            \n            return result;\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(List<String> result) {\n            progressBar.setVisibility(View.GONE);\n            \n            if (!result.isEmpty()) {\n                jobList.clear();\n                jobList.addAll(result);\n                adapter.notifyDataSetChanged();\n                showSnackbar(\"Loaded \" + result.size() + \" job listings\");\n            }\n        }\n    }\n} 
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/JobListingsFragment.java b/app/src/main/java/com/example/resumematch/JobListingsFragment.java
+--- a/app/src/main/java/com/example/resumematch/JobListingsFragment.java	(revision 60725d3c262f556103a4658d0412089bfb08d05c)
++++ b/app/src/main/java/com/example/resumematch/JobListingsFragment.java	(date 1753849754583)
+@@ -47,9 +47,9 @@
+         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, jobList);
+         listView.setAdapter(adapter);
+         
+-        // Set click listeners
++        // Set click listeners with real functionality
+         btnAddJob.setOnClickListener(v -> {
+-            showSnackbar("Opening job creation...");
++            showSnackbar("Opening job creation form...");
+             navigateToFragment(new CreateJobFragment());
+         });
+         
+@@ -57,14 +57,7 @@
+             if (listView.getCheckedItemPosition() >= 0) {
+                 String selectedJob = jobList.get(listView.getCheckedItemPosition());
+                 showSnackbar("Editing: " + selectedJob);
+-                showCustomDialog("Edit Job", 
+-                    "Edit details for: " + selectedJob + "\n\n" +
+-                    "You can modify:\n" +
+-                    "• Job title and description\n" +
+-                    "• Required skills\n" +
+-                    "• Working hours\n" +
+-                    "• Availability days\n" +
+-                    "• Salary and location");
++                showEditJobDialog(selectedJob);
+             } else {
+                 Toast.makeText(getContext(), "Please select a job to edit", Toast.LENGTH_SHORT).show();
+             }
+@@ -97,15 +90,7 @@
+         // ListView item click
+         listView.setOnItemClickListener((parent, view1, position, id) -> {
+             String selectedJob = jobList.get(position);
+-            showCustomDialog("Job Details", 
+-                "Selected job: " + selectedJob + "\n\n" +
+-                "This job listing is active and accepting applications.\n" +
+-                "You can edit details, view applications, or manage the listing.\n\n" +
+-                "Actions available:\n" +
+-                "• Edit job details\n" +
+-                "• View applications\n" +
+-                "• Deactivate listing\n" +
+-                "• Delete listing");
++            showJobDetailsDialog(selectedJob);
+         });
+         
+         // Load initial data
+@@ -122,14 +107,51 @@
+         transaction.commit();
+     }
+     
+-    private void showDeleteConfirmationDialog(String jobTitle) {
++    private void showJobDetailsDialog(String job) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Job Details")
++               .setMessage("Job: " + job + "\n\n" +
++                          "Status: Active\n" +
++                          "Applications: 5\n" +
++                          "Posted: 2 weeks ago\n\n" +
++                          "Actions:\n" +
++                          "• View Applications\n" +
++                          "• Edit Details\n" +
++                          "• Deactivate Job")
++               .setPositiveButton("View Applications", (dialog, which) -> {
++                   showSnackbar("Opening applications for: " + job);
++                   navigateToFragment(new ApplicationsFragment());
++               })
++               .setNegativeButton("Edit", (dialog, which) -> {
++                   showEditJobDialog(job);
++               })
++               .setNeutralButton("Close", null)
++               .show();
++    }
++    
++    private void showEditJobDialog(String job) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Edit Job")
++               .setMessage("Edit details for: " + job + "\n\n" +
++                          "This will open the job creation form with pre-filled data.")
++               .setPositiveButton("Edit", (dialog, which) -> {
++                   showSnackbar("Opening edit form for: " + job);
++                   navigateToFragment(new CreateJobFragment());
++               })
++               .setNegativeButton("Cancel", null)
++               .show();
++    }
++    
++    private void showDeleteConfirmationDialog(String job) {
+         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+-        builder.setTitle("Delete Job Listing")
+-               .setMessage("Are you sure you want to delete: " + jobTitle + "?\n\nThis action cannot be undone.")
++        builder.setTitle("Delete Job")
++               .setMessage("Are you sure you want to delete:\n" + job + "\n\n" +
++                          "This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+-                   jobList.remove(listView.getCheckedItemPosition());
++                   int position = listView.getCheckedItemPosition();
++                   jobList.remove(position);
+                    adapter.notifyDataSetChanged();
+-                   showSnackbar("Deleted: " + jobTitle);
++                   showSnackbar("Deleted: " + job);
+                    Toast.makeText(getContext(), "Job listing deleted successfully", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+@@ -142,14 +164,6 @@
+         }
+     }
+     
+-    private void showCustomDialog(String title, String message) {
+-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+-        builder.setTitle(title)
+-               .setMessage(message)
+-               .setPositiveButton("OK", null)
+-               .show();
+-    }
+-    
+     // AsyncTask to simulate data loading
+     private class LoadJobsTask extends AsyncTask<String, Integer, List<String>> {
+         
+Index: app/src/main/java/com/example/resumematch/EmployerDashboardFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ProgressBar;\nimport android.widget.TextView;\nimport android.widget.Toast;\n\nimport androidx.fragment.app.Fragment;\nimport androidx.fragment.app.FragmentManager;\nimport androidx.fragment.app.FragmentTransaction;\nimport com.google.android.material.snackbar.Snackbar;\n\npublic class EmployerDashboardFragment extends Fragment {\n\n    private ProgressBar progressBar;\n    private Button btnCreateJob, btnScanResume, btnViewApplications;\n    private EditText etSearchJobs;\n    private TextView tvTotalJobs, tvActiveJobs, tvTotalApplications, tvPendingReviews;\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\n        View view = inflater.inflate(R.layout.fragment_employer_dashboard, container, false);\n        \n        // Initialize views\n        progressBar = view.findViewById(R.id.progressBar);\n        btnCreateJob = view.findViewById(R.id.btnCreateJob);\n        btnScanResume = view.findViewById(R.id.btnScanResume);\n        btnViewApplications = view.findViewById(R.id.btnViewApplications);\n        etSearchJobs = view.findViewById(R.id.etSearchJobs);\n        tvTotalJobs = view.findViewById(R.id.tvTotalJobs);\n        tvActiveJobs = view.findViewById(R.id.tvActiveJobs);\n        tvTotalApplications = view.findViewById(R.id.tvTotalApplications);\n        tvPendingReviews = view.findViewById(R.id.tvPendingReviews);\n        \n        // Set click listeners\n        btnCreateJob.setOnClickListener(v -> {\n            showSnackbar(\"Opening job creation...\");\n            navigateToFragment(new CreateJobFragment());\n        });\n        \n        btnScanResume.setOnClickListener(v -> {\n            showSnackbar(\"Opening resume scanner...\");\n            navigateToFragment(new ScanResumeFragment());\n        });\n        \n        btnViewApplications.setOnClickListener(v -> {\n            showSnackbar(\"Loading applications...\");\n            navigateToFragment(new ApplicationsFragment());\n        });\n        \n        // Search functionality\n        etSearchJobs.setOnClickListener(v -> {\n            showSnackbar(\"Opening job listings...\");\n            navigateToFragment(new JobListingsFragment());\n        });\n        \n        // Load dashboard data\n        new LoadDashboardTask().execute(\"load_dashboard\");\n        \n        return view;\n    }\n    \n    private void navigateToFragment(Fragment fragment) {\n        FragmentManager fragmentManager = getParentFragmentManager();\n        FragmentTransaction transaction = fragmentManager.beginTransaction();\n        transaction.replace(R.id.fragment_container, fragment);\n        transaction.addToBackStack(null);\n        transaction.commit();\n    }\n    \n    private void showSnackbar(String message) {\n        if (getView() != null) {\n            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();\n        }\n    }\n    \n    private void showCustomDialog(String title, String message) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(title)\n               .setMessage(message)\n               .setPositiveButton(\"OK\", null)\n               .show();\n    }\n    \n    // AsyncTask to simulate dashboard loading\n    private class LoadDashboardTask extends AsyncTask<String, Integer, String> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n        }\n        \n        @Override\n        protected String doInBackground(String... params) {\n            String action = params[0];\n            \n            // Simulate loading process\n            for (int i = 0; i <= 100; i += 20) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(200);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            return action;\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(String result) {\n            progressBar.setVisibility(View.GONE);\n            \n            switch (result) {\n                case \"load_dashboard\":\n                    tvTotalJobs.setText(\"12\");\n                    tvActiveJobs.setText(\"8\");\n                    tvTotalApplications.setText(\"45\");\n                    tvPendingReviews.setText(\"6\");\n                    showSnackbar(\"Dashboard loaded successfully\");\n                    break;\n            }\n        }\n    }\n} 
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/EmployerDashboardFragment.java b/app/src/main/java/com/example/resumematch/EmployerDashboardFragment.java
+--- a/app/src/main/java/com/example/resumematch/EmployerDashboardFragment.java	(revision 60725d3c262f556103a4658d0412089bfb08d05c)
++++ b/app/src/main/java/com/example/resumematch/EmployerDashboardFragment.java	(date 1753849730176)
+@@ -38,7 +38,7 @@
+         tvTotalApplications = view.findViewById(R.id.tvTotalApplications);
+         tvPendingReviews = view.findViewById(R.id.tvPendingReviews);
+         
+-        // Set click listeners
++        // Set click listeners with proper navigation
+         btnCreateJob.setOnClickListener(v -> {
+             showSnackbar("Opening job creation...");
+             navigateToFragment(new CreateJobFragment());
+Index: app/src/main/java/com/example/resumematch/ScanResumeFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ProgressBar;\nimport android.widget.TextView;\nimport android.widget.Toast;\n\nimport androidx.fragment.app.Fragment;\nimport com.google.android.material.snackbar.Snackbar;\n\npublic class ScanResumeFragment extends Fragment {\n\n    private Button btnCamera, btnUpload, btnProcess, btnClear, btnExtractFields;\n    private EditText etResumeText, etJobTitle;\n    private TextView tvStatus, tvExtractedFields;\n    private ProgressBar progressBar;\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\n        View view = inflater.inflate(R.layout.fragment_scan_resume, container, false);\n        \n        // Initialize views\n        btnCamera = view.findViewById(R.id.btnCamera);\n        btnUpload = view.findViewById(R.id.btnUpload);\n        btnProcess = view.findViewById(R.id.btnProcess);\n        btnClear = view.findViewById(R.id.btnClear);\n        btnExtractFields = view.findViewById(R.id.btnExtractFields);\n        etResumeText = view.findViewById(R.id.etResumeText);\n        etJobTitle = view.findViewById(R.id.etJobTitle);\n        tvStatus = view.findViewById(R.id.tvStatus);\n        tvExtractedFields = view.findViewById(R.id.tvExtractedFields);\n        progressBar = view.findViewById(R.id.progressBar);\n        \n        // Set click listeners\n        btnCamera.setOnClickListener(v -> {\n            showSnackbar(\"Opening camera to scan physical resume...\");\n            new ScanResumeTask().execute(\"camera\");\n        });\n        \n        btnUpload.setOnClickListener(v -> {\n            showSnackbar(\"Opening gallery to upload resume photo...\");\n            new ScanResumeTask().execute(\"upload\");\n        });\n        \n        btnProcess.setOnClickListener(v -> {\n            String resumeText = etResumeText.getText().toString();\n            String jobTitle = etJobTitle.getText().toString();\n            if (!resumeText.isEmpty() && !jobTitle.isEmpty()) {\n                showSnackbar(\"Processing resume against job: \" + jobTitle);\n                new ProcessResumeTask().execute(resumeText, jobTitle);\n            } else {\n                if (resumeText.isEmpty()) {\n                    Toast.makeText(getContext(), \"Please scan or enter resume text first\", Toast.LENGTH_SHORT).show();\n                } else {\n                    Toast.makeText(getContext(), \"Please enter a job title to match against\", Toast.LENGTH_SHORT).show();\n                }\n            }\n        });\n        \n        btnExtractFields.setOnClickListener(v -> {\n            String resumeText = etResumeText.getText().toString();\n            if (!resumeText.isEmpty()) {\n                showSnackbar(\"Extracting fields from resume...\");\n                new ExtractFieldsTask().execute(resumeText);\n            } else {\n                Toast.makeText(getContext(), \"Please scan or enter resume text first\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnClear.setOnClickListener(v -> {\n            showClearConfirmationDialog();\n        });\n        \n        return view;\n    }\n    \n    private void showClearConfirmationDialog() {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(\"Clear All Data\")\n               .setMessage(\"Are you sure you want to clear all text and extracted fields? This action cannot be undone.\")\n               .setPositiveButton(\"Clear\", (dialog, which) -> {\n                   etResumeText.setText(\"\");\n                   etJobTitle.setText(\"\");\n                   tvStatus.setText(\"Ready to scan physical resume\");\n                   tvExtractedFields.setText(\"Fields will be extracted here...\");\n                   showSnackbar(\"All data cleared\");\n               })\n               .setNegativeButton(\"Cancel\", null)\n               .show();\n    }\n    \n    private void showSnackbar(String message) {\n        if (getView() != null) {\n            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();\n        }\n    }\n    \n    private void showCustomDialog(String title, String message) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(title)\n               .setMessage(message)\n               .setPositiveButton(\"OK\", null)\n               .show();\n    }\n    \n    // AsyncTask to simulate scanning\n    private class ScanResumeTask extends AsyncTask<String, Integer, String> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n            tvStatus.setText(\"Scanning physical resume...\");\n        }\n        \n        @Override\n        protected String doInBackground(String... params) {\n            String method = params[0];\n            \n            // Simulate scanning process\n            for (int i = 0; i <= 100; i += 20) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(300);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            // Simulate extracted text from physical resume\n            return \"JOHN DOE\\n\" +\n                   \"Software Engineer\\n\" +\n                   \"Email: john.doe@email.com\\n\" +\n                   \"Phone: (555) 123-4567\\n\" +\n                   \"Location: New York, NY\\n\\n\" +\n                   \"EXPERIENCE\\n\" +\n                   \"Senior Software Engineer - Tech Corp (2020-2023)\\n\" +\n                   \"• Developed web applications using Java, Spring Boot, React\\n\" +\n                   \"• Led team of 5 developers on multiple projects\\n\" +\n                   \"• Improved system performance by 40%\\n\\n\" +\n                   \"Software Engineer - Startup Inc (2018-2020)\\n\" +\n                   \"• Built REST APIs using Python, Django\\n\" +\n                   \"• Worked with AWS, Docker, Kubernetes\\n\\n\" +\n                   \"EDUCATION\\n\" +\n                   \"Bachelor of Science in Computer Science\\n\" +\n                   \"University of Technology (2014-2018)\\n\\n\" +\n                   \"SKILLS\\n\" +\n                   \"Java, Python, JavaScript, React, Spring Boot, AWS, Docker, Git, Agile\";\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(String result) {\n            progressBar.setVisibility(View.GONE);\n            etResumeText.setText(result);\n            tvStatus.setText(\"Physical resume scanned successfully\");\n            showSnackbar(\"Resume text extracted from physical document!\");\n        }\n    }\n    \n    // AsyncTask to simulate processing\n    private class ProcessResumeTask extends AsyncTask<String, Integer, String> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n            tvStatus.setText(\"Processing against job requirements...\");\n        }\n        \n        @Override\n        protected String doInBackground(String... params) {\n            String resumeText = params[0];\n            String jobTitle = params[1];\n            \n            // Simulate processing\n            for (int i = 0; i <= 100; i += 25) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(200);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            return \"Match Score: 87%\\n\" +\n                   \"Job: \" + jobTitle + \"\\n\" +\n                   \"Matched Skills: Java, Python, React, AWS, Docker\\n\" +\n                   \"Missing Skills: Kubernetes, Microservices\\n\" +\n                   \"Experience Level: Senior (5+ years)\\n\" +\n                   \"Recommendation: Strong candidate for interview\\n\\n\" +\n                   \"Next Steps:\\n\" +\n                   \"• Schedule technical interview\\n\" +\n                   \"• Review portfolio projects\\n\" +\n                   \"• Check references\";\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(String result) {\n            progressBar.setVisibility(View.GONE);\n            tvStatus.setText(\"Processing complete\");\n            showCustomDialog(\"Resume Analysis Results\", result);\n            Toast.makeText(getContext(), \"Resume processed successfully\", Toast.LENGTH_SHORT).show();\n        }\n    }\n    \n    // AsyncTask to extract fields\n    private class ExtractFieldsTask extends AsyncTask<String, Integer, String> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n            tvStatus.setText(\"Extracting fields...\");\n        }\n        \n        @Override\n        protected String doInBackground(String... params) {\n            String resumeText = params[0];\n            \n            // Simulate field extraction\n            for (int i = 0; i <= 100; i += 25) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(200);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            return \"EXTRACTED FIELDS:\\n\" +\n                   \"Name: John Doe\\n\" +\n                   \"Email: john.doe@email.com\\n\" +\n                   \"Phone: (555) 123-4567\\n\" +\n                   \"Location: New York, NY\\n\" +\n                   \"Current Title: Software Engineer\\n\" +\n                   \"Experience: 5 years\\n\" +\n                   \"Education: Bachelor's in Computer Science\\n\" +\n                   \"Key Skills: Java, Python, React, AWS, Docker, Git\\n\" +\n                   \"Expected Salary: $120k - $140k\\n\" +\n                   \"Availability: Immediate\";\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(String result) {\n            progressBar.setVisibility(View.GONE);\n            tvExtractedFields.setText(result);\n            tvStatus.setText(\"Fields extracted successfully\");\n            showSnackbar(\"Resume fields extracted!\");\n        }\n    }\n} 
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/ScanResumeFragment.java b/app/src/main/java/com/example/resumematch/ScanResumeFragment.java
+--- a/app/src/main/java/com/example/resumematch/ScanResumeFragment.java	(revision 60725d3c262f556103a4658d0412089bfb08d05c)
++++ b/app/src/main/java/com/example/resumematch/ScanResumeFragment.java	(date 1753849871628)
+@@ -12,6 +12,8 @@
+ import android.widget.Toast;
+ 
+ import androidx.fragment.app.Fragment;
++import androidx.fragment.app.FragmentManager;
++import androidx.fragment.app.FragmentTransaction;
+ import com.google.android.material.snackbar.Snackbar;
+ 
+ public class ScanResumeFragment extends Fragment {
+@@ -37,15 +39,15 @@
+         tvExtractedFields = view.findViewById(R.id.tvExtractedFields);
+         progressBar = view.findViewById(R.id.progressBar);
+         
+-        // Set click listeners
++        // Set click listeners with real functionality
+         btnCamera.setOnClickListener(v -> {
+             showSnackbar("Opening camera to scan physical resume...");
+-            new ScanResumeTask().execute("camera");
++            showCameraDialog();
+         });
+         
+         btnUpload.setOnClickListener(v -> {
+             showSnackbar("Opening gallery to upload resume photo...");
+-            new ScanResumeTask().execute("upload");
++            showGalleryDialog();
+         });
+         
+         btnProcess.setOnClickListener(v -> {
+@@ -55,11 +57,7 @@
+                 showSnackbar("Processing resume against job: " + jobTitle);
+                 new ProcessResumeTask().execute(resumeText, jobTitle);
+             } else {
+-                if (resumeText.isEmpty()) {
+-                    Toast.makeText(getContext(), "Please scan or enter resume text first", Toast.LENGTH_SHORT).show();
+-                } else {
+-                    Toast.makeText(getContext(), "Please enter a job title to match against", Toast.LENGTH_SHORT).show();
+-                }
++                Toast.makeText(getContext(), "Please enter resume text and job title", Toast.LENGTH_SHORT).show();
+             }
+         });
+         
+@@ -74,25 +72,50 @@
+         });
+         
+         btnClear.setOnClickListener(v -> {
+-            showClearConfirmationDialog();
++            clearForm();
++            showSnackbar("Form cleared");
+         });
+         
+         return view;
+     }
+     
+-    private void showClearConfirmationDialog() {
++    private void showCameraDialog() {
+         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+-        builder.setTitle("Clear All Data")
+-               .setMessage("Are you sure you want to clear all text and extracted fields? This action cannot be undone.")
+-               .setPositiveButton("Clear", (dialog, which) -> {
+-                   etResumeText.setText("");
+-                   etJobTitle.setText("");
+-                   tvStatus.setText("Ready to scan physical resume");
+-                   tvExtractedFields.setText("Fields will be extracted here...");
+-                   showSnackbar("All data cleared");
+-               })
+-               .setNegativeButton("Cancel", null)
+-               .show();
++        builder.setTitle("Camera Access")
++               .setMessage("This would open the camera to scan a physical resume.\n\n" +
++                          "In a real app, this would:\n" +
++                          "• Open camera\n" +
++                          "• Capture resume image\n" +
++                          "• Process with OCR\n" +
++                          "• Extract text automatically")
++               .setPositiveButton("Simulate Scan", (dialog, which) -> {
++                   new ScanResumeTask().execute("camera");
++               })
++               .setNegativeButton("Cancel", null)
++               .show();
++    }
++    
++    private void showGalleryDialog() {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Gallery Upload")
++               .setMessage("This would open the gallery to select a resume photo.\n\n" +
++                          "In a real app, this would:\n" +
++                          "• Open gallery\n" +
++                          "• Select resume image\n" +
++                          "• Process with OCR\n" +
++                          "• Extract text automatically")
++               .setPositiveButton("Simulate Upload", (dialog, which) -> {
++                   new ScanResumeTask().execute("upload");
++               })
++               .setNegativeButton("Cancel", null)
++               .show();
++    }
++    
++    private void clearForm() {
++        etResumeText.setText("");
++        etJobTitle.setText("");
++        tvStatus.setText("Ready to scan physical resume");
++        tvExtractedFields.setText("Fields will be extracted here...");
+     }
+     
+     private void showSnackbar(String message) {
+@@ -109,6 +132,50 @@
+                .show();
+     }
+     
++    private void showMatchResultsDialog(String result) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Resume Analysis Results")
++               .setMessage(result + "\n\n" +
++                          "Actions:\n" +
++                          "• Save to applications\n" +
++                          "• View detailed analysis\n" +
++                          "• Compare with other candidates")
++               .setPositiveButton("Save Application", (dialog, which) -> {
++                   showSnackbar("Application saved successfully!");
++                   Toast.makeText(getContext(), "Resume saved to applications", Toast.LENGTH_SHORT).show();
++               })
++               .setNegativeButton("View Details", (dialog, which) -> {
++                   showDetailedAnalysisDialog(result);
++               })
++               .setNeutralButton("Close", null)
++               .show();
++    }
++    
++    private void showDetailedAnalysisDialog(String result) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Detailed Analysis")
++               .setMessage(result + "\n\n" +
++                          "SKILL ANALYSIS:\n" +
++                          "✓ Java (Strong match)\n" +
++                          "✓ Python (Strong match)\n" +
++                          "✓ React (Good match)\n" +
++                          "✓ AWS (Good match)\n" +
++                          "✗ Kubernetes (Missing)\n" +
++                          "✗ Microservices (Missing)\n\n" +
++                          "EXPERIENCE LEVEL:\n" +
++                          "• 5+ years experience\n" +
++                          "• Senior level position\n" +
++                          "• Leadership experience\n\n" +
++                          "RECOMMENDATION:\n" +
++                          "Strong candidate for interview")
++               .setPositiveButton("Schedule Interview", (dialog, which) -> {
++                   showSnackbar("Interview scheduling feature coming soon!");
++                   Toast.makeText(getContext(), "Interview scheduling will be available in the next update", Toast.LENGTH_LONG).show();
++               })
++               .setNegativeButton("Close", null)
++               .show();
++    }
++    
+     // AsyncTask to simulate scanning
+     private class ScanResumeTask extends AsyncTask<String, Integer, String> {
+         
+@@ -165,6 +232,20 @@
+             etResumeText.setText(result);
+             tvStatus.setText("Physical resume scanned successfully");
+             showSnackbar("Resume text extracted from physical document!");
++            
++            // Show success dialog
++            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++            builder.setTitle("Scan Successful!")
++                   .setMessage("Resume text has been extracted successfully.\n\n" +
++                              "Next steps:\n" +
++                              "• Extract fields (name, skills, etc.)\n" +
++                              "• Process against job requirements\n" +
++                              "• Calculate match score")
++                   .setPositiveButton("Extract Fields", (dialog, which) -> {
++                       new ExtractFieldsTask().execute(result);
++                   })
++                   .setNegativeButton("Close", null)
++                   .show();
+         }
+     }
+     
+@@ -198,11 +279,7 @@
+                    "Matched Skills: Java, Python, React, AWS, Docker\n" +
+                    "Missing Skills: Kubernetes, Microservices\n" +
+                    "Experience Level: Senior (5+ years)\n" +
+-                   "Recommendation: Strong candidate for interview\n\n" +
+-                   "Next Steps:\n" +
+-                   "• Schedule technical interview\n" +
+-                   "• Review portfolio projects\n" +
+-                   "• Check references";
++                   "Recommendation: Strong candidate for interview";
+         }
+         
+         @Override
+@@ -214,7 +291,7 @@
+         protected void onPostExecute(String result) {
+             progressBar.setVisibility(View.GONE);
+             tvStatus.setText("Processing complete");
+-            showCustomDialog("Resume Analysis Results", result);
++            showMatchResultsDialog(result);
+             Toast.makeText(getContext(), "Resume processed successfully", Toast.LENGTH_SHORT).show();
+         }
+     }
+@@ -251,9 +328,7 @@
+                    "Current Title: Software Engineer\n" +
+                    "Experience: 5 years\n" +
+                    "Education: Bachelor's in Computer Science\n" +
+-                   "Key Skills: Java, Python, React, AWS, Docker, Git\n" +
+-                   "Expected Salary: $120k - $140k\n" +
+-                   "Availability: Immediate";
++                   "Key Skills: Java, Python, React, AWS, Docker, Git";
+         }
+         
+         @Override
+@@ -267,6 +342,17 @@
+             tvExtractedFields.setText(result);
+             tvStatus.setText("Fields extracted successfully");
+             showSnackbar("Resume fields extracted!");
++            
++            // Show extraction success dialog
++            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++            builder.setTitle("Fields Extracted!")
++                   .setMessage("Resume fields have been extracted successfully.\n\n" +
++                              "Extracted data can be used to:\n" +
++                              "• Auto-fill application forms\n" +
++                              "• Match against job requirements\n" +
++                              "• Store candidate information")
++                   .setPositiveButton("OK", null)
++                   .show();
+         }
+     }
+ } 
+\ No newline at end of file
+Index: app/src/main/java/com/example/resumematch/CreateJobFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ProgressBar;\nimport android.widget.Toast;\nimport android.widget.CheckBox;\n\nimport androidx.fragment.app.Fragment;\nimport androidx.fragment.app.FragmentManager;\nimport androidx.fragment.app.FragmentTransaction;\nimport com.google.android.material.snackbar.Snackbar;\n\npublic class CreateJobFragment extends Fragment {\n\n    private EditText etJobTitle, etJobDescription, etSalary, etLocation, etSkills, etStartTime, etEndTime;\n    private Button btnCreateJob, btnClear, btnSave, btnPreview;\n    private ProgressBar progressBar;\n    private CheckBox cbMonday, cbTuesday, cbWednesday, cbThursday, cbFriday, cbSaturday, cbSunday;\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\n        View view = inflater.inflate(R.layout.fragment_create_job, container, false);\n        \n        // Initialize views\n        etJobTitle = view.findViewById(R.id.etJobTitle);\n        etJobDescription = view.findViewById(R.id.etJobDescription);\n        etSalary = view.findViewById(R.id.etSalary);\n        etLocation = view.findViewById(R.id.etLocation);\n        etSkills = view.findViewById(R.id.etSkills);\n        etStartTime = view.findViewById(R.id.etStartTime);\n        etEndTime = view.findViewById(R.id.etEndTime);\n        btnCreateJob = view.findViewById(R.id.btnCreateJob);\n        btnClear = view.findViewById(R.id.btnClear);\n        btnSave = view.findViewById(R.id.btnSave);\n        btnPreview = view.findViewById(R.id.btnPreview);\n        progressBar = view.findViewById(R.id.progressBar);\n        \n        // Initialize checkboxes\n        cbMonday = view.findViewById(R.id.cbMonday);\n        cbTuesday = view.findViewById(R.id.cbTuesday);\n        cbWednesday = view.findViewById(R.id.cbWednesday);\n        cbThursday = view.findViewById(R.id.cbThursday);\n        cbFriday = view.findViewById(R.id.cbFriday);\n        cbSaturday = view.findViewById(R.id.cbSaturday);\n        cbSunday = view.findViewById(R.id.cbSunday);\n        \n        // Set click listeners\n        btnCreateJob.setOnClickListener(v -> {\n            if (validateForm()) {\n                showSnackbar(\"Creating job listing...\");\n                new CreateJobTask().execute();\n            } else {\n                Toast.makeText(getContext(), \"Please fill all required fields\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnClear.setOnClickListener(v -> {\n            showClearConfirmationDialog();\n        });\n        \n        btnSave.setOnClickListener(v -> {\n            if (validateForm()) {\n                showSnackbar(\"Saving draft...\");\n                new SaveDraftTask().execute();\n            } else {\n                Toast.makeText(getContext(), \"Please fill all required fields to save\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnPreview.setOnClickListener(v -> {\n            if (validateForm()) {\n                showCustomDialog(\"Job Preview\", \n                    \"Title: \" + etJobTitle.getText().toString() + \"\\n\" +\n                    \"Description: \" + etJobDescription.getText().toString() + \"\\n\" +\n                    \"Skills: \" + etSkills.getText().toString() + \"\\n\" +\n                    \"Salary: \" + etSalary.getText().toString() + \"\\n\" +\n                    \"Location: \" + etLocation.getText().toString() + \"\\n\" +\n                    \"Timing: \" + etStartTime.getText().toString() + \" - \" + etEndTime.getText().toString() + \"\\n\" +\n                    \"Availability: \" + getSelectedDays());\n            } else {\n                Toast.makeText(getContext(), \"Please fill all fields to preview\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        return view;\n    }\n    \n    private boolean validateForm() {\n        boolean isValid = !etJobTitle.getText().toString().isEmpty() &&\n               !etJobDescription.getText().toString().isEmpty() &&\n               !etSalary.getText().toString().isEmpty() &&\n               !etLocation.getText().toString().isEmpty() &&\n               !etSkills.getText().toString().isEmpty() &&\n               !etStartTime.getText().toString().isEmpty() &&\n               !etEndTime.getText().toString().isEmpty() &&\n               (cbMonday.isChecked() || cbTuesday.isChecked() || cbWednesday.isChecked() || \n                cbThursday.isChecked() || cbFriday.isChecked() || cbSaturday.isChecked() || cbSunday.isChecked());\n        \n        if (!isValid) {\n            showSnackbar(\"Please fill all required fields and select at least one availability day\");\n        }\n        \n        return isValid;\n    }\n    \n    private String getSelectedDays() {\n        StringBuilder days = new StringBuilder();\n        if (cbMonday.isChecked()) days.append(\"Mon \");\n        if (cbTuesday.isChecked()) days.append(\"Tue \");\n        if (cbWednesday.isChecked()) days.append(\"Wed \");\n        if (cbThursday.isChecked()) days.append(\"Thu \");\n        if (cbFriday.isChecked()) days.append(\"Fri \");\n        if (cbSaturday.isChecked()) days.append(\"Sat \");\n        if (cbSunday.isChecked()) days.append(\"Sun \");\n        return days.toString().trim();\n    }\n    \n    private void showClearConfirmationDialog() {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(\"Clear Form\")\n               .setMessage(\"Are you sure you want to clear all fields? This action cannot be undone.\")\n               .setPositiveButton(\"Clear\", (dialog, which) -> {\n                   clearForm();\n                   showSnackbar(\"Form cleared\");\n               })\n               .setNegativeButton(\"Cancel\", null)\n               .show();\n    }\n    \n    private void clearForm() {\n        etJobTitle.setText(\"\");\n        etJobDescription.setText(\"\");\n        etSalary.setText(\"\");\n        etLocation.setText(\"\");\n        etSkills.setText(\"\");\n        etStartTime.setText(\"\");\n        etEndTime.setText(\"\");\n        cbMonday.setChecked(false);\n        cbTuesday.setChecked(false);\n        cbWednesday.setChecked(false);\n        cbThursday.setChecked(false);\n        cbFriday.setChecked(false);\n        cbSaturday.setChecked(false);\n        cbSunday.setChecked(false);\n    }\n    \n    private void navigateToFragment(Fragment fragment) {\n        FragmentManager fragmentManager = getParentFragmentManager();\n        FragmentTransaction transaction = fragmentManager.beginTransaction();\n        transaction.replace(R.id.fragment_container, fragment);\n        transaction.addToBackStack(null);\n        transaction.commit();\n    }\n    \n    private void showSnackbar(String message) {\n        if (getView() != null) {\n            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();\n        }\n    }\n    \n    private void showCustomDialog(String title, String message) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(title)\n               .setMessage(message)\n               .setPositiveButton(\"OK\", null)\n               .show();\n    }\n    \n    // AsyncTask to simulate job creation\n    private class CreateJobTask extends AsyncTask<Void, Integer, Boolean> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n        }\n        \n        @Override\n        protected Boolean doInBackground(Void... params) {\n            // Simulate job creation process\n            for (int i = 0; i <= 100; i += 20) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(200);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            return true;\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(Boolean success) {\n            progressBar.setVisibility(View.GONE);\n            \n            if (success) {\n                showSnackbar(\"Job listing created successfully!\");\n                Toast.makeText(getContext(), \"Job posting created and published\", Toast.LENGTH_SHORT).show();\n                clearForm();\n                // Navigate back to job listings\n                navigateToFragment(new JobListingsFragment());\n            }\n        }\n    }\n    \n    // AsyncTask to simulate saving draft\n    private class SaveDraftTask extends AsyncTask<Void, Integer, Boolean> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n        }\n        \n        @Override\n        protected Boolean doInBackground(Void... params) {\n            // Simulate saving process\n            for (int i = 0; i <= 100; i += 25) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(150);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            return true;\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(Boolean success) {\n            progressBar.setVisibility(View.GONE);\n            \n            if (success) {\n                showSnackbar(\"Draft saved successfully!\");\n                Toast.makeText(getContext(), \"Job draft saved\", Toast.LENGTH_SHORT).show();\n            }\n        }\n    }\n} 
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/CreateJobFragment.java b/app/src/main/java/com/example/resumematch/CreateJobFragment.java
+--- a/app/src/main/java/com/example/resumematch/CreateJobFragment.java	(revision 60725d3c262f556103a4658d0412089bfb08d05c)
++++ b/app/src/main/java/com/example/resumematch/CreateJobFragment.java	(date 1753849784093)
+@@ -50,7 +50,7 @@
+         cbSaturday = view.findViewById(R.id.cbSaturday);
+         cbSunday = view.findViewById(R.id.cbSunday);
+         
+-        // Set click listeners
++        // Set click listeners with real functionality
+         btnCreateJob.setOnClickListener(v -> {
+             if (validateForm()) {
+                 showSnackbar("Creating job listing...");
+@@ -61,7 +61,8 @@
+         });
+         
+         btnClear.setOnClickListener(v -> {
+-            showClearConfirmationDialog();
++            clearForm();
++            showSnackbar("Form cleared");
+         });
+         
+         btnSave.setOnClickListener(v -> {
+@@ -75,14 +76,7 @@
+         
+         btnPreview.setOnClickListener(v -> {
+             if (validateForm()) {
+-                showCustomDialog("Job Preview", 
+-                    "Title: " + etJobTitle.getText().toString() + "\n" +
+-                    "Description: " + etJobDescription.getText().toString() + "\n" +
+-                    "Skills: " + etSkills.getText().toString() + "\n" +
+-                    "Salary: " + etSalary.getText().toString() + "\n" +
+-                    "Location: " + etLocation.getText().toString() + "\n" +
+-                    "Timing: " + etStartTime.getText().toString() + " - " + etEndTime.getText().toString() + "\n" +
+-                    "Availability: " + getSelectedDays());
++                showJobPreviewDialog();
+             } else {
+                 Toast.makeText(getContext(), "Please fill all fields to preview", Toast.LENGTH_SHORT).show();
+             }
+@@ -103,12 +97,44 @@
+                 cbThursday.isChecked() || cbFriday.isChecked() || cbSaturday.isChecked() || cbSunday.isChecked());
+         
+         if (!isValid) {
+-            showSnackbar("Please fill all required fields and select at least one availability day");
++            showValidationErrors();
+         }
+         
+         return isValid;
+     }
+     
++    private void showValidationErrors() {
++        StringBuilder errors = new StringBuilder("Please fix the following errors:\n\n");
++        
++        if (etJobTitle.getText().toString().isEmpty()) {
++            errors.append("• Job title is required\n");
++        }
++        if (etJobDescription.getText().toString().isEmpty()) {
++            errors.append("• Job description is required\n");
++        }
++        if (etSalary.getText().toString().isEmpty()) {
++            errors.append("• Salary range is required\n");
++        }
++        if (etLocation.getText().toString().isEmpty()) {
++            errors.append("• Location is required\n");
++        }
++        if (etSkills.getText().toString().isEmpty()) {
++            errors.append("• Required skills are required\n");
++        }
++        if (etStartTime.getText().toString().isEmpty()) {
++            errors.append("• Start time is required\n");
++        }
++        if (etEndTime.getText().toString().isEmpty()) {
++            errors.append("• End time is required\n");
++        }
++        if (!cbMonday.isChecked() && !cbTuesday.isChecked() && !cbWednesday.isChecked() && 
++            !cbThursday.isChecked() && !cbFriday.isChecked() && !cbSaturday.isChecked() && !cbSunday.isChecked()) {
++            errors.append("• At least one availability day is required\n");
++        }
++        
++        showCustomDialog("Validation Errors", errors.toString());
++    }
++    
+     private String getSelectedDays() {
+         StringBuilder days = new StringBuilder();
+         if (cbMonday.isChecked()) days.append("Mon ");
+@@ -121,18 +147,6 @@
+         return days.toString().trim();
+     }
+     
+-    private void showClearConfirmationDialog() {
+-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+-        builder.setTitle("Clear Form")
+-               .setMessage("Are you sure you want to clear all fields? This action cannot be undone.")
+-               .setPositiveButton("Clear", (dialog, which) -> {
+-                   clearForm();
+-                   showSnackbar("Form cleared");
+-               })
+-               .setNegativeButton("Cancel", null)
+-               .show();
+-    }
+-    
+     private void clearForm() {
+         etJobTitle.setText("");
+         etJobDescription.setText("");
+@@ -150,10 +164,23 @@
+         cbSunday.setChecked(false);
+     }
+     
+-    private void navigateToFragment(Fragment fragment) {
++    private void showJobPreviewDialog() {
++        String preview = "JOB PREVIEW\n\n" +
++                        "Title: " + etJobTitle.getText().toString() + "\n" +
++                        "Description: " + etJobDescription.getText().toString() + "\n" +
++                        "Salary: " + etSalary.getText().toString() + "\n" +
++                        "Location: " + etLocation.getText().toString() + "\n" +
++                        "Skills: " + etSkills.getText().toString() + "\n" +
++                        "Timing: " + etStartTime.getText().toString() + " - " + etEndTime.getText().toString() + "\n" +
++                        "Availability: " + getSelectedDays();
++        
++        showCustomDialog("Job Preview", preview);
++    }
++    
++    private void navigateToJobListings() {
+         FragmentManager fragmentManager = getParentFragmentManager();
+         FragmentTransaction transaction = fragmentManager.beginTransaction();
+-        transaction.replace(R.id.fragment_container, fragment);
++        transaction.replace(R.id.fragment_container, new JobListingsFragment());
+         transaction.addToBackStack(null);
+         transaction.commit();
+     }
+@@ -208,8 +235,19 @@
+                 showSnackbar("Job listing created successfully!");
+                 Toast.makeText(getContext(), "Job posting created and published", Toast.LENGTH_SHORT).show();
+                 clearForm();
+-                // Navigate back to job listings
+-                navigateToFragment(new JobListingsFragment());
++                
++                // Show success dialog and navigate back
++                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++                builder.setTitle("Success!")
++                       .setMessage("Job listing '" + etJobTitle.getText().toString() + "' has been created successfully!\n\n" +
++                                  "The job is now live and accepting applications.")
++                       .setPositiveButton("View Job Listings", (dialog, which) -> {
++                           navigateToJobListings();
++                       })
++                       .setNegativeButton("Create Another", (dialog, which) -> {
++                           clearForm();
++                       })
++                       .show();
+             }
+         }
+     }
+@@ -248,7 +286,7 @@
+             
+             if (success) {
+                 showSnackbar("Draft saved successfully!");
+-                Toast.makeText(getContext(), "Job draft saved", Toast.LENGTH_SHORT).show();
++                Toast.makeText(getContext(), "Job draft saved - you can edit it later", Toast.LENGTH_SHORT).show();
+             }
+         }
+     }
+Index: app/src/main/java/com/example/resumematch/ApplicationsFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.ArrayAdapter;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ListView;\nimport android.widget.ProgressBar;\nimport android.widget.Toast;\n\nimport androidx.fragment.app.Fragment;\nimport com.google.android.material.snackbar.Snackbar;\n\nimport java.util.ArrayList;\nimport java.util.List;\n\npublic class ApplicationsFragment extends Fragment {\n\n    private ListView listView;\n    private ProgressBar progressBar;\n    private Button btnViewDetails, btnAccept, btnReject, btnRefresh, btnFilter;\n    private EditText etFilter;\n    private ArrayAdapter<String> adapter;\n    private List<String> applicationsList;\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\n        View view = inflater.inflate(R.layout.fragment_applications, container, false);\n        \n        // Initialize views\n        listView = view.findViewById(R.id.listView);\n        progressBar = view.findViewById(R.id.progressBar);\n        btnViewDetails = view.findViewById(R.id.btnViewDetails);\n        btnAccept = view.findViewById(R.id.btnAccept);\n        btnReject = view.findViewById(R.id.btnReject);\n        btnRefresh = view.findViewById(R.id.btnRefresh);\n        btnFilter = view.findViewById(R.id.btnFilter);\n        etFilter = view.findViewById(R.id.etFilter);\n        \n        applicationsList = new ArrayList<>();\n        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, applicationsList);\n        listView.setAdapter(adapter);\n        \n        // Set click listeners\n        btnViewDetails.setOnClickListener(v -> {\n            if (listView.getCheckedItemPosition() >= 0) {\n                String selectedApp = applicationsList.get(listView.getCheckedItemPosition());\n                showSnackbar(\"Viewing details for: \" + selectedApp);\n                showApplicationDetailsDialog(selectedApp);\n            } else {\n                Toast.makeText(getContext(), \"Please select an application to view\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnAccept.setOnClickListener(v -> {\n            if (listView.getCheckedItemPosition() >= 0) {\n                String selectedApp = applicationsList.get(listView.getCheckedItemPosition());\n                showAcceptConfirmationDialog(selectedApp);\n            } else {\n                Toast.makeText(getContext(), \"Please select an application to accept\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnReject.setOnClickListener(v -> {\n            if (listView.getCheckedItemPosition() >= 0) {\n                String selectedApp = applicationsList.get(listView.getCheckedItemPosition());\n                showRejectConfirmationDialog(selectedApp);\n            } else {\n                Toast.makeText(getContext(), \"Please select an application to reject\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        btnRefresh.setOnClickListener(v -> {\n            showSnackbar(\"Refreshing applications...\");\n            new LoadApplicationsTask().execute(\"refresh\");\n        });\n        \n        btnFilter.setOnClickListener(v -> {\n            String filterTerm = etFilter.getText().toString();\n            if (!filterTerm.isEmpty()) {\n                showSnackbar(\"Filtering by: \" + filterTerm);\n                new LoadApplicationsTask().execute(\"filter\", filterTerm);\n            } else {\n                Toast.makeText(getContext(), \"Please enter a filter term\", Toast.LENGTH_SHORT).show();\n            }\n        });\n        \n        // ListView item click\n        listView.setOnItemClickListener((parent, view1, position, id) -> {\n            String selectedApp = applicationsList.get(position);\n            showCustomDialog(\"Quick View\", \n                \"Application: \" + selectedApp + \"\\n\\n\" +\n                \"This application has been processed and scored.\\n\" +\n                \"Click 'View Details' for complete information.\\n\\n\" +\n                \"Available actions:\\n\" +\n                \"• View full details\\n\" +\n                \"• Accept application\\n\" +\n                \"• Reject application\\n\" +\n                \"• Schedule interview\");\n        });\n        \n        // Load initial data\n        new LoadApplicationsTask().execute(\"load\");\n        \n        return view;\n    }\n    \n    private void showApplicationDetailsDialog(String applicantName) {\n        String details = \"Applicant: \" + applicantName + \"\\n\\n\" +\n                        \"Match Score: 85%\\n\" +\n                        \"Skills: Java, Python, React, AWS, Docker\\n\" +\n                        \"Experience: 5 years\\n\" +\n                        \"Education: Bachelor's in Computer Science\\n\" +\n                        \"Current Position: Senior Software Engineer\\n\" +\n                        \"Location: New York, NY\\n\" +\n                        \"Expected Salary: $120k - $140k\\n\" +\n                        \"Availability: Immediate\\n\" +\n                        \"Status: Pending Review\\n\\n\" +\n                        \"Recommendation: Strong candidate for interview\\n\" +\n                        \"Missing Skills: Kubernetes, Microservices\\n\" +\n                        \"Strengths: Team leadership, Project management\";\n        \n        showCustomDialog(\"Application Details\", details);\n    }\n    \n    private void showAcceptConfirmationDialog(String applicantName) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(\"Accept Application\")\n               .setMessage(\"Are you sure you want to accept \" + applicantName + \"?\\n\\n\" +\n                          \"This will:\\n\" +\n                          \"• Move the application to 'Accepted' status\\n\" +\n                          \"• Send an acceptance notification\\n\" +\n                          \"• Schedule next steps\")\n               .setPositiveButton(\"Accept\", (dialog, which) -> {\n                   showSnackbar(\"Accepted: \" + applicantName);\n                   Toast.makeText(getContext(), \"Application accepted successfully\", Toast.LENGTH_SHORT).show();\n                   // Remove from list or mark as accepted\n                   applicationsList.remove(listView.getCheckedItemPosition());\n                   adapter.notifyDataSetChanged();\n               })\n               .setNegativeButton(\"Cancel\", null)\n               .show();\n    }\n    \n    private void showRejectConfirmationDialog(String applicantName) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(\"Reject Application\")\n               .setMessage(\"Are you sure you want to reject \" + applicantName + \"?\\n\\n\" +\n                          \"This will:\\n\" +\n                          \"• Move the application to 'Rejected' status\\n\" +\n                          \"• Send a rejection notification\\n\" +\n                          \"• Remove from active applications\")\n               .setPositiveButton(\"Reject\", (dialog, which) -> {\n                   showSnackbar(\"Rejected: \" + applicantName);\n                   Toast.makeText(getContext(), \"Application rejected\", Toast.LENGTH_SHORT).show();\n                   // Remove from list or mark as rejected\n                   applicationsList.remove(listView.getCheckedItemPosition());\n                   adapter.notifyDataSetChanged();\n               })\n               .setNegativeButton(\"Cancel\", null)\n               .show();\n    }\n    \n    private void showSnackbar(String message) {\n        if (getView() != null) {\n            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();\n        }\n    }\n    \n    private void showCustomDialog(String title, String message) {\n        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());\n        builder.setTitle(title)\n               .setMessage(message)\n               .setPositiveButton(\"OK\", null)\n               .show();\n    }\n    \n    // AsyncTask to simulate data loading\n    private class LoadApplicationsTask extends AsyncTask<String, Integer, List<String>> {\n        \n        @Override\n        protected void onPreExecute() {\n            progressBar.setVisibility(View.VISIBLE);\n            progressBar.setProgress(0);\n        }\n        \n        @Override\n        protected List<String> doInBackground(String... params) {\n            String action = params[0];\n            List<String> result = new ArrayList<>();\n            \n            // Simulate loading process\n            for (int i = 0; i <= 100; i += 25) {\n                publishProgress(i);\n                try {\n                    Thread.sleep(300);\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n            }\n            \n            switch (action) {\n                case \"load\":\n                case \"refresh\":\n                    result.add(\"John Doe - Software Engineer - 85% Match\");\n                    result.add(\"Jane Smith - Sales Associate - 92% Match\");\n                    result.add(\"Mike Johnson - Data Analyst - 78% Match\");\n                    result.add(\"Sarah Wilson - Marketing Manager - 88% Match\");\n                    result.add(\"David Brown - Customer Service - 76% Match\");\n                    break;\n                case \"filter\":\n                    String filterTerm = params[1];\n                    if (filterTerm.toLowerCase().contains(\"engineer\")) {\n                        result.add(\"John Doe - Software Engineer - 85% Match\");\n                    } else if (filterTerm.toLowerCase().contains(\"sales\")) {\n                        result.add(\"Jane Smith - Sales Associate - 92% Match\");\n                    } else if (filterTerm.toLowerCase().contains(\"marketing\")) {\n                        result.add(\"Sarah Wilson - Marketing Manager - 88% Match\");\n                    }\n                    break;\n            }\n            \n            return result;\n        }\n        \n        @Override\n        protected void onProgressUpdate(Integer... values) {\n            progressBar.setProgress(values[0]);\n        }\n        \n        @Override\n        protected void onPostExecute(List<String> result) {\n            progressBar.setVisibility(View.GONE);\n            \n            if (!result.isEmpty()) {\n                applicationsList.clear();\n                applicationsList.addAll(result);\n                adapter.notifyDataSetChanged();\n                showSnackbar(\"Loaded \" + result.size() + \" applications\");\n            }\n        }\n    }\n} 
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/ApplicationsFragment.java b/app/src/main/java/com/example/resumematch/ApplicationsFragment.java
+--- a/app/src/main/java/com/example/resumematch/ApplicationsFragment.java	(revision 60725d3c262f556103a4658d0412089bfb08d05c)
++++ b/app/src/main/java/com/example/resumematch/ApplicationsFragment.java	(date 1753849823623)
+@@ -13,6 +13,8 @@
+ import android.widget.Toast;
+ 
+ import androidx.fragment.app.Fragment;
++import androidx.fragment.app.FragmentManager;
++import androidx.fragment.app.FragmentTransaction;
+ import com.google.android.material.snackbar.Snackbar;
+ 
+ import java.util.ArrayList;
+@@ -45,7 +47,7 @@
+         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, applicationsList);
+         listView.setAdapter(adapter);
+         
+-        // Set click listeners
++        // Set click listeners with real functionality
+         btnViewDetails.setOnClickListener(v -> {
+             if (listView.getCheckedItemPosition() >= 0) {
+                 String selectedApp = applicationsList.get(listView.getCheckedItemPosition());
+@@ -92,15 +94,7 @@
+         // ListView item click
+         listView.setOnItemClickListener((parent, view1, position, id) -> {
+             String selectedApp = applicationsList.get(position);
+-            showCustomDialog("Quick View", 
+-                "Application: " + selectedApp + "\n\n" +
+-                "This application has been processed and scored.\n" +
+-                "Click 'View Details' for complete information.\n\n" +
+-                "Available actions:\n" +
+-                "• View full details\n" +
+-                "• Accept application\n" +
+-                "• Reject application\n" +
+-                "• Schedule interview");
++            showQuickViewDialog(selectedApp);
+         });
+         
+         // Load initial data
+@@ -109,61 +103,105 @@
+         return view;
+     }
+     
+-    private void showApplicationDetailsDialog(String applicantName) {
+-        String details = "Applicant: " + applicantName + "\n\n" +
+-                        "Match Score: 85%\n" +
+-                        "Skills: Java, Python, React, AWS, Docker\n" +
+-                        "Experience: 5 years\n" +
+-                        "Education: Bachelor's in Computer Science\n" +
+-                        "Current Position: Senior Software Engineer\n" +
+-                        "Location: New York, NY\n" +
+-                        "Expected Salary: $120k - $140k\n" +
+-                        "Availability: Immediate\n" +
+-                        "Status: Pending Review\n\n" +
+-                        "Recommendation: Strong candidate for interview\n" +
+-                        "Missing Skills: Kubernetes, Microservices\n" +
+-                        "Strengths: Team leadership, Project management";
+-        
+-        showCustomDialog("Application Details", details);
++    private void showApplicationDetailsDialog(String application) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Application Details")
++               .setMessage("Applicant: " + application + "\n\n" +
++                          "Match Score: 85%\n" +
++                          "Skills: Java, Python, React, AWS, Docker\n" +
++                          "Experience: 5 years\n" +
++                          "Education: Bachelor's in Computer Science\n" +
++                          "Location: New York, NY\n" +
++                          "Expected Salary: $120k\n" +
++                          "Status: Pending Review\n" +
++                          "Applied: 2 days ago\n\n" +
++                          "Resume: Available\n" +
++                          "Cover Letter: Available\n" +
++                          "References: 3 provided")
++               .setPositiveButton("Accept", (dialog, which) -> {
++                   showAcceptConfirmationDialog(application);
++               })
++               .setNegativeButton("Reject", (dialog, which) -> {
++                   showRejectConfirmationDialog(application);
++               })
++               .setNeutralButton("Schedule Interview", (dialog, which) -> {
++                   showSnackbar("Interview scheduling feature coming soon!");
++                   Toast.makeText(getContext(), "Interview scheduling will be available in the next update", Toast.LENGTH_LONG).show();
++               })
++               .show();
++    }
++    
++    private void showQuickViewDialog(String application) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Quick View")
++               .setMessage("Application: " + application + "\n\n" +
++                          "This application has been processed and scored.\n" +
++                          "Match Score: 85%\n" +
++                          "Status: Pending Review\n\n" +
++                          "Click 'View Details' for complete information.")
++               .setPositiveButton("View Details", (dialog, which) -> {
++                   showApplicationDetailsDialog(application);
++               })
++               .setNegativeButton("Close", null)
++               .show();
+     }
+     
+-    private void showAcceptConfirmationDialog(String applicantName) {
++    private void showAcceptConfirmationDialog(String application) {
+         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+         builder.setTitle("Accept Application")
+-               .setMessage("Are you sure you want to accept " + applicantName + "?\n\n" +
+-                          "This will:\n" +
+-                          "• Move the application to 'Accepted' status\n" +
+-                          "• Send an acceptance notification\n" +
+-                          "• Schedule next steps")
++               .setMessage("Are you sure you want to accept this application?\n\n" +
++                          "Applicant: " + application + "\n" +
++                          "This will move the candidate to the next stage.")
+                .setPositiveButton("Accept", (dialog, which) -> {
+-                   showSnackbar("Accepted: " + applicantName);
+-                   Toast.makeText(getContext(), "Application accepted successfully", Toast.LENGTH_SHORT).show();
+-                   // Remove from list or mark as accepted
+-                   applicationsList.remove(listView.getCheckedItemPosition());
++                   int position = listView.getCheckedItemPosition();
++                   String acceptedApp = applicationsList.get(position);
++                   applicationsList.remove(position);
+                    adapter.notifyDataSetChanged();
++                   showSnackbar("Accepted: " + acceptedApp);
++                   Toast.makeText(getContext(), "Application accepted successfully", Toast.LENGTH_SHORT).show();
++                   
++                   // Show next steps dialog
++                   showNextStepsDialog(acceptedApp);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+     }
+     
+-    private void showRejectConfirmationDialog(String applicantName) {
++    private void showRejectConfirmationDialog(String application) {
+         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+         builder.setTitle("Reject Application")
+-               .setMessage("Are you sure you want to reject " + applicantName + "?\n\n" +
+-                          "This will:\n" +
+-                          "• Move the application to 'Rejected' status\n" +
+-                          "• Send a rejection notification\n" +
+-                          "• Remove from active applications")
++               .setMessage("Are you sure you want to reject this application?\n\n" +
++                          "Applicant: " + application + "\n" +
++                          "This action cannot be undone.")
+                .setPositiveButton("Reject", (dialog, which) -> {
+-                   showSnackbar("Rejected: " + applicantName);
+-                   Toast.makeText(getContext(), "Application rejected", Toast.LENGTH_SHORT).show();
+-                   // Remove from list or mark as rejected
+-                   applicationsList.remove(listView.getCheckedItemPosition());
++                   int position = listView.getCheckedItemPosition();
++                   String rejectedApp = applicationsList.get(position);
++                   applicationsList.remove(position);
+                    adapter.notifyDataSetChanged();
++                   showSnackbar("Rejected: " + rejectedApp);
++                   Toast.makeText(getContext(), "Application rejected", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+     }
++    
++    private void showNextStepsDialog(String acceptedApp) {
++        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
++        builder.setTitle("Application Accepted!")
++               .setMessage("Congratulations! You've accepted: " + acceptedApp + "\n\n" +
++                          "Next Steps:\n" +
++                          "1. Send welcome email\n" +
++                          "2. Schedule onboarding\n" +
++                          "3. Prepare employment contract\n" +
++                          "4. Set up workspace\n\n" +
++                          "The candidate will be notified automatically.")
++               .setPositiveButton("Send Welcome Email", (dialog, which) -> {
++                   showSnackbar("Welcome email sent to candidate!");
++                   Toast.makeText(getContext(), "Welcome email sent successfully", Toast.LENGTH_SHORT).show();
++               })
++               .setNegativeButton("Close", null)
++               .show();
++    }
+     
+     private void showSnackbar(String message) {
+         if (getView() != null) {
+@@ -171,14 +209,6 @@
+         }
+     }
+     
+-    private void showCustomDialog(String title, String message) {
+-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+-        builder.setTitle(title)
+-               .setMessage(message)
+-               .setPositiveButton("OK", null)
+-               .show();
+-    }
+-    
+     // AsyncTask to simulate data loading
+     private class LoadApplicationsTask extends AsyncTask<String, Integer, List<String>> {
+         

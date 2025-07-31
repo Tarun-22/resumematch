@@ -1,19 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="16dp">
 
+    <!-- Status Bar Space -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="24dp" />
+
+    <!-- Main Navigation Icons Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="32dp"
+        android:gravity="center">
+
+        <!-- Job Management -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivJobManagement"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_job_management"
+                android:alpha="0.6"
+                android:contentDescription="Job Management" />
+
+            <TextView
+                android:id="@+id/tvJobManagement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Job Management"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Resume Scanning -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivResumeScanning"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_camera"
+                android:alpha="0.6"
+                android:contentDescription="Resume Scanning" />
+
+            <TextView
+                android:id="@+id/tvResumeScanning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Resume Scanning"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Applications -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivApplications"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_applications"
+                android:alpha="0.6"
+                android:contentDescription="Applications" />
+
+            <TextView
+                android:id="@+id/tvApplications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Applications"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Profile &amp; Settings -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivProfileSettings"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_profile_settings"
+                android:alpha="0.6"
+                android:contentDescription="Profile &amp; Settings" />
+
+            <TextView
+                android:id="@+id/tvProfileSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile &amp; Settings"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Main Page Sections Header -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Quick Actions"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:layout_marginBottom="16dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Activity List Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Posted Jobs -->
+        <Button
+            android:id="@+id/btnPostedJobs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Posted Jobs (3 active)"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_posted_jobs_blue"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Recent Resumes -->
+        <Button
+            android:id="@+id/btnRecentResumes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Recent Resumes (12 scanned)"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_recent_resumes_blue"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Create New Job -->
+        <Button
+            android:id="@+id/btnCreateJob"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Create New Job"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_create_job_blue"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Scan Resume -->
+        <Button
+            android:id="@+id/btnScanResume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Scan New Resume"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_camera_blue"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+    </LinearLayout>
+
+</LinearLayout>
