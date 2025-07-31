@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ public class JobListingsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private Button buttonCreateJob, buttonDeleteSelected;
+    private ImageView backButton;
     private JobPostAdapter jobAdapter;
     private TextView textEmptyState;
     private ProgressBar progressBar;
@@ -40,6 +42,7 @@ public class JobListingsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerJobPosts);
         buttonCreateJob = view.findViewById(R.id.buttonCreateJob);
         buttonDeleteSelected = view.findViewById(R.id.buttonDeleteSelected);
+        backButton = view.findViewById(R.id.backButton);
         textEmptyState = view.findViewById(R.id.textEmptyState);
         progressBar = view.findViewById(R.id.progressBar);
 
@@ -66,6 +69,13 @@ public class JobListingsFragment extends Fragment {
         buttonDeleteSelected.setOnClickListener(v -> {
             // Show delete confirmation dialog
             showDeleteConfirmationDialog();
+        });
+
+        backButton.setOnClickListener(v -> {
+            // Navigate back to main content
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
         });
         
         return view;
