@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         // Resume Scanning
         ivResumeScanning.setOnClickListener(v -> {
             highlightNavigationIcon(ivResumeScanning, tvResumeScanning);
-            // Navigate to resume scanning section
-            Intent intent = new Intent(MainActivity.this, ScanResumeActivity.class);
+            // Navigate to job selection for resume scanning
+            Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
         
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Scan New Resume
         btnScanResume.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ScanResumeActivity.class);
+            Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
     }

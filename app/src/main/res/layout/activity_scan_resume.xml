@@ -34,6 +34,20 @@
                 android:textColor="#000000" />
         </LinearLayout>
 
+        <!-- Job Title Display -->
+        <TextView
+            android:id="@+id/textJobTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="For: Software Engineer"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:background="#E3F2FD"
+            android:padding="12dp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

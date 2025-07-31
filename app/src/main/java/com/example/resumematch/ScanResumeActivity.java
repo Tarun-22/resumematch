@@ -58,11 +58,22 @@ public class ScanResumeActivity extends AppCompatActivity {
             Log.d("ScanResume", "Job ID: " + jobId + ", Title: " + jobTitle);
         }
 
+        // Check if job details are provided
+        if (jobId == null || jobTitle == null || jobDescription == null) {
+            Toast.makeText(this, "No job selected. Please select a job first.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
         // here we are declaring the variables for button, camera, and the text for preview
         backButton = findViewById(R.id.backButton);
         buttonCamera = findViewById(R.id.buttonCamera);
         buttonUpload = findViewById(R.id.buttonUpload);
         textOCRPreview = findViewById(R.id.textOCRPreview);
+        TextView textJobTitle = findViewById(R.id.textJobTitle);
+
+        // Display the selected job title
+        textJobTitle.setText("For: " + jobTitle);
 
         backButton.setOnClickListener(v -> finish());
 
