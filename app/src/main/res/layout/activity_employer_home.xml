@@ -6,7 +6,6 @@
     android:padding="16dp"
     android:background="#FFFFFF">
 
-
     <TextView
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
@@ -16,6 +15,19 @@
         android:textStyle="bold"
         android:textColor="#000000"
         android:layout_marginBottom="12dp" />
+
+    <!-- Empty state message -->
+    <TextView
+        android:id="@+id/textEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No jobs posted yet. Create your first job!"
+        android:textSize="16sp"
+        android:textColor="#888888"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerJobPosts"

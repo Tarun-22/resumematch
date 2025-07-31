@@ -35,6 +35,7 @@ public class ScanResumeActivity extends AppCompatActivity {
     String jobId;
     String jobTitle;
     String jobDescription;
+    DataRepository dataRepository;
 
     ActivityResultLauncher<Intent> imagePickerLauncher;
 
@@ -44,6 +45,9 @@ public class ScanResumeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_resume);
+
+        // Initialize DataRepository
+        dataRepository = new DataRepository(this);
 
         // Get job details from intent
         Intent intent = getIntent();
@@ -98,25 +102,19 @@ public class ScanResumeActivity extends AppCompatActivity {
             InputImage image = InputImage.fromBitmap(bitmap, 0);
             TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
-            //here we are setting the text preview with text "Scanning"
-            textOCRPreview.setText("Scanning...");
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
-                        String resultText = visionText.getText();
-                        textOCRPreview.setText(resultText.isEmpty() ? "No text found." : resultText);
-                        Log.d("OCR_RESULT", resultText);
-                        
-                        // Process the OCR result and calculate match score
-                        processOCRResult(resultText);
+                        String resumeText = visionText.getText();
+                        Log.d("OCR", "Extracted text: " + resumeText.substring(0, Math.min(100, resumeText.length())) + "...");
+                        processOCRResult(resumeText);
                     })
                     .addOnFailureListener(e -> {
-                        textOCRPreview.setText("OCR failed: " + e.getMessage());
-                        Toast.makeText(this, "OCR failed", Toast.LENGTH_SHORT).show();
+                        Log.e("OCR", "Error processing image: " + e.getMessage());
+                        Toast.makeText(ScanResumeActivity.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
-
         } catch (Exception e) {
-            //if anything wrong happens, we are displaying the error message
-            textOCRPreview.setText("Error loading image: " + e.getMessage());
+            Log.e("OCR", "Error loading image: " + e.getMessage());
+            Toast.makeText(this, "Error loading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -130,28 +128,43 @@ public class ScanResumeActivity extends AppCompatActivity {
             // Calculate match score
             MatchResult matchResult = calculateMatchScore(jobDescription, resumeText);
             
-            // Create and save resume
+            // Create and save resume to database
             String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             String currentDate = java.time.LocalDate.now().toString();
-            String matchScore = matchResult.getMatchScore() + "% Match";
+            String matchScore = matchResult.getMatchScore() + "%";
             
-            Resume newResume = new Resume(resumeId, currentDate, matchScore, jobId);
-            JobStorage.addResume(newResume);
-            
-            // Update job resume count
-            updateJobResumeCount();
-            
-            Log.d("ScanResume", "Resume saved successfully: " + resumeId + " with score: " + matchScore);
-            
-            // Navigate to match score screen
-            Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
-            intent.putExtra("resumeId", resumeId);
-            intent.putExtra("matchScore", matchResult.getMatchScore());
-            intent.putExtra("matchedKeywords", matchResult.getMatchedKeywords().toArray(new String[0]));
-            intent.putExtra("missingKeywords", matchResult.getMissingKeywords().toArray(new String[0]));
-            intent.putExtra("resumeText", resumeText);
-            startActivity(intent);
-            finish();
+            ResumeEntity newResume = new ResumeEntity(
+                resumeId,
+                jobId,
+                jobTitle,
+                currentDate,
+                matchScore,
+                resumeText,
+                System.currentTimeMillis()
+            );
+
+            // Save to database
+            dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+                @Override
+                public void onResult(Void result) {
+                    runOnUiThread(() -> {
+                        // Update job resume count in database
+                        updateJobResumeCount();
+                        
+                        Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+                        
+                        // Navigate to match score screen
+                        Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
+                        intent.putExtra("resumeId", resumeId);
+                        intent.putExtra("matchScore", matchResult.getMatchScore());
+                        intent.putExtra("matchedKeywords", matchResult.getMatchedKeywords().toArray(new String[0]));
+                        intent.putExtra("missingKeywords", matchResult.getMissingKeywords().toArray(new String[0]));
+                        intent.putExtra("resumeText", resumeText);
+                        startActivity(intent);
+                        finish();
+                    });
+                }
+            });
             
         } catch (Exception e) {
             Log.e("ScanResume", "Error processing OCR result: " + e.getMessage());
@@ -217,18 +230,25 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private void updateJobResumeCount() {
         if (jobId != null) {
-            List<Resume> jobResumes = JobStorage.getResumesForJob(jobId);
-            // Find the job and update its resume count
-            for (JobPost job : JobStorage.jobList) {
-                if (job.getId().equals(jobId)) {
-                    job.setResumeCount(jobResumes.size());
-                    break;
+            // Get current resume count for this job
+            dataRepository.getResumeCountForJob(jobId, new DataRepository.DatabaseCallback<Integer>() {
+                @Override
+                public void onResult(Integer resumeCount) {
+                    // Update the job's resume count in database
+                    dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
+                        @Override
+                        public void onResult(JobEntity jobEntity) {
+                            if (jobEntity != null) {
+                                jobEntity.setResumeCount(resumeCount);
+                                dataRepository.updateJob(jobEntity, null);
+                            }
+                        }
+                    });
                 }
-            }
+            });
         }
     }
 
-    // MatchResult class to hold match data
     public static class MatchResult {
         private int matchScore;
         private List<String> matchedKeywords;
@@ -243,5 +263,13 @@ public class ScanResumeActivity extends AppCompatActivity {
         public int getMatchScore() { return matchScore; }
         public List<String> getMatchedKeywords() { return matchedKeywords; }
         public List<String> getMissingKeywords() { return missingKeywords; }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dataRepository != null) {
+            dataRepository.shutdown();
+        }
     }
 }

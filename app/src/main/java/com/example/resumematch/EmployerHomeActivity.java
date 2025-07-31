@@ -4,66 +4,104 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.List;
 
 public class EmployerHomeActivity extends AppCompatActivity {
 
-    //creating the variables for recyclerview, button and adapter
     private RecyclerView recyclerView;
     private Button buttonCreateJob;
     private JobPostAdapter jobAdapter;
+    private TextView textEmptyState;
+    private DataRepository dataRepository;
+    private List<JobEntity> jobEntities = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_employer_home);
 
-        //connecting variables to ui elements
+        // Initialize DataRepository
+        dataRepository = new DataRepository(this);
+
         recyclerView = findViewById(R.id.recyclerJobPosts);
         buttonCreateJob = findViewById(R.id.buttonCreateJob);
-
-        // Add some sample data if the list is empty
-        if (JobStorage.jobList.isEmpty()) {
-            JobPost sampleJob1 = new JobPost(
-                UUID.randomUUID().toString(),
-                "Senior Software Engineer",
-                "We are looking for a senior software engineer with experience in Java, Spring Boot, React, and REST APIs. The ideal candidate should have knowledge of microservices architecture, Docker, and AWS. Experience with Agile methodologies and Git is required.",
-                new ArrayList<>(),
-                new ArrayList<>()
-            );
-            JobPost sampleJob2 = new JobPost(
-                UUID.randomUUID().toString(),
-                "Product Manager",
-                "We are seeking a product manager with strong leadership skills and experience in project management. The candidate should have excellent communication skills and experience working with cross-functional teams. Knowledge of Agile and Scrum methodologies is essential.",
-                new ArrayList<>(),
-                new ArrayList<>()
-            );
-            JobStorage.addJob(sampleJob1);
-            JobStorage.addJob(sampleJob2);
-        }
-
-        Log.d("EmployerHome", "Job list size: " + JobStorage.jobList.size());
+        textEmptyState = findViewById(R.id.textEmptyState);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        jobAdapter = new JobPostAdapter(JobStorage.jobList);
+        
+        // Create adapter with empty list initially
+        jobAdapter = new JobPostAdapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
-        //setting the onclick event for this button to open
+        // Load jobs from database
+        loadJobsFromDatabase();
+
         buttonCreateJob.setOnClickListener(v -> {
             Intent intent = new Intent(EmployerHomeActivity.this, CreateJobActivity.class);
             startActivity(intent);
         });
     }
 
+    private void loadJobsFromDatabase() {
+        dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+            @Override
+            public void onResult(List<JobEntity> jobs) {
+                runOnUiThread(() -> {
+                    jobEntities = jobs;
+                    updateJobAdapter();
+                    updateEmptyState();
+                });
+            }
+        });
+    }
+
+    private void updateJobAdapter() {
+        // Convert JobEntity to JobPost for the adapter
+        List<JobPost> jobPosts = new ArrayList<>();
+        for (JobEntity jobEntity : jobEntities) {
+            JobPost jobPost = new JobPost(
+                jobEntity.getId(),
+                jobEntity.getTitle(),
+                jobEntity.getDescription(), // Pass the description
+                new ArrayList<>(), // keywords (empty for now)
+                new ArrayList<>()  // resumes (empty for now)
+            );
+            jobPost.setResumeCount(jobEntity.getResumeCount());
+            jobPosts.add(jobPost);
+        }
+        
+        jobAdapter = new JobPostAdapter(jobPosts);
+        recyclerView.setAdapter(jobAdapter);
+    }
+
+    private void updateEmptyState() {
+        if (jobEntities.isEmpty()) {
+            textEmptyState.setVisibility(TextView.VISIBLE);
+            recyclerView.setVisibility(RecyclerView.GONE);
+        } else {
+            textEmptyState.setVisibility(TextView.GONE);
+            recyclerView.setVisibility(RecyclerView.VISIBLE);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("EmployerHome", "onResume - Job list size: " + JobStorage.jobList.size());
-        jobAdapter.notifyDataSetChanged();
+        // Reload jobs when returning to this activity
+        loadJobsFromDatabase();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dataRepository != null) {
+            dataRepository.shutdown();
+        }
     }
 }

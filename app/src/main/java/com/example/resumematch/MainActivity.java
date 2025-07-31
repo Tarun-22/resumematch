@@ -14,11 +14,15 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivJobManagement, ivResumeScanning, ivApplications, ivProfileSettings;
     private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
     private TextView tvJobManagement, tvResumeScanning, tvApplications, tvProfileSettings;
+    private DataRepository dataRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        // Initialize DataRepository
+        dataRepository = new DataRepository(this);
         
         // Initialize navigation icons
         ivJobManagement = findViewById(R.id.ivJobManagement);
@@ -43,6 +47,31 @@ public class MainActivity extends AppCompatActivity {
         
         // Set up main page section button click listeners
         setupMainPageSections();
+        
+        // Load counts from database
+        loadCountsFromDatabase();
+    }
+    
+    private void loadCountsFromDatabase() {
+        // Load job count
+        dataRepository.getJobCount(new DataRepository.DatabaseCallback<Integer>() {
+            @Override
+            public void onResult(Integer jobCount) {
+                runOnUiThread(() -> {
+                    btnPostedJobs.setText("Posted Jobs (" + jobCount + " active)");
+                });
+            }
+        });
+        
+        // Load resume count
+        dataRepository.getResumeCount(new DataRepository.DatabaseCallback<Integer>() {
+            @Override
+            public void onResult(Integer resumeCount) {
+                runOnUiThread(() -> {
+                    btnRecentResumes.setText("Recent Resumes (" + resumeCount + " scanned)");
+                });
+            }
+        });
     }
     
     private void setupNavigationIcons() {
@@ -88,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Recent Resumes
         btnRecentResumes.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ResumeListActivity.class);
+            Intent intent = new Intent(MainActivity.this, RecentResumesActivity.class);
             startActivity(intent);
         });
         
@@ -126,5 +155,20 @@ public class MainActivity extends AppCompatActivity {
         tvResumeScanning.setTextColor(getResources().getColor(android.R.color.black));
         tvApplications.setTextColor(getResources().getColor(android.R.color.black));
         tvProfileSettings.setTextColor(getResources().getColor(android.R.color.black));
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload counts when returning to main activity
+        loadCountsFromDatabase();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dataRepository != null) {
+            dataRepository.shutdown();
+        }
     }
 }
