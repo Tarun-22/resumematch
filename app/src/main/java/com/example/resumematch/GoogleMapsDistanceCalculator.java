@@ -13,7 +13,7 @@ import org.json.JSONArray;
 public class GoogleMapsDistanceCalculator {
     
     // You would need to get a Google Maps API key
-    private static final String API_KEY = "AIzaSyCRpzKq9rahJ5AzILvfdrmNt_P6Du7nCbg"; // Replace with actual API key
+    private static final String API_KEY = "your-google-maps-api-key-here"; // Replace with actual API key
     private static final String DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
     
     public interface DistanceCallback {
