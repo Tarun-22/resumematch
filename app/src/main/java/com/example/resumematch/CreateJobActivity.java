@@ -5,8 +5,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.UUID;
 
@@ -36,13 +37,19 @@ public class CreateJobActivity extends AppCompatActivity {
         backArrowbutton.setImageResource(R.drawable.back_arrow_black);
         backArrowbutton.setOnClickListener(v -> finish());
 
-        cancelButton.setOnClickListener(v -> finish());
+        cancelButton.setOnClickListener(v -> {
+            // Show confirmation dialog
+            showCancelConfirmationDialog();
+        });
 
         createJobButton.setOnClickListener(v -> {
             String title = jobTitleInput.getText().toString().trim();
             String desc = jobDescriptionInput.getText().toString().trim();
 
             if (!title.isEmpty()) {
+                // Show progress with Snackbar
+                Snackbar.make(createJobButton, "Creating job...", Snackbar.LENGTH_SHORT).show();
+                
                 // Create JobEntity and save to database
                 String jobId = UUID.randomUUID().toString();
                 JobEntity newJob = new JobEntity(
@@ -58,15 +65,37 @@ public class CreateJobActivity extends AppCompatActivity {
                     @Override
                     public void onResult(Void result) {
                         runOnUiThread(() -> {
+                            // Show success Toast
                             Toast.makeText(CreateJobActivity.this, "Job created successfully!", Toast.LENGTH_SHORT).show();
+                            
+                            // Show success Snackbar
+                            Snackbar.make(createJobButton, "Job '" + title + "' has been created!", Snackbar.LENGTH_LONG).show();
+                            
                             finish();
                         });
                     }
                 });
             } else {
+                // Show error Toast
+                Toast.makeText(this, "Job title is required!", Toast.LENGTH_SHORT).show();
                 jobTitleInput.setError("Job title required");
             }
         });
+    }
+
+    private void showCancelConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Cancel Job Creation")
+                .setMessage("Are you sure you want to cancel? All entered data will be lost.")
+                .setPositiveButton("Yes, Cancel", (dialog, which) -> {
+                    Toast.makeText(this, "Job creation cancelled", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .setNegativeButton("Continue Editing", (dialog, which) -> {
+                    // Do nothing, just dismiss dialog
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override

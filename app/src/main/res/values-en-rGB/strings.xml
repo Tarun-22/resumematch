@@ -29,7 +29,7 @@
     <string name="help_version">Version: 1.0</string>
     <string name="help_instructions">How to use ResumeMatch:</string>
     <string name="help_create_jobs">1. Create Jobs: Use \'Create Job\' to add new job postings</string>
-    <string name="help_scan_resumes">2. Scan Resumes: Use \'Scan Resume\' to upload and analyze resumes</string>
+    <string name="help_scan_resumes">2. Scan Resumes: Use \'Scan Resume\' to upload and analyse resumes</string>
     <string name="help_view_jobs">3. View Posted Jobs: See all your created job postings</string>
     <string name="help_view_resumes">4. View Recent Resumes: See all scanned resumes with match scores</string>
     <string name="help_features">Features:</string>
@@ -82,4 +82,4 @@
     
     <!-- OK Button -->
     <string name="ok">OK</string>
-</resources>
+</resources> 

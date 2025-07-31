@@ -5,8 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,6 +15,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivPostedJobs, ivRecentResumes, ivCreateJob, ivScanResume;
     private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
     private TextView tvPostedJobs, tvRecentResumes, tvCreateJob, tvScanResume;
+    private ProgressBar progressBar;
+    private ImageView helpButton;
     private DataRepository dataRepository;
 
     @Override
@@ -42,23 +45,34 @@ public class MainActivity extends AppCompatActivity {
         btnCreateJob = findViewById(R.id.btnCreateJob);
         btnScanResume = findViewById(R.id.btnScanResume);
         
+        // Initialize progress bar and help button
+        progressBar = findViewById(R.id.progressBar);
+        helpButton = findViewById(R.id.helpButton);
+        
         // Set up navigation icon click listeners
         setupNavigationIcons();
         
         // Set up main page section button click listeners
         setupMainPageSections();
         
+        // Set up help button
+        helpButton.setOnClickListener(v -> showHelpDialog());
+        
         // Load counts from database
         loadCountsFromDatabase();
     }
     
     private void loadCountsFromDatabase() {
+        // Show progress bar
+        progressBar.setVisibility(View.VISIBLE);
+        
         // Load job count
         dataRepository.getJobCount(new DataRepository.DatabaseCallback<Integer>() {
             @Override
             public void onResult(Integer jobCount) {
                 runOnUiThread(() -> {
                     btnPostedJobs.setText("Posted Jobs (" + jobCount + " active)");
+                    hideProgressBar();
                 });
             }
         });
@@ -69,9 +83,15 @@ public class MainActivity extends AppCompatActivity {
             public void onResult(Integer resumeCount) {
                 runOnUiThread(() -> {
                     btnRecentResumes.setText("Recent Resumes (" + resumeCount + " scanned)");
+                    hideProgressBar();
                 });
             }
         });
+    }
+    
+    private void hideProgressBar() {
+        // Hide progress bar after both counts are loaded
+        progressBar.setVisibility(View.GONE);
     }
     
     private void setupNavigationIcons() {
@@ -151,6 +171,28 @@ public class MainActivity extends AppCompatActivity {
         tvRecentResumes.setTextColor(getResources().getColor(android.R.color.black));
         tvCreateJob.setTextColor(getResources().getColor(android.R.color.black));
         tvScanResume.setTextColor(getResources().getColor(android.R.color.black));
+    }
+    
+    private void showHelpDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("ResumeMatch - Help")
+                .setMessage("Author: Kumar Sashank\n" +
+                        "Version: 1.0\n\n" +
+                        "How to use ResumeMatch:\n\n" +
+                        "1. Create Jobs: Use 'Create Job' to add new job postings\n" +
+                        "2. Scan Resumes: Use 'Scan Resume' to upload and analyze resumes\n" +
+                        "3. View Posted Jobs: See all your created job postings\n" +
+                        "4. View Recent Resumes: See all scanned resumes with match scores\n\n" +
+                        "Features:\n" +
+                        "• OCR text extraction from resume images\n" +
+                        "• Automatic keyword matching and scoring\n" +
+                        "• Local database storage\n" +
+                        "• Real-time job and resume counts")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Dialog dismissed
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
     
     @Override
