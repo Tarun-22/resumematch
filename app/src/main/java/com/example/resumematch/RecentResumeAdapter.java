@@ -17,9 +17,18 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
 
     private List<ResumeEntity> resumeList;
     private Context context;
+    private OnResumeDeleteListener deleteListener;
+
+    public interface OnResumeDeleteListener {
+        void onResumeDelete(ResumeEntity resume, int position);
+    }
 
     public RecentResumeAdapter(List<ResumeEntity> resumeList) {
         this.resumeList = resumeList;
+    }
+
+    public void setOnResumeDeleteListener(OnResumeDeleteListener listener) {
+        this.deleteListener = listener;
     }
 
     @NonNull
@@ -102,8 +111,15 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
                     android.util.Log.e("RecentResumeAdapter", "Error parsing extracted data: " + e.getMessage());
                 }
             }
-            
+
             context.startActivity(intent);
+        });
+
+        // Set click listener for Delete button
+        holder.buttonDeleteResume.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onResumeDelete(resume, position);
+            }
         });
     }
 
@@ -117,8 +133,16 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
         notifyDataSetChanged();
     }
 
+    public void removeResume(int position) {
+        if (position >= 0 && position < resumeList.size()) {
+            resumeList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView textResumeId, textResumeDate, textMatchScore, textJobTitle;
+        android.widget.Button buttonDeleteResume;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -126,6 +150,7 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
             textResumeDate = itemView.findViewById(R.id.textResumeDate);
             textMatchScore = itemView.findViewById(R.id.textMatchScore);
             textJobTitle = itemView.findViewById(R.id.textJobTitle);
+            buttonDeleteResume = itemView.findViewById(R.id.buttonDeleteResume);
         }
     }
 } 

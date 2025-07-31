@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
@@ -16,9 +17,18 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
 
     private List<JobPost> jobList;
     private Context context;
+    private OnJobDeleteListener deleteListener;
+
+    public interface OnJobDeleteListener {
+        void onJobDelete(JobPost job, int position);
+    }
 
     public JobPostAdapter(List<JobPost> jobList) {
         this.jobList = jobList;
+    }
+
+    public void setOnJobDeleteListener(OnJobDeleteListener listener) {
+        this.deleteListener = listener;
     }
 
     @NonNull
@@ -63,6 +73,13 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
                     intent.putExtra("jobTitle", job.getTitle());
                     context.startActivity(intent);
                 });
+
+                // Set click listener for Delete button
+                holder.buttonDeleteJob.setOnClickListener(v -> {
+                    if (deleteListener != null) {
+                        deleteListener.onJobDelete(job, position);
+                    }
+                });
             } else {
                 Log.e("JobPostAdapter", "Job at position " + position + " is null");
             }
@@ -82,9 +99,16 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
         notifyDataSetChanged();
     }
 
+    public void removeJob(int position) {
+        if (position >= 0 && position < jobList.size()) {
+            jobList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView textJobTitle, textJobDescription, textResumeCount;
-        android.widget.Button buttonViewApplications;
+        android.widget.Button buttonViewApplications, buttonDeleteJob;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -92,6 +116,7 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
             textJobDescription = itemView.findViewById(R.id.textJobDescription);
             textResumeCount = itemView.findViewById(R.id.textResumeCount);
             buttonViewApplications = itemView.findViewById(R.id.buttonViewApplications);
+            buttonDeleteJob = itemView.findViewById(R.id.buttonDeleteJob);
         }
     }
 }

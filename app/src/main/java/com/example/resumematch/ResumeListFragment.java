@@ -60,6 +60,11 @@ public class ResumeListFragment extends Fragment {
         resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
         recyclerView.setAdapter(resumeAdapter);
 
+        // Set up delete listener
+        resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
+            showIndividualDeleteConfirmationDialog(resume, position);
+        });
+
         // Set up click listeners
         backButton.setOnClickListener(v -> {
             // Navigate back to main content
@@ -240,6 +245,61 @@ public class ResumeListFragment extends Fragment {
             });
         } catch (Exception e) {
             Log.e("ResumeListFragment", "Error deleting resumes: " + e.getMessage());
+            e.printStackTrace();
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void showIndividualDeleteConfirmationDialog(ResumeEntity resume, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Delete Resume")
+                .setMessage("Are you sure you want to delete this resume?")
+                .setPositiveButton("Yes, Delete", (dialog, which) -> {
+                    deleteResume(resume, position);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Do nothing
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void deleteResume(ResumeEntity resume, int position) {
+        try {
+            progressBar.setVisibility(View.VISIBLE);
+            
+            // Show progress message
+            Snackbar.make(requireView(), "Deleting resume...", Snackbar.LENGTH_SHORT).show();
+            
+            dataRepository.deleteResume(resume.getId(), new DataRepository.DatabaseCallback<Void>() {
+                @Override
+                public void onResult(Void result) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            try {
+                                progressBar.setVisibility(View.GONE);
+                                
+                                // Remove from local list
+                                resumeEntities.remove(position);
+                                updateResumeAdapter();
+                                updateEmptyState();
+                                
+                                // Show success message
+                                Toast.makeText(requireContext(), "Resume deleted successfully!", Toast.LENGTH_SHORT).show();
+                                Snackbar.make(requireView(), "Resume deleted", Snackbar.LENGTH_LONG).show();
+                                
+                                Log.d("ResumeListFragment", "Resume deleted successfully");
+                            } catch (Exception e) {
+                                Log.e("ResumeListFragment", "Error updating UI after delete: " + e.getMessage());
+                                e.printStackTrace();
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.e("ResumeListFragment", "Error deleting resume: " + e.getMessage());
             e.printStackTrace();
             progressBar.setVisibility(View.GONE);
         }

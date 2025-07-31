@@ -45,6 +45,10 @@ public class DataRepository {
         new DeleteJobAsyncTask(jobDao, callback).execute(job);
     }
 
+    public void deleteJob(String jobId, DatabaseCallback<Void> callback) {
+        new DeleteJobByIdAsyncTask(jobDao, callback).execute(jobId);
+    }
+
     public void getJobCount(DatabaseCallback<Integer> callback) {
         new GetJobCountAsyncTask(jobDao, callback).execute();
     }
@@ -76,6 +80,10 @@ public class DataRepository {
 
     public void deleteResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
         new DeleteResumeAsyncTask(resumeDao, callback).execute(resume);
+    }
+
+    public void deleteResume(String resumeId, DatabaseCallback<Void> callback) {
+        new DeleteResumeByIdAsyncTask(resumeDao, callback).execute(resumeId);
     }
 
     public void deleteAllResumes(DatabaseCallback<Void> callback) {
@@ -241,6 +249,29 @@ public class DataRepository {
         }
     }
 
+    private static class DeleteJobByIdAsyncTask extends AsyncTask<String, Void, Void> {
+        private JobDao jobDao;
+        private DatabaseCallback<Void> callback;
+
+        DeleteJobByIdAsyncTask(JobDao jobDao, DatabaseCallback<Void> callback) {
+            this.jobDao = jobDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(String... jobIds) {
+            jobDao.deleteJobById(jobIds[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
     private static class GetJobCountAsyncTask extends AsyncTask<Void, Void, Integer> {
         private JobDao jobDao;
         private DatabaseCallback<Integer> callback;
@@ -388,6 +419,29 @@ public class DataRepository {
         @Override
         protected Void doInBackground(ResumeEntity... resumes) {
             resumeDao.deleteResume(resumes[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class DeleteResumeByIdAsyncTask extends AsyncTask<String, Void, Void> {
+        private ResumeDao resumeDao;
+        private DatabaseCallback<Void> callback;
+
+        DeleteResumeByIdAsyncTask(ResumeDao resumeDao, DatabaseCallback<Void> callback) {
+            this.resumeDao = resumeDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(String... resumeIds) {
+            resumeDao.deleteResumeById(resumeIds[0]);
             return null;
         }
 

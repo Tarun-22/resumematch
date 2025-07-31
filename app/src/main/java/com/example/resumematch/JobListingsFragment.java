@@ -49,6 +49,11 @@ public class JobListingsFragment extends Fragment {
         jobAdapter = new JobPostAdapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
+        // Set up delete listener
+        jobAdapter.setOnJobDeleteListener((job, position) -> {
+            showIndividualDeleteConfirmationDialog(job, position);
+        });
+
         // Load jobs from database
         loadJobsFromDatabase();
 
@@ -192,6 +197,61 @@ public class JobListingsFragment extends Fragment {
             });
         } catch (Exception e) {
             Log.e("JobListingsFragment", "Error deleting jobs: " + e.getMessage());
+            e.printStackTrace();
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void showIndividualDeleteConfirmationDialog(JobPost job, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Delete Job")
+                .setMessage("Are you sure you want to delete this job?")
+                .setPositiveButton("Yes, Delete", (dialog, which) -> {
+                    deleteJob(job.getId(), position);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Do nothing
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void deleteJob(String jobId, int position) {
+        try {
+            progressBar.setVisibility(View.VISIBLE);
+            
+            // Show progress message
+            Snackbar.make(requireView(), "Deleting job...", Snackbar.LENGTH_SHORT).show();
+            
+            dataRepository.deleteJob(jobId, new DataRepository.DatabaseCallback<Void>() {
+                @Override
+                public void onResult(Void result) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            try {
+                                progressBar.setVisibility(View.GONE);
+                                
+                                // Remove from local list
+                                jobEntities.remove(position);
+                                updateJobAdapter();
+                                updateEmptyState();
+                                
+                                // Show success message
+                                Toast.makeText(requireContext(), "Job deleted successfully!", Toast.LENGTH_SHORT).show();
+                                Snackbar.make(requireView(), "Job has been deleted", Snackbar.LENGTH_LONG).show();
+                                
+                                Log.d("JobListingsFragment", "Job with ID " + jobId + " deleted successfully");
+                            } catch (Exception e) {
+                                Log.e("JobListingsFragment", "Error updating UI after individual delete: " + e.getMessage());
+                                e.printStackTrace();
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.e("JobListingsFragment", "Error deleting job: " + e.getMessage());
             e.printStackTrace();
             progressBar.setVisibility(View.GONE);
         }
