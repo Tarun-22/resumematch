@@ -176,13 +176,14 @@ public class ScanResumeActivity extends AppCompatActivity {
         }
 
         try {
-            // Calculate match score
-            MatchResult matchResult = calculateMatchScore(jobDescription, resumeText);
+            // Use enhanced scoring system
+            ResumeDataExtractor.EnhancedMatchResult enhancedResult = 
+                ResumeDataExtractor.calculateEnhancedMatchScore(jobDescription, resumeText);
             
             // Create and save resume to database
             String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             String currentDate = java.time.LocalDate.now().toString();
-            String matchScore = matchResult.getMatchScore() + "%";
+            String matchScore = enhancedResult.getOverallScore() + "%";
             
             ResumeEntity newResume = new ResumeEntity(
                 resumeId,
@@ -204,13 +205,19 @@ public class ScanResumeActivity extends AppCompatActivity {
                         
                         Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
                         
-                        // Navigate to match score screen
-                        Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
+                        // Navigate to enhanced match score screen
+                        Intent intent = new Intent(ScanResumeActivity.this, EnhancedMatchScoreActivity.class);
                         intent.putExtra("resumeId", resumeId);
-                        intent.putExtra("matchScore", matchResult.getMatchScore());
-                        intent.putExtra("matchedKeywords", matchResult.getMatchedKeywords().toArray(new String[0]));
-                        intent.putExtra("missingKeywords", matchResult.getMissingKeywords().toArray(new String[0]));
+                        intent.putExtra("overallScore", enhancedResult.getOverallScore());
+                        intent.putExtra("skillsScore", enhancedResult.getSkillsScore());
+                        intent.putExtra("experienceScore", enhancedResult.getExperienceScore());
+                        intent.putExtra("availabilityScore", enhancedResult.getAvailabilityScore());
+                        intent.putExtra("educationScore", enhancedResult.getEducationScore());
+                        intent.putExtra("matchedSkills", enhancedResult.getMatchedSkills().toArray(new String[0]));
+                        intent.putExtra("missingSkills", enhancedResult.getMissingSkills().toArray(new String[0]));
+                        intent.putExtra("recommendation", enhancedResult.getRecommendation());
                         intent.putExtra("resumeText", resumeText);
+                        intent.putExtra("extractedData", enhancedResult.getExtractedData());
                         startActivity(intent);
                         finish();
                     });
