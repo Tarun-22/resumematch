@@ -32,6 +32,10 @@ public class JobListingsFragment extends Fragment {
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
 
+    // Add ListView for requirement
+    private android.widget.ListView listViewJobs;
+    private android.widget.ArrayAdapter<String> listViewAdapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_job_listings, container, false);
@@ -45,6 +49,7 @@ public class JobListingsFragment extends Fragment {
         backButton = view.findViewById(R.id.backButton);
         textEmptyState = view.findViewById(R.id.textEmptyState);
         progressBar = view.findViewById(R.id.progressBar);
+        listViewJobs = view.findViewById(R.id.listViewJobs);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         
@@ -52,9 +57,20 @@ public class JobListingsFragment extends Fragment {
         jobAdapter = new JobPostAdapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
+        // Initialize ListView adapter
+        listViewAdapter = new android.widget.ArrayAdapter<>(requireContext(), 
+            android.R.layout.simple_list_item_1, new ArrayList<>());
+        listViewJobs.setAdapter(listViewAdapter);
+
         // Set up delete listener
         jobAdapter.setOnJobDeleteListener((job, position) -> {
             showIndividualDeleteConfirmationDialog(job, position);
+        });
+
+        // Set up ListView item click listener
+        listViewJobs.setOnItemClickListener((parent, view1, position, id) -> {
+            String jobTitle = listViewAdapter.getItem(position);
+            Toast.makeText(requireContext(), "Selected: " + jobTitle, Toast.LENGTH_SHORT).show();
         });
 
         // Load jobs from database
@@ -82,67 +98,51 @@ public class JobListingsFragment extends Fragment {
     }
 
     private void loadJobsFromDatabase() {
-        try {
-            Log.d("JobListingsFragment", "Starting to load jobs from database");
-            progressBar.setVisibility(View.VISIBLE);
-            
-            dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
-                @Override
-                public void onResult(List<JobEntity> jobs) {
-                    Log.d("JobListingsFragment", "Database callback received, jobs: " + (jobs != null ? jobs.size() : "null"));
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            try {
-                                jobEntities = jobs != null ? jobs : new ArrayList<>();
-                                Log.d("JobListingsFragment", "Loaded " + jobEntities.size() + " jobs from database");
-                                
-                                updateJobAdapter();
-                                updateEmptyState();
-                                progressBar.setVisibility(View.GONE);
-                                
-                                // Show success message
-                                if (jobEntities.size() > 0) {
-                                    Snackbar.make(requireView(), "Loaded " + jobEntities.size() + " jobs", Snackbar.LENGTH_SHORT).show();
-                                }
-                            } catch (Exception e) {
-                                Log.e("JobListingsFragment", "Error updating UI: " + e.getMessage());
-                                e.printStackTrace();
-                                progressBar.setVisibility(View.GONE);
-                            }
-                        });
-                    }
+        progressBar.setVisibility(View.VISIBLE);
+        
+        dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+            @Override
+            public void onResult(List<JobEntity> jobs) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        jobEntities = jobs;
+                        updateJobAdapter();
+                        updateListViewAdapter();
+                        updateEmptyState();
+                        progressBar.setVisibility(View.GONE);
+                    });
                 }
-            });
-        } catch (Exception e) {
-            Log.e("JobListingsFragment", "Error loading jobs: " + e.getMessage());
-            e.printStackTrace();
-            progressBar.setVisibility(View.GONE);
-        }
+            }
+        });
     }
 
     private void updateJobAdapter() {
-        try {
-            // Convert JobEntity to JobPost for the adapter
-            List<JobPost> jobPosts = new ArrayList<>();
-            for (JobEntity jobEntity : jobEntities) {
-                JobPost jobPost = new JobPost(
-                    jobEntity.getId(),
-                    jobEntity.getTitle(),
-                    jobEntity.getDescription(),
-                    new ArrayList<>(), // keywords (empty for now)
-                    new ArrayList<>()  // resumes (empty for now)
-                );
-                jobPost.setResumeCount(jobEntity.getResumeCount());
-                jobPosts.add(jobPost);
-            }
-            
-            Log.d("JobListingsFragment", "Created " + jobPosts.size() + " JobPost objects");
-            jobAdapter = new JobPostAdapter(jobPosts);
-            recyclerView.setAdapter(jobAdapter);
-        } catch (Exception e) {
-            Log.e("JobListingsFragment", "Error updating job adapter: " + e.getMessage());
-            e.printStackTrace();
+        // Convert JobEntity to JobPost for the adapter
+        List<JobPost> jobPosts = new ArrayList<>();
+        for (JobEntity jobEntity : jobEntities) {
+            JobPost jobPost = new JobPost(
+                jobEntity.getId(),
+                jobEntity.getTitle(),
+                jobEntity.getDescription(),
+                new ArrayList<>(), // keywords (empty for now)
+                new ArrayList<>()  // resumes (empty for now)
+            );
+            jobPost.setResumeCount(jobEntity.getResumeCount());
+            jobPosts.add(jobPost);
         }
+        jobAdapter = new JobPostAdapter(jobPosts);
+        recyclerView.setAdapter(jobAdapter);
+    }
+
+    private void updateListViewAdapter() {
+        // Update ListView with job titles
+        List<String> jobTitles = new ArrayList<>();
+        for (JobEntity job : jobEntities) {
+            jobTitles.add(job.getTitle());
+        }
+        listViewAdapter.clear();
+        listViewAdapter.addAll(jobTitles);
+        listViewAdapter.notifyDataSetChanged();
     }
 
     private void updateEmptyState() {
@@ -189,6 +189,7 @@ public class JobListingsFragment extends Fragment {
                                 // Clear local list
                                 jobEntities.clear();
                                 updateJobAdapter();
+                                updateListViewAdapter(); // Also clear ListView
                                 updateEmptyState();
                                 
                                 // Show success messages
@@ -244,6 +245,7 @@ public class JobListingsFragment extends Fragment {
                                 // Remove from local list
                                 jobEntities.remove(position);
                                 updateJobAdapter();
+                                updateListViewAdapter(); // Also update ListView
                                 updateEmptyState();
                                 
                                 // Show success message

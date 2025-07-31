@@ -61,6 +61,25 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
+    <!-- ListView for requirement -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Job Titles (ListView)"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#1976D2"
+        android:layout_marginBottom="8dp" />
+
+    <android.widget.ListView
+        android:id="@+id/listViewJobs"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#F5F5F5"
+        android:divider="#E0E0E0"
+        android:dividerHeight="1dp"
+        android:layout_marginBottom="16dp" />
+
     <!-- Job Posts RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerJobPosts"

@@ -2,6 +2,8 @@ package com.example.resumematch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -9,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -20,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
     private TextView tvPostedJobs, tvRecentResumes, tvCreateJob, tvScanResume;
     private ProgressBar progressBar;
-    private ImageView helpButton;
+    private Toolbar toolbar;
     private DataRepository dataRepository;
     private View fragmentContainer;
     private View activityListSection;
@@ -35,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
         
         // Initialize DataRepository
         dataRepository = new DataRepository(this);
+        
+        // Initialize toolbar
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         
         // Initialize navigation icons
         ivPostedJobs = findViewById(R.id.ivPostedJobs);
@@ -54,9 +61,8 @@ public class MainActivity extends AppCompatActivity {
         btnCreateJob = findViewById(R.id.btnCreateJob);
         btnScanResume = findViewById(R.id.btnScanResume);
         
-        // Initialize progress bar and help button
+        // Initialize progress bar
         progressBar = findViewById(R.id.progressBar);
-        helpButton = findViewById(R.id.helpButton);
         
         // Initialize fragment container and activity list section
         fragmentContainer = findViewById(R.id.fragment_container);
@@ -68,14 +74,33 @@ public class MainActivity extends AppCompatActivity {
         // Set up main page section button click listeners
         setupMainPageSections();
         
-        // Set up help button
-        helpButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening help...", Toast.LENGTH_SHORT).show();
-            showHelpDialog();
-        });
-        
         // Load counts from database
         loadCountsFromDatabase();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_help) {
+            showHelpDialog();
+            return true;
+        } else if (id == R.id.action_settings) {
+            Toast.makeText(this, "Settings coming soon...", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_store_profile) {
+            Intent intent = new Intent(MainActivity.this, StoreProfileActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
     
     private void loadCountsFromDatabase() {
