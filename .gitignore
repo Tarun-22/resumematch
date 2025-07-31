@@ -13,3 +13,19 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+app/src/main/assets/env.properties
+app/src/main/assets/config.properties
+
+# API Keys and sensitive data
+app/src/main/java/com/example/resumematch/ApiKeys.java
+app/src/main/java/com/example/resumematch/Secrets.java
+
+# Debug files
+DEBUG_GPT_API.md
+TEST_GPT_API.md
