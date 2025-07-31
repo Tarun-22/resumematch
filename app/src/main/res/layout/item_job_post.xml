@@ -43,15 +43,33 @@
             android:textColor="#666666"
             android:layout_marginTop="4dp" />
 
-        <TextView
-            android:id="@+id/textViewResumes"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View Resumes ›"
-            android:textColor="#1976D2"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/textViewResumes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="View Resumes ›"
+                android:textColor="#1976D2"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/buttonViewApplications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View Applications"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#4CAF50"
+                android:textSize="12sp"
+                android:padding="8dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

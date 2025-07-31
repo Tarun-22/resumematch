@@ -1,0 +1,414 @@
+Index: app/src/main/java/com/example/resumematch/JobPostAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumematch;\n\nimport android.content.Context;\nimport android.content.Intent;\nimport android.util.Log;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.TextView;\nimport androidx.annotation.NonNull;\nimport androidx.recyclerview.widget.RecyclerView;\n\nimport java.util.List;\n\npublic class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHolder> {\n\n    private List<JobPost> jobList;\n    private Context context;\n\n    public JobPostAdapter(List<JobPost> jobList) {\n        this.jobList = jobList;\n    }\n\n    @NonNull\n    @Override\n    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {\n        context = parent.getContext();\n        View view = LayoutInflater.from(context).inflate(R.layout.item_job_post, parent, false);\n        return new ViewHolder(view);\n    }\n\n    @Override\n    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {\n        try {\n            JobPost job = jobList.get(position);\n            \n            if (job != null) {\n                holder.textJobTitle.setText(job.getTitle() != null ? job.getTitle() : \"Untitled Job\");\n                holder.textJobDescription.setText(job.getDescription() != null ? job.getDescription() : \"No description\");\n                holder.textResumeCount.setText(job.getResumeCount() + \" resumes\");\n                \n                // Set click listener for job editing\n                holder.itemView.setOnClickListener(v -> {\n                    try {\n                        Log.d(\"JobPostAdapter\", \"Job clicked: \" + job.getId());\n                        \n                        // Navigate to job editing activity\n                        Intent intent = new Intent(context, EditJobActivity.class);\n                        intent.putExtra(\"jobId\", job.getId());\n                        intent.putExtra(\"jobTitle\", job.getTitle());\n                        intent.putExtra(\"jobDescription\", job.getDescription());\n                        context.startActivity(intent);\n                    } catch (Exception e) {\n                        Log.e(\"JobPostAdapter\", \"Error navigating to edit job: \" + e.getMessage());\n                        e.printStackTrace();\n                    }\n                });\n            } else {\n                Log.e(\"JobPostAdapter\", \"Job at position \" + position + \" is null\");\n            }\n        } catch (Exception e) {\n            Log.e(\"JobPostAdapter\", \"Error binding view holder: \" + e.getMessage());\n            e.printStackTrace();\n        }\n    }\n\n    @Override\n    public int getItemCount() {\n        return jobList.size();\n    }\n\n    public void updateJobList(List<JobPost> newJobList) {\n        this.jobList = newJobList;\n        notifyDataSetChanged();\n    }\n\n    public static class ViewHolder extends RecyclerView.ViewHolder {\n        TextView textJobTitle, textJobDescription, textResumeCount;\n\n        public ViewHolder(@NonNull View itemView) {\n            super(itemView);\n            textJobTitle = itemView.findViewById(R.id.textJobTitle);\n            textJobDescription = itemView.findViewById(R.id.textJobDescription);\n            textResumeCount = itemView.findViewById(R.id.textResumeCount);\n        }\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/JobPostAdapter.java b/app/src/main/java/com/example/resumematch/JobPostAdapter.java
+--- a/app/src/main/java/com/example/resumematch/JobPostAdapter.java	(revision 2b2e3e7523abdbd2bf473192a3edb397f58a5900)
++++ b/app/src/main/java/com/example/resumematch/JobPostAdapter.java	(date 1753998443757)
+@@ -37,14 +37,14 @@
+             if (job != null) {
+                 holder.textJobTitle.setText(job.getTitle() != null ? job.getTitle() : "Untitled Job");
+                 holder.textJobDescription.setText(job.getDescription() != null ? job.getDescription() : "No description");
+-                holder.textResumeCount.setText(job.getResumeCount() + " resumes");
++                holder.textResumeCount.setText(job.getResumeCount() + " applications");
+                 
+-                // Set click listener for job editing
++                // Set click listener for the entire item
+                 holder.itemView.setOnClickListener(v -> {
+                     try {
+                         Log.d("JobPostAdapter", "Job clicked: " + job.getId());
+                         
+-                        // Navigate to job editing activity
++                        // Navigate to job details or edit
+                         Intent intent = new Intent(context, EditJobActivity.class);
+                         intent.putExtra("jobId", job.getId());
+                         intent.putExtra("jobTitle", job.getTitle());
+@@ -55,6 +55,14 @@
+                         e.printStackTrace();
+                     }
+                 });
++                
++                // Set click listener for View Applications button
++                holder.buttonViewApplications.setOnClickListener(v -> {
++                    Intent intent = new Intent(context, JobApplicationsActivity.class);
++                    intent.putExtra("jobId", job.getId());
++                    intent.putExtra("jobTitle", job.getTitle());
++                    context.startActivity(intent);
++                });
+             } else {
+                 Log.e("JobPostAdapter", "Job at position " + position + " is null");
+             }
+@@ -76,12 +84,14 @@
+ 
+     public static class ViewHolder extends RecyclerView.ViewHolder {
+         TextView textJobTitle, textJobDescription, textResumeCount;
++        android.widget.Button buttonViewApplications;
+ 
+         public ViewHolder(@NonNull View itemView) {
+             super(itemView);
+             textJobTitle = itemView.findViewById(R.id.textJobTitle);
+             textJobDescription = itemView.findViewById(R.id.textJobDescription);
+             textResumeCount = itemView.findViewById(R.id.textResumeCount);
++            buttonViewApplications = itemView.findViewById(R.id.buttonViewApplications);
+         }
+     }
+ }
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    package=\"com.example.resumematch\">\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>\n    <uses-permission android:name=\"android.permission.CAMERA\"/>\n    <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />\n\n    <application\n        android:allowBackup=\"true\"\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\n        android:fullBackupContent=\"@xml/backup_rules\"\n        android:icon=\"@mipmap/ic_launcher\"\n        android:label=\"@string/app_name\"\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/Theme.ResumeMatch\"\n        tools:targetApi=\"31\">\n        \n        <activity android:name=\".MainActivity\"\n            android:exported=\"true\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n        \n        <activity android:name=\".JobManagementActivity\" />\n        <activity android:name=\".ProfileActivity\" />\n        <activity android:name=\".CreateJobActivity\" />\n        <activity android:name=\".ScanResumeActivity\" />\n        <activity android:name=\".MatchScoreActivity\" />\n        <activity android:name=\".EmployerHomeActivity\" />\n        <activity android:name=\".ResumeListActivity\" />\n        <activity android:name=\".RecentResumesActivity\" />\n        <activity android:name=\".JobSelectionActivity\" />\n        <activity android:name=\".EditJobActivity\" />\n        <activity android:name=\".ResumeDetailsActivity\" />\n        <activity android:name=\".JobTemplateActivity\" />\n        <activity android:name=\".StoreProfileActivity\" />\n        <activity android:name=\".ResumePhotoViewerActivity\" />\n        <activity android:name=\".ResumeImageActivity\" />\n        <activity android:name=\".FragmentHostActivity\" />\n    </application>\n\n</manifest>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 2b2e3e7523abdbd2bf473192a3edb397f58a5900)
++++ b/app/src/main/AndroidManifest.xml	(date 1753998499155)
+@@ -41,6 +41,7 @@
+         <activity android:name=".ResumePhotoViewerActivity" />
+         <activity android:name=".ResumeImageActivity" />
+         <activity android:name=".FragmentHostActivity" />
++        <activity android:name=".JobApplicationsActivity" />
+     </application>
+ 
+ </manifest>
+Index: app/src/main/res/menu/job_applications_menu.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/menu/job_applications_menu.xml b/app/src/main/res/menu/job_applications_menu.xml
+new file mode 100644
+--- /dev/null	(date 1753999816570)
++++ b/app/src/main/res/menu/job_applications_menu.xml	(date 1753999816570)
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="utf-8"?>
++<menu xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto">
++
++    <item
++        android:id="@+id/action_sort_score"
++        android:title="Sort by Score"
++        android:icon="@android:drawable/ic_menu_sort_by_size"
++        app:showAsAction="ifRoom" />
++
++    <item
++        android:id="@+id/action_sort_distance"
++        android:title="Sort by Distance"
++        android:icon="@android:drawable/ic_menu_mylocation"
++        app:showAsAction="ifRoom" />
++
++</menu> 
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_job_applications.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_job_applications.xml b/app/src/main/res/layout/activity_job_applications.xml
+new file mode 100644
+--- /dev/null	(date 1753998530999)
++++ b/app/src/main/res/layout/activity_job_applications.xml	(date 1753998530999)
+@@ -0,0 +1,64 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:orientation="vertical"
++    android:background="#FFFFFF">
++
++    <!-- Header -->
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:orientation="horizontal"
++        android:gravity="center_vertical"
++        android:padding="16dp"
++        android:background="#1976D2">
++
++        <ImageView
++            android:id="@+id/backButton"
++            android:layout_width="24dp"
++            android:layout_height="24dp"
++            android:src="@drawable/back_arrow_black"
++            android:contentDescription="Back"
++            android:clickable="true"
++            android:focusable="true"
++            android:background="?android:attr/selectableItemBackground"
++            android:padding="4dp"
++            android:tint="#FFFFFF" />
++
++        <TextView
++            android:id="@+id/titleText"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:text="Applications"
++            android:textSize="18sp"
++            android:textStyle="bold"
++            android:textColor="#FFFFFF"
++            android:gravity="center"
++            android:layout_marginStart="16dp" />
++
++    </LinearLayout>
++
++    <!-- Applications RecyclerView -->
++    <androidx.recyclerview.widget.RecyclerView
++        android:id="@+id/recyclerApplications"
++        android:layout_width="match_parent"
++        android:layout_height="0dp"
++        android:layout_weight="1"
++        android:padding="16dp"
++        android:clipToPadding="false" />
++
++    <!-- Empty State -->
++    <TextView
++        android:id="@+id/textEmptyState"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:text="No applications found for this job.\n\nResumes will appear here once candidates apply."
++        android:textSize="16sp"
++        android:textColor="#666666"
++        android:gravity="center"
++        android:padding="32dp"
++        android:visibility="gone" />
++
++</LinearLayout> 
+\ No newline at end of file
+Index: app/src/main/java/com/example/resumematch/JobApplicationsActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/resumematch/JobApplicationsActivity.java b/app/src/main/java/com/example/resumematch/JobApplicationsActivity.java
+new file mode 100644
+--- /dev/null	(date 1753999816536)
++++ b/app/src/main/java/com/example/resumematch/JobApplicationsActivity.java	(date 1753999816536)
+@@ -0,0 +1,171 @@
++package com.example.resumematch;
++
++import android.content.Intent;
++import android.os.Bundle;
++import android.util.Log;
++import android.view.Menu;
++import android.view.MenuItem;
++import android.widget.ImageView;
++import android.widget.TextView;
++import androidx.appcompat.app.AppCompatActivity;
++import androidx.appcompat.widget.Toolbar;
++import androidx.recyclerview.widget.LinearLayoutManager;
++import androidx.recyclerview.widget.RecyclerView;
++import com.google.android.material.snackbar.Snackbar;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.Comparator;
++import java.util.List;
++
++public class JobApplicationsActivity extends AppCompatActivity {
++
++    private RecyclerView recyclerView;
++    private TextView textEmptyState;
++    private ImageView backButton;
++    private TextView titleText;
++    private DataRepository dataRepository;
++    private List<ResumeEntity> resumeEntities = new ArrayList<>();
++    private RecentResumeAdapter resumeAdapter;
++    private String jobId;
++    private String jobTitle;
++    private String currentSortBy = "score"; // "score" or "distance"
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_job_applications);
++
++        // Get job details from intent
++        jobId = getIntent().getStringExtra("jobId");
++        jobTitle = getIntent().getStringExtra("jobTitle");
++
++        // Initialize DataRepository
++        dataRepository = new DataRepository(this);
++
++        // Initialize views
++        backButton = findViewById(R.id.backButton);
++        titleText = findViewById(R.id.titleText);
++        recyclerView = findViewById(R.id.recyclerApplications);
++        textEmptyState = findViewById(R.id.textEmptyState);
++
++        // Set title
++        titleText.setText("Applications for " + jobTitle);
++
++        // Set up RecyclerView
++        recyclerView.setLayoutManager(new LinearLayoutManager(this));
++        resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
++        recyclerView.setAdapter(resumeAdapter);
++
++        // Set up click listeners
++        backButton.setOnClickListener(v -> finish());
++
++        // Load resumes for this specific job
++        loadResumesForJob();
++    }
++
++    private void loadResumesForJob() {
++        if (jobId == null) {
++            Log.e("JobApplications", "Job ID is null");
++            return;
++        }
++
++        dataRepository.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
++            @Override
++            public void onResult(List<ResumeEntity> resumes) {
++                runOnUiThread(() -> {
++                    resumeEntities = resumes != null ? resumes : new ArrayList<>();
++                    sortResumes();
++                    updateResumeAdapter();
++                    updateEmptyState();
++                });
++            }
++        });
++    }
++
++    private void sortResumes() {
++        if (resumeEntities.isEmpty()) return;
++
++        if ("score".equals(currentSortBy)) {
++            // Sort by score (highest first)
++            Collections.sort(resumeEntities, (r1, r2) -> {
++                int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
++                int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
++                return Integer.compare(score2, score1); // Descending order
++            });
++        } else if ("distance".equals(currentSortBy)) {
++            // Sort by distance (closest first)
++            // For now, we'll sort by score as a proxy since distance isn't stored separately
++            // In a real app, you'd store distance in the ResumeEntity
++            Collections.sort(resumeEntities, (r1, r2) -> {
++                int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
++                int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
++                return Integer.compare(score1, score2); // Ascending order for distance proxy
++            });
++        }
++    }
++
++    private void updateResumeAdapter() {
++        resumeAdapter.updateResumeList(resumeEntities);
++    }
++
++    private void updateEmptyState() {
++        if (resumeEntities.isEmpty()) {
++            textEmptyState.setVisibility(TextView.VISIBLE);
++            recyclerView.setVisibility(RecyclerView.GONE);
++        } else {
++            textEmptyState.setVisibility(TextView.GONE);
++            recyclerView.setVisibility(RecyclerView.VISIBLE);
++        }
++    }
++
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu) {
++        getMenuInflater().inflate(R.menu.job_applications_menu, menu);
++        return true;
++    }
++
++    @Override
++    public boolean onOptionsItemSelected(MenuItem item) {
++        int id = item.getItemId();
++
++        if (id == R.id.action_sort_score) {
++            currentSortBy = "score";
++            sortResumes();
++            updateResumeAdapter();
++            Snackbar.make(findViewById(android.R.id.content), "Sorted by Score", Snackbar.LENGTH_SHORT).show();
++            return true;
++        } else if (id == R.id.action_sort_distance) {
++            currentSortBy = "distance";
++            sortResumes();
++            updateResumeAdapter();
++            Snackbar.make(findViewById(android.R.id.content), "Sorted by Distance", Snackbar.LENGTH_SHORT).show();
++            return true;
++        } else if (id == android.R.id.home) {
++            onBackPressed();
++            return true;
++        }
++
++        return super.onOptionsItemSelected(item);
++    }
++
++    @Override
++    public void onBackPressed() {
++        super.onBackPressed();
++    }
++
++    @Override
++    protected void onResume() {
++        super.onResume();
++        // Reload resumes when returning to this activity
++        loadResumesForJob();
++    }
++
++    @Override
++    protected void onDestroy() {
++        super.onDestroy();
++        if (dataRepository != null) {
++            dataRepository.shutdown();
++        }
++    }
++} 
+\ No newline at end of file
+Index: app/src/main/res/layout/item_job_post.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<androidx.cardview.widget.CardView xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"wrap_content\"\n    android:layout_marginBottom=\"12dp\"\n    android:elevation=\"4dp\"\n    android:radius=\"8dp\"\n    android:layout_marginTop=\"4dp\"\n    android:background=\"#FFFFFF\">\n\n    <LinearLayout\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\"\n        android:orientation=\"vertical\"\n        android:padding=\"16dp\">\n\n        <TextView\n            android:id=\"@+id/textJobTitle\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Job Title\"\n            android:textStyle=\"bold\"\n            android:textSize=\"16sp\"\n            android:textColor=\"#000000\" />\n\n        <TextView\n            android:id=\"@+id/textJobDescription\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Job Description\"\n            android:textSize=\"14sp\"\n            android:textColor=\"#666666\"\n            android:layout_marginTop=\"4dp\"\n            android:maxLines=\"2\"\n            android:ellipsize=\"end\" />\n\n        <TextView\n            android:id=\"@+id/textResumeCount\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"X Resumes Scanned\"\n            android:textSize=\"14sp\"\n            android:textColor=\"#666666\"\n            android:layout_marginTop=\"4dp\" />\n\n        <TextView\n            android:id=\"@+id/textViewResumes\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"View Resumes ›\"\n            android:textColor=\"#1976D2\"\n            android:textSize=\"14sp\"\n            android:textStyle=\"bold\"\n            android:layout_marginTop=\"8dp\" />\n    </LinearLayout>\n\n</androidx.cardview.widget.CardView>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/item_job_post.xml b/app/src/main/res/layout/item_job_post.xml
+--- a/app/src/main/res/layout/item_job_post.xml	(revision 2b2e3e7523abdbd2bf473192a3edb397f58a5900)
++++ b/app/src/main/res/layout/item_job_post.xml	(date 1753998433177)
+@@ -43,15 +43,33 @@
+             android:textColor="#666666"
+             android:layout_marginTop="4dp" />
+ 
+-        <TextView
+-            android:id="@+id/textViewResumes"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:text="View Resumes ›"
+-            android:textColor="#1976D2"
+-            android:textSize="14sp"
+-            android:textStyle="bold"
+-            android:layout_marginTop="8dp" />
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:orientation="horizontal"
++            android:layout_marginTop="8dp">
++
++            <TextView
++                android:id="@+id/textViewResumes"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight="1"
++                android:text="View Resumes ›"
++                android:textColor="#1976D2"
++                android:textSize="14sp"
++                android:textStyle="bold" />
++
++            <Button
++                android:id="@+id/buttonViewApplications"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="View Applications"
++                android:textColor="#FFFFFF"
++                android:backgroundTint="#4CAF50"
++                android:textSize="12sp"
++                android:padding="8dp" />
++
++        </LinearLayout>
+     </LinearLayout>
+ 
+ </androidx.cardview.widget.CardView>

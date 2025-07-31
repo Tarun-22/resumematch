@@ -37,14 +37,14 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
             if (job != null) {
                 holder.textJobTitle.setText(job.getTitle() != null ? job.getTitle() : "Untitled Job");
                 holder.textJobDescription.setText(job.getDescription() != null ? job.getDescription() : "No description");
-                holder.textResumeCount.setText(job.getResumeCount() + " resumes");
+                holder.textResumeCount.setText(job.getResumeCount() + " applications");
                 
-                // Set click listener for job editing
+                // Set click listener for the entire item
                 holder.itemView.setOnClickListener(v -> {
                     try {
                         Log.d("JobPostAdapter", "Job clicked: " + job.getId());
                         
-                        // Navigate to job editing activity
+                        // Navigate to job details or edit
                         Intent intent = new Intent(context, EditJobActivity.class);
                         intent.putExtra("jobId", job.getId());
                         intent.putExtra("jobTitle", job.getTitle());
@@ -54,6 +54,14 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
                         Log.e("JobPostAdapter", "Error navigating to edit job: " + e.getMessage());
                         e.printStackTrace();
                     }
+                });
+                
+                // Set click listener for View Applications button
+                holder.buttonViewApplications.setOnClickListener(v -> {
+                    Intent intent = new Intent(context, JobApplicationsActivity.class);
+                    intent.putExtra("jobId", job.getId());
+                    intent.putExtra("jobTitle", job.getTitle());
+                    context.startActivity(intent);
                 });
             } else {
                 Log.e("JobPostAdapter", "Job at position " + position + " is null");
@@ -76,12 +84,14 @@ public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView textJobTitle, textJobDescription, textResumeCount;
+        android.widget.Button buttonViewApplications;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textJobTitle = itemView.findViewById(R.id.textJobTitle);
             textJobDescription = itemView.findViewById(R.id.textJobDescription);
             textResumeCount = itemView.findViewById(R.id.textResumeCount);
+            buttonViewApplications = itemView.findViewById(R.id.buttonViewApplications);
         }
     }
 }
