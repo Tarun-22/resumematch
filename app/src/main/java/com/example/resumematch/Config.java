@@ -43,6 +43,7 @@ public class Config {
         if (preferences != null) {
             String userKey = preferences.getString(KEY_OPENAI_API_KEY, null);
             if (userKey != null && !userKey.equals(DEFAULT_OPENAI_API_KEY)) {
+                Log.d("Config", "Using OpenAI API key from SharedPreferences");
                 return userKey;
             }
         }
@@ -50,10 +51,15 @@ public class Config {
         // Then try to get from environment file (development)
         if (envProperties != null) {
             String envKey = envProperties.getProperty("OPENAI_API_KEY");
+            Log.d("Config", "Environment file loaded, checking OpenAI key: " + (envKey != null ? "found" : "not found"));
             if (envKey != null && !envKey.equals("your-openai-api-key-here")) {
                 Log.d("Config", "Using OpenAI API key from environment file");
                 return envKey;
+            } else {
+                Log.w("Config", "OpenAI API key in environment file is placeholder or invalid");
             }
+        } else {
+            Log.w("Config", "Environment properties not loaded");
         }
         
         // Fallback to default
@@ -66,6 +72,7 @@ public class Config {
         if (preferences != null) {
             String userKey = preferences.getString(KEY_GOOGLE_MAPS_API_KEY, null);
             if (userKey != null && !userKey.equals(DEFAULT_GOOGLE_MAPS_API_KEY)) {
+                Log.d("Config", "Using Google Maps API key from SharedPreferences");
                 return userKey;
             }
         }
@@ -73,10 +80,15 @@ public class Config {
         // Then try to get from environment file (development)
         if (envProperties != null) {
             String envKey = envProperties.getProperty("GOOGLE_MAPS_API_KEY");
+            Log.d("Config", "Environment file loaded, checking Google Maps key: " + (envKey != null ? "found" : "not found"));
             if (envKey != null && !envKey.equals("your-google-maps-api-key-here")) {
                 Log.d("Config", "Using Google Maps API key from environment file");
                 return envKey;
+            } else {
+                Log.w("Config", "Google Maps API key in environment file is placeholder or invalid");
             }
+        } else {
+            Log.w("Config", "Environment properties not loaded");
         }
         
         // Fallback to default

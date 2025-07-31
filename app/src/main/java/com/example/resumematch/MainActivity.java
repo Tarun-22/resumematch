@@ -25,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        // Initialize Config for API keys
+        Config.init(this);
+        
         // Initialize DataRepository
         dataRepository = new DataRepository(this);
         

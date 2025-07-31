@@ -22,7 +22,7 @@ public class MatchScoreActivity extends AppCompatActivity {
     ImageView backArrow;
     TextView textScore;
     LinearLayout matchedContainer, missingContainer;
-    Button buttonBack;
+    Button buttonBack, buttonViewImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +35,20 @@ public class MatchScoreActivity extends AppCompatActivity {
         matchedContainer = findViewById(R.id.matchedKeywordsContainer);
         missingContainer = findViewById(R.id.missingKeywordsContainer);
         buttonBack = findViewById(R.id.buttonBack);
+        buttonViewImage = findViewById(R.id.buttonViewImage);
 
         //setting the onclick events with a function to these buttons
         backArrow.setOnClickListener(v -> finish());
         buttonBack.setOnClickListener(v -> finish());
+        buttonViewImage.setOnClickListener(v -> {
+            String photoPath = getIntent().getStringExtra("photoPath");
+            String resumeText = getIntent().getStringExtra("resumeText");
+            
+            Intent intent = new Intent(MatchScoreActivity.this, ResumeImageActivity.class);
+            intent.putExtra("photoPath", photoPath);
+            intent.putExtra("resumeText", resumeText);
+            startActivity(intent);
+        });
 
         // Get match data from intent
         Intent intent = getIntent();
@@ -62,7 +72,6 @@ public class MatchScoreActivity extends AppCompatActivity {
             String availability = intent.getStringExtra("availability");
             String availabilityDetails = intent.getStringExtra("availabilityDetails");
             String transportation = intent.getStringExtra("transportation");
-            String expectedSalary = intent.getStringExtra("expectedSalary");
             String startDate = intent.getStringExtra("startDate");
             String workAuthorization = intent.getStringExtra("workAuthorization");
             String emergencyContact = intent.getStringExtra("emergencyContact");
@@ -81,55 +90,61 @@ public class MatchScoreActivity extends AppCompatActivity {
             double distanceMiles = intent.getDoubleExtra("distanceMiles", 0.0);
             String distanceDescription = intent.getStringExtra("distanceDescription");
             
+            // Get GPT feedback and recommendations
+            String feedback = intent.getStringExtra("feedback");
+            String recommendations = intent.getStringExtra("recommendations");
+            
             // Get store info
             String storeName = intent.getStringExtra("storeName");
             String storeAddress = intent.getStringExtra("storeAddress");
             
-            // Get recommendations
-            String[] recommendations = intent.getStringArrayExtra("recommendations");
+            // Convert distance to KM
+            double distanceKm = distanceMiles * 1.60934;
             
-            Log.d("MatchScore", "Score: " + matchScore + ", Matched: " + 
-                   (matchedKeywords != null ? matchedKeywords.length : 0) + 
-                   ", Missing: " + (missingKeywords != null ? missingKeywords.length : 0));
+            Log.d("MatchScore", "Score: " + matchScore + ", Feedback: " + feedback + ", Recommendations: " + recommendations);
             
             // Display the actual match score
             textScore.setText(matchScore + "%");
             
             // Display candidate information
-            displayCandidateInfo(candidateName, candidateEmail, candidatePhone, candidateAddress, candidateCity, candidateState, candidateZipCode, candidateTitle, experienceYears, education, availability, availabilityDetails, transportation, expectedSalary, startDate, workAuthorization, emergencyContact, emergencyPhone, references, previousRetailExperience, languages, certifications);
+            displayCandidateInfo(candidateName, candidateEmail, candidatePhone, candidateAddress, candidateCity, candidateState, candidateZipCode, candidateTitle, experienceYears, education, availability, availabilityDetails, transportation, startDate, workAuthorization, emergencyContact, emergencyPhone, references, previousRetailExperience, languages, certifications);
             
-            // Display category scores
-            displayCategoryScores(skillScore, experienceScore, availabilityScore, educationScore, distanceScore, distanceMiles, distanceDescription);
+            // Display category scores with distance in KM
+            displayCategoryScores(skillScore, experienceScore, availabilityScore, educationScore, distanceScore, distanceKm, distanceDescription);
             
-            // Display matched keywords
+            // Display GPT feedback
+            displayFeedback(feedback);
+            
+            // Display GPT recommendations
+            displayGPTRecommendations(recommendations);
+            
+            // Display matched keywords (if available from fallback system)
             if (matchedKeywords != null && matchedKeywords.length > 0) {
                 settingkeywordchips(matchedContainer, matchedKeywords, true);
             } else {
                 TextView noMatchText = new TextView(this);
-                noMatchText.setText("No keywords matched");
-                noMatchText.setTextColor(Color.parseColor("#999999"));
+                noMatchText.setText("AI Analysis Complete");
+                noMatchText.setTextColor(Color.parseColor("#4CAF50"));
                 noMatchText.setTextSize(14);
+                noMatchText.setTypeface(null, android.graphics.Typeface.BOLD);
                 matchedContainer.addView(noMatchText);
             }
             
-            // Display missing keywords
+            // Display missing keywords (if available from fallback system)
             if (missingKeywords != null && missingKeywords.length > 0) {
                 settingkeywordchips(missingContainer, missingKeywords, false);
             } else {
                 TextView allFoundText = new TextView(this);
-                allFoundText.setText("All keywords found!");
-                allFoundText.setTextColor(Color.parseColor("#4CAF50"));
+                allFoundText.setText("Detailed analysis provided by AI");
+                allFoundText.setTextColor(Color.parseColor("#1976D2"));
                 allFoundText.setTextSize(14);
                 missingContainer.addView(allFoundText);
             }
-            
-            // Display recommendations
-            displayRecommendations(recommendations);
         }
     }
     
     private void displayCandidateInfo(String name, String email, String phone, String address, String city, String state, String zipCode, String title, int experience, String education, 
-                                    String availability, String availabilityDetails, String transportation, String expectedSalary, String startDate, String workAuthorization, String emergencyContact, String emergencyPhone, String references, String previousRetailExperience, String languages, String certifications) {
+                                    String availability, String availabilityDetails, String transportation, String startDate, String workAuthorization, String emergencyContact, String emergencyPhone, String references, String previousRetailExperience, String languages, String certifications) {
         // Create candidate info section dynamically
         LinearLayout candidateContainer = new LinearLayout(this);
         candidateContainer.setOrientation(LinearLayout.VERTICAL);
@@ -162,9 +177,6 @@ public class MatchScoreActivity extends AppCompatActivity {
         }
         if (transportation != null && !transportation.isEmpty()) {
             addInfoRow(candidateContainer, "Transportation", transportation);
-        }
-        if (expectedSalary != null && !expectedSalary.isEmpty()) {
-            addInfoRow(candidateContainer, "Expected Salary", expectedSalary);
         }
         if (startDate != null && !startDate.isEmpty()) {
             addInfoRow(candidateContainer, "Start Date", startDate);
@@ -228,7 +240,7 @@ public class MatchScoreActivity extends AppCompatActivity {
         }
     }
     
-    private void displayCategoryScores(int skillScore, int experienceScore, int availabilityScore, int educationScore, int distanceScore, double distanceMiles, String distanceDescription) {
+    private void displayCategoryScores(int skillScore, int experienceScore, int availabilityScore, int educationScore, int distanceScore, double distanceKm, String distanceDescription) {
         // Create category scores section dynamically
         LinearLayout categoryContainer = new LinearLayout(this);
         categoryContainer.setOrientation(LinearLayout.VERTICAL);
@@ -250,6 +262,46 @@ public class MatchScoreActivity extends AppCompatActivity {
         addCategoryScore(categoryContainer, "Availability", availabilityScore);
         addCategoryScore(categoryContainer, "Education", educationScore);
         addCategoryScore(categoryContainer, "Distance", distanceScore);
+        
+        // Add distance information
+        if (distanceKm > 0) {
+            LinearLayout distanceRow = new LinearLayout(this);
+            distanceRow.setOrientation(LinearLayout.HORIZONTAL);
+            distanceRow.setPadding(0, 8, 0, 8);
+            
+            TextView distanceLabel = new TextView(this);
+            distanceLabel.setText("Distance: ");
+            distanceLabel.setTypeface(null, android.graphics.Typeface.BOLD);
+            distanceLabel.setTextSize(14);
+            distanceLabel.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1.0f
+            ));
+            
+            TextView distanceValue = new TextView(this);
+            distanceValue.setText(String.format("%.1f km", distanceKm));
+            distanceValue.setTextSize(14);
+            distanceValue.setTextColor(Color.parseColor("#1976D2"));
+            distanceValue.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+            
+            distanceRow.addView(distanceLabel);
+            distanceRow.addView(distanceValue);
+            categoryContainer.addView(distanceRow);
+            
+            // Add distance description if available
+            if (distanceDescription != null && !distanceDescription.isEmpty()) {
+                TextView distanceDesc = new TextView(this);
+                distanceDesc.setText(distanceDescription);
+                distanceDesc.setTextSize(12);
+                distanceDesc.setTextColor(Color.parseColor("#666666"));
+                distanceDesc.setPadding(0, 4, 0, 0);
+                categoryContainer.addView(distanceDesc);
+            }
+        }
         
         // Add to the main layout
         ViewParent parent = findViewById(R.id.matchedKeywordsContainer).getParent();
@@ -294,38 +346,63 @@ public class MatchScoreActivity extends AppCompatActivity {
         else return Color.parseColor("#F44336"); // Red
     }
     
-    private void displayRecommendations(String[] recommendations) {
-        if (recommendations == null || recommendations.length == 0) return;
-        
-        // Create recommendations section dynamically
+    private void displayFeedback(String feedback) {
+        if (feedback == null || feedback.isEmpty()) return;
+
+        LinearLayout feedbackContainer = new LinearLayout(this);
+        feedbackContainer.setOrientation(LinearLayout.VERTICAL);
+        feedbackContainer.setPadding(16, 16, 16, 16);
+        feedbackContainer.setBackgroundColor(Color.parseColor("#E0F2F7"));
+
+        TextView titleView = new TextView(this);
+        titleView.setText("AI Feedback");
+        titleView.setTextSize(16);
+        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
+        titleView.setTextColor(Color.parseColor("#1976D2"));
+        titleView.setPadding(0, 0, 0, 8);
+        feedbackContainer.addView(titleView);
+
+        TextView feedbackText = new TextView(this);
+        feedbackText.setText(feedback);
+        feedbackText.setTextSize(14);
+        feedbackText.setTextColor(Color.parseColor("#333333"));
+        feedbackText.setPadding(0, 0, 0, 8);
+        feedbackContainer.addView(feedbackText);
+
+        ViewParent parent = findViewById(R.id.matchedKeywordsContainer).getParent();
+        if (parent instanceof LinearLayout) {
+            LinearLayout mainLayout = (LinearLayout) parent;
+            mainLayout.addView(feedbackContainer, 3); // Add after category scores
+        }
+    }
+
+    private void displayGPTRecommendations(String recommendations) {
+        if (recommendations == null || recommendations.isEmpty()) return;
+
         LinearLayout recommendationsContainer = new LinearLayout(this);
         recommendationsContainer.setOrientation(LinearLayout.VERTICAL);
         recommendationsContainer.setPadding(16, 16, 16, 16);
         recommendationsContainer.setBackgroundColor(Color.parseColor("#FFF3E0"));
-        
-        // Add recommendations title
+
         TextView titleView = new TextView(this);
-        titleView.setText("Recommendations");
+        titleView.setText("AI Recommendations");
         titleView.setTextSize(16);
         titleView.setTypeface(null, android.graphics.Typeface.BOLD);
         titleView.setTextColor(Color.parseColor("#E65100"));
         titleView.setPadding(0, 0, 0, 8);
         recommendationsContainer.addView(titleView);
-        
-        // Add each recommendation
-        for (String recommendation : recommendations) {
-            TextView recView = new TextView(this);
-            recView.setText("• " + recommendation);
-            recView.setTextSize(14);
-            recView.setPadding(0, 4, 0, 4);
-            recommendationsContainer.addView(recView);
-        }
-        
-        // Add to the main layout
+
+        TextView recommendationsText = new TextView(this);
+        recommendationsText.setText(recommendations);
+        recommendationsText.setTextSize(14);
+        recommendationsText.setTextColor(Color.parseColor("#333333"));
+        recommendationsText.setPadding(0, 0, 0, 8);
+        recommendationsContainer.addView(recommendationsText);
+
         ViewParent parent = findViewById(R.id.matchedKeywordsContainer).getParent();
         if (parent instanceof LinearLayout) {
             LinearLayout mainLayout = (LinearLayout) parent;
-            mainLayout.addView(recommendationsContainer, 3); // Add after category scores
+            mainLayout.addView(recommendationsContainer, 4); // Add after feedback
         }
     }
 
@@ -351,7 +428,7 @@ public class MatchScoreActivity extends AppCompatActivity {
             chip.setPadding(24, 12, 24, 12);
             chip.setTextColor(matched ? Color.WHITE : Color.parseColor("#999999"));
             chip.setBackgroundResource(matched ? R.drawable.chip_matched : R.drawable.chip_missing);
-            
+
             // Set layout parameters with margins
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -359,7 +436,7 @@ public class MatchScoreActivity extends AppCompatActivity {
             );
             params.setMargins(8, 8, 8, 8);
             chip.setLayoutParams(params);
-            
+
             // Add chip to current row
             currentRow.addView(chip);
             

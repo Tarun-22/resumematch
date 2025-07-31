@@ -95,6 +95,15 @@
             android:layout_height="wrap_content"
             android:text="Back to Job Detail"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#1976D2" />
+            android:backgroundTint="#1976D2"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/buttonViewImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Resume Image"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50" />
     </LinearLayout>
 </ScrollView>

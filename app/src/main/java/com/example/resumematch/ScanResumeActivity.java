@@ -177,118 +177,344 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         // Show progress dialog
         android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
-        progressDialog.setMessage("Extracting candidate data...");
+        progressDialog.setMessage("Analyzing resume with AI...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        ResumeDataExtractor.extractDataWithMLKit(this, resumeText, extractedData -> {
-            try {
-                // Get store profile for distance calculation
-                dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
-                    @Override
-                    public void onResult(StoreProfile storeProfile) {
-                        // Calculate enhanced match score with store profile
-                        EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData, storeProfile);
+        // First check if store profile exists
+        dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
+            @Override
+            public void onResult(StoreProfile storeProfile) {
+                if (storeProfile == null) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        // Show dialog to redirect to store profile setup
+                        showStoreProfileRequiredDialog();
+                    });
+                    return;
+                }
 
-                        // Create and save resume to database
-                        String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-                        String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-                        String matchScore = scoringResult.getOverallScore() + "%";
+                // Set a timeout for GPT API call
+                android.os.Handler timeoutHandler = new android.os.Handler();
+                Runnable timeoutRunnable = () -> {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Log.w("ScanResume", "GPT API timeout, using fallback");
+                        Toast.makeText(ScanResumeActivity.this, "AI analysis timed out, using fallback method", Toast.LENGTH_LONG).show();
+                        processWithFallback(resumeText, storeProfile);
+                    });
+                };
 
-                        // Save resume photo
-                        String photoPath = saveResumePhoto(selectedImageUri, resumeId);
+                // Set 30 second timeout
+                timeoutHandler.postDelayed(timeoutRunnable, 30000);
 
-                        // Convert extracted data to JSON for manual editing
-                        String extractedDataJson = convertExtractedDataToJson(extractedData);
+                // Use GPT API for analysis
+                GPTApiService.analyzeResume(resumeText, jobDescription, storeProfile.getFormattedAddress(),
+                    new GPTApiService.GPTCallback() {
+                        @Override
+                        public void onSuccess(GPTApiService.GPTResponse gptResponse) {
+                            // Cancel timeout
+                            timeoutHandler.removeCallbacks(timeoutRunnable);
 
-                        ResumeEntity newResume = new ResumeEntity(
-                            resumeId,
-                            jobId,
-                            jobTitle,
-                            currentDate,
-                            matchScore,
-                            resumeText,
-                            System.currentTimeMillis()
-                        );
-                        newResume.setPhotoPath(photoPath);
-                        newResume.setExtractedDataJson(extractedDataJson);
+                            runOnUiThread(() -> {
+                                Log.d("ScanResume", "GPT analysis successful");
+                                processGPTResponse(gptResponse, resumeText, progressDialog);
+                            });
+                        }
 
-                        // Save to database
-                        dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
-                            @Override
-                            public void onResult(Void result) {
-                                runOnUiThread(() -> {
-                                    // Update job resume count in database
-                                    updateJobResumeCount();
+                        @Override
+                        public void onError(String error) {
+                            // Cancel timeout
+                            timeoutHandler.removeCallbacks(timeoutRunnable);
 
-                                    Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+                            runOnUiThread(() -> {
+                                progressDialog.dismiss();
+                                Log.e("ScanResume", "GPT API error: " + error);
 
-                                    // Navigate to match score screen with enhanced data
-                                    Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
-                                    intent.putExtra("resumeId", resumeId);
-                                    intent.putExtra("matchScore", scoringResult.getOverallScore());
-                                    intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
-                                    intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
-                                    intent.putExtra("resumeText", resumeText);
+                                // Show detailed error dialog
+                                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ScanResumeActivity.this);
+                                builder.setTitle("AI Analysis Failed")
+                                        .setMessage("The AI analysis encountered an error:\n\n" + error + "\n\nWould you like to try the fallback method?")
+                                        .setPositiveButton("Use Fallback", (dialog, which) -> {
+                                            processWithFallback(resumeText, storeProfile);
+                                        })
+                                        .setNegativeButton("Cancel", (dialog, which) -> {
+                                            Toast.makeText(ScanResumeActivity.this, "Analysis cancelled", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .setCancelable(false)
+                                        .show();
+                            });
+                        }
+                    });
+            }
+        });
+    }
 
-                                    // Add extracted data
-                                    intent.putExtra("candidateName", extractedData.getName());
-                                    intent.putExtra("candidateEmail", extractedData.getEmail());
-                                    intent.putExtra("candidatePhone", extractedData.getPhone());
-                                    intent.putExtra("candidateAddress", extractedData.getAddress());
-                                    intent.putExtra("candidateCity", extractedData.getCity());
-                                    intent.putExtra("candidateState", extractedData.getState());
-                                    intent.putExtra("candidateZipCode", extractedData.getZipCode());
-                                    intent.putExtra("candidateTitle", extractedData.getCurrentTitle());
-                                    intent.putExtra("experienceYears", extractedData.getExperienceYears());
-                                    intent.putExtra("education", extractedData.getEducation());
-                                    intent.putExtra("availability", extractedData.getAvailability());
-                                    intent.putExtra("availabilityDetails", extractedData.getAvailabilityDetails());
-                                    intent.putExtra("transportation", extractedData.getTransportation());
-                                    intent.putExtra("expectedSalary", extractedData.getExpectedSalary());
-                                    intent.putExtra("startDate", extractedData.getStartDate());
-                                    intent.putExtra("workAuthorization", extractedData.getWorkAuthorization());
-                                    intent.putExtra("emergencyContact", extractedData.getEmergencyContact());
-                                    intent.putExtra("emergencyPhone", extractedData.getEmergencyPhone());
-                                    intent.putExtra("references", extractedData.getReferences());
-                                    intent.putExtra("previousRetailExperience", extractedData.getPreviousRetailExperience());
-                                    intent.putExtra("languages", extractedData.getLanguages());
-                                    intent.putExtra("certifications", extractedData.getCertifications());
+    private void processGPTResponse(GPTApiService.GPTResponse gptResponse, String resumeText, android.app.ProgressDialog progressDialog) {
+        try {
+            // Create and save resume to database
+            String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 
-                                    // Add category scores
-                                    intent.putExtra("skillScore", scoringResult.getSkillMatchScore());
-                                    intent.putExtra("experienceScore", scoringResult.getExperienceScore());
-                                    intent.putExtra("availabilityScore", scoringResult.getAvailabilityScore());
-                                    intent.putExtra("educationScore", scoringResult.getEducationScore());
-                                    intent.putExtra("distanceScore", scoringResult.getDistanceScore());
-                                    intent.putExtra("distanceMiles", scoringResult.getDistanceMiles());
-                                    intent.putExtra("distanceDescription", scoringResult.getDistanceDescription());
-
-                                    // Add recommendations
-                                    intent.putExtra("recommendations", scoringResult.getRecommendations().toArray(new String[0]));
-
-                                    // Add store info
-                                    if (storeProfile != null) {
-                                        intent.putExtra("storeName", storeProfile.getStoreName());
-                                        intent.putExtra("storeAddress", storeProfile.getFullAddress());
-                                    }
-
-                                    progressDialog.dismiss();
-                                    startActivity(intent);
-                                    finish();
-                                });
-                            }
-                        });
+            // Get store profile for distance calculation
+            dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
+                @Override
+                public void onResult(StoreProfile storeProfile) {
+                    // Calculate distance score (25 points max)
+                    int distanceScore = 0;
+                    double distanceMiles = 0;
+                    String distanceDescription = "Distance not available";
+                    
+                    if (storeProfile != null && !gptResponse.getAddress().isEmpty()) {
+                        // Calculate distance using Google Maps
+                        GoogleMapsDistanceCalculator.calculateDistance(ScanResumeActivity.this, 
+                            gptResponse.getAddress(), storeProfile.getFormattedAddress(),
+                            new GoogleMapsDistanceCalculator.DistanceCallback() {
+                                @Override
+                                public void onDistanceCalculated(double distance, String duration, String distanceText) {
+                                    // Calculate distance score out of 25 points
+                                    int calculatedDistanceScore = GoogleMapsDistanceCalculator.calculateDistanceScore(distance);
+                                    String calculatedDistanceDescription = GoogleMapsDistanceCalculator.getDistanceDescription(distance);
+                                    
+                                    // Calculate final overall score: GPT (75) + Distance (25) = 100
+                                    int finalOverallScore = gptResponse.getOverallScore() + calculatedDistanceScore;
+                                    
+                                    Log.d("ScanResume", "GPT Score: " + gptResponse.getOverallScore() + 
+                                          ", Distance Score: " + calculatedDistanceScore + 
+                                          ", Final Score: " + finalOverallScore);
+                                    
+                                    // Save resume with final score
+                                    saveResumeWithScore(resumeId, currentDate, finalOverallScore, resumeText, 
+                                        gptResponse, calculatedDistanceScore, distance, calculatedDistanceDescription);
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    Log.e("ScanResume", "Distance calculation error: " + error);
+                                    // Use default distance score
+                                    int defaultDistanceScore = 12; // Default 12/25 points
+                                    int finalOverallScore = gptResponse.getOverallScore() + defaultDistanceScore;
+                                    
+                                    Log.d("ScanResume", "Using default distance score. GPT: " + gptResponse.getOverallScore() + 
+                                          ", Distance: " + defaultDistanceScore + ", Final: " + finalOverallScore);
+                                    
+                                    saveResumeWithScore(resumeId, currentDate, finalOverallScore, resumeText, 
+                                        gptResponse, defaultDistanceScore, 15.0, "Default distance (15 miles)");
+                                }
+                            });
+                    } else {
+                        // No store profile or address, use default distance score
+                        int defaultDistanceScore = 12; // Default 12/25 points
+                        int finalOverallScore = gptResponse.getOverallScore() + defaultDistanceScore;
+                        
+                        Log.d("ScanResume", "No store profile. GPT: " + gptResponse.getOverallScore() + 
+                              ", Distance: " + defaultDistanceScore + ", Final: " + finalOverallScore);
+                        
+                        saveResumeWithScore(resumeId, currentDate, finalOverallScore, resumeText, 
+                            gptResponse, defaultDistanceScore, 15.0, "No store profile available");
                     }
-                });
-            } catch (Exception e) {
-                Log.e("ScanResume", "Error processing OCR result: " + e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error processing GPT response: " + e.getMessage());
+            progressDialog.dismiss();
+            Toast.makeText(this, "Error processing AI analysis: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private void saveResumeWithScore(String resumeId, String currentDate, int finalOverallScore, String resumeText, 
+                                   GPTApiService.GPTResponse gptResponse, int distanceScore, double distanceMiles, String distanceDescription) {
+        String matchScore = finalOverallScore + "%";
+
+        // Save resume photo
+        String photoPath = saveResumePhoto(selectedImageUri, resumeId);
+
+        // Convert GPT response to JSON for storage
+        String extractedDataJson = convertGPTResponseToJson(gptResponse);
+
+        ResumeEntity newResume = new ResumeEntity(
+            resumeId,
+            jobId,
+            jobTitle,
+            currentDate,
+            matchScore,
+            resumeText,
+            System.currentTimeMillis()
+        );
+        newResume.setPhotoPath(photoPath);
+        newResume.setExtractedDataJson(extractedDataJson);
+
+        // Save to database
+        dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+            @Override
+            public void onResult(Void result) {
                 runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(this, "Error processing resume: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Update job resume count in database
+                    updateJobResumeCount();
+
+                    Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+
+                    // Navigate to match score screen with GPT data
+                    Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
+                    intent.putExtra("resumeId", resumeId);
+                    intent.putExtra("matchScore", finalOverallScore);
+                    intent.putExtra("resumeText", resumeText);
+
+                    // Add GPT extracted data
+                    intent.putExtra("candidateName", gptResponse.getCandidateName());
+                    intent.putExtra("candidateEmail", gptResponse.getEmail());
+                    intent.putExtra("candidatePhone", gptResponse.getPhone());
+                    intent.putExtra("candidateAddress", gptResponse.getAddress());
+                    intent.putExtra("candidateCity", gptResponse.getCity());
+                    intent.putExtra("candidateState", gptResponse.getState());
+                    intent.putExtra("candidateZipCode", gptResponse.getZipCode());
+                    intent.putExtra("candidateTitle", gptResponse.getCurrentTitle());
+                    intent.putExtra("experienceYears", gptResponse.getExperienceYears());
+                    intent.putExtra("education", gptResponse.getEducation());
+                    intent.putExtra("availability", gptResponse.getAvailability());
+                    intent.putExtra("availabilityDetails", gptResponse.getAvailabilityDetails());
+                    intent.putExtra("transportation", gptResponse.getTransportation());
+                    intent.putExtra("startDate", gptResponse.getStartDate());
+                    intent.putExtra("workAuthorization", gptResponse.getWorkAuthorization());
+                    intent.putExtra("emergencyContact", gptResponse.getEmergencyContact());
+                    intent.putExtra("emergencyPhone", gptResponse.getEmergencyPhone());
+                    intent.putExtra("references", gptResponse.getReferences());
+                    intent.putExtra("previousRetailExperience", gptResponse.getPreviousRetailExperience());
+                    intent.putExtra("languages", gptResponse.getLanguages());
+                    intent.putExtra("certifications", gptResponse.getCertifications());
+
+                    // Add category scores from GPT (out of 75 total)
+                    intent.putExtra("skillScore", gptResponse.getSkillScore());
+                    intent.putExtra("experienceScore", gptResponse.getExperienceScore());
+                    intent.putExtra("availabilityScore", gptResponse.getAvailabilityScore());
+                    intent.putExtra("educationScore", gptResponse.getEducationScore());
+                    
+                    // Add distance score (out of 25 total)
+                    intent.putExtra("distanceScore", distanceScore);
+                    intent.putExtra("distanceMiles", distanceMiles);
+                    intent.putExtra("distanceDescription", distanceDescription);
+
+                    // Add feedback and recommendations from GPT
+                    intent.putExtra("feedback", gptResponse.getFeedback());
+                    intent.putExtra("recommendations", gptResponse.getRecommendations());
+
+                    startActivity(intent);
+                    finish();
                 });
             }
         });
+    }
+
+    private void processWithFallback(String resumeText, StoreProfile storeProfile) {
+        // Fallback to old method if GPT fails
+        ResumeDataExtractor.extractDataWithMLKit(this, resumeText, extractedData -> {
+            try {
+                // Calculate enhanced match score with store profile
+                EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData, storeProfile);
+
+                // Create and save resume to database
+                String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+                String matchScore = scoringResult.getOverallScore() + "%";
+
+                // Save resume photo
+                String photoPath = saveResumePhoto(selectedImageUri, resumeId);
+
+                // Convert extracted data to JSON for manual editing
+                String extractedDataJson = convertExtractedDataToJson(extractedData);
+
+                ResumeEntity newResume = new ResumeEntity(
+                    resumeId,
+                    jobId,
+                    jobTitle,
+                    currentDate,
+                    matchScore,
+                    resumeText,
+                    System.currentTimeMillis()
+                );
+                newResume.setPhotoPath(photoPath);
+                newResume.setExtractedDataJson(extractedDataJson);
+
+                // Save to database
+                dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+                    @Override
+                    public void onResult(Void result) {
+                        runOnUiThread(() -> {
+                            // Update job resume count in database
+                            updateJobResumeCount();
+
+                            Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+
+                            // Navigate to match score screen with enhanced data
+                            Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
+                            intent.putExtra("resumeId", resumeId);
+                            intent.putExtra("matchScore", scoringResult.getOverallScore());
+                            intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
+                            intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
+                            intent.putExtra("resumeText", resumeText);
+
+                            // Add extracted data
+                            intent.putExtra("candidateName", extractedData.getName());
+                            intent.putExtra("candidateEmail", extractedData.getEmail());
+                            intent.putExtra("candidatePhone", extractedData.getPhone());
+                            intent.putExtra("candidateAddress", extractedData.getAddress());
+                            intent.putExtra("candidateCity", extractedData.getCity());
+                            intent.putExtra("candidateState", extractedData.getState());
+                            intent.putExtra("candidateZipCode", extractedData.getZipCode());
+                            intent.putExtra("candidateTitle", extractedData.getCurrentTitle());
+                            intent.putExtra("experienceYears", extractedData.getExperienceYears());
+                            intent.putExtra("education", extractedData.getEducation());
+                            intent.putExtra("availability", extractedData.getAvailability());
+                            intent.putExtra("availabilityDetails", extractedData.getAvailabilityDetails());
+                            intent.putExtra("transportation", extractedData.getTransportation());
+                            intent.putExtra("startDate", extractedData.getStartDate());
+                            intent.putExtra("workAuthorization", extractedData.getWorkAuthorization());
+                            intent.putExtra("emergencyContact", extractedData.getEmergencyContact());
+                            intent.putExtra("emergencyPhone", extractedData.getEmergencyPhone());
+                            intent.putExtra("references", extractedData.getReferences());
+                            intent.putExtra("previousRetailExperience", extractedData.getPreviousRetailExperience());
+                            intent.putExtra("languages", extractedData.getLanguages());
+                            intent.putExtra("certifications", extractedData.getCertifications());
+
+                            // Add category scores
+                            intent.putExtra("skillScore", scoringResult.getSkillMatchScore());
+                            intent.putExtra("experienceScore", scoringResult.getExperienceScore());
+                            intent.putExtra("availabilityScore", scoringResult.getAvailabilityScore());
+                            intent.putExtra("educationScore", scoringResult.getEducationScore());
+                            intent.putExtra("distanceScore", scoringResult.getDistanceScore());
+                            intent.putExtra("distanceMiles", scoringResult.getDistanceMiles());
+                            intent.putExtra("distanceDescription", scoringResult.getDistanceDescription());
+
+                            // Add recommendations
+                            intent.putExtra("recommendations", scoringResult.getRecommendations().toArray(new String[0]));
+
+                            startActivity(intent);
+                            finish();
+                        });
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("ScanResume", "Error in fallback processing: " + e.getMessage());
+                Toast.makeText(ScanResumeActivity.this, "Error processing resume: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void showStoreProfileRequiredDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Store Profile Required")
+                .setMessage("You need to set up your store profile first to calculate distance and provide accurate scoring.")
+                .setPositiveButton("Setup Store Profile", (dialog, which) -> {
+                    Intent intent = new Intent(ScanResumeActivity.this, StoreProfileActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
     }
 
     private String saveResumePhoto(Uri imageUri, String resumeId) {
@@ -319,7 +545,7 @@ public class ScanResumeActivity extends AppCompatActivity {
             
             Log.d("ScanResume", "Resume photo saved: " + photoFile.getAbsolutePath());
             return photoFile.getAbsolutePath();
-            
+
         } catch (Exception e) {
             Log.e("ScanResume", "Error saving resume photo: " + e.getMessage());
             return "";
@@ -461,6 +687,44 @@ public class ScanResumeActivity extends AppCompatActivity {
         super.onDestroy();
         if (dataRepository != null) {
             dataRepository.shutdown();
+        }
+    }
+
+    private String convertGPTResponseToJson(GPTApiService.GPTResponse gptResponse) {
+        try {
+            org.json.JSONObject json = new org.json.JSONObject();
+            json.put("candidateName", gptResponse.getCandidateName());
+            json.put("email", gptResponse.getEmail());
+            json.put("phone", gptResponse.getPhone());
+            json.put("address", gptResponse.getAddress());
+            json.put("city", gptResponse.getCity());
+            json.put("state", gptResponse.getState());
+            json.put("zipCode", gptResponse.getZipCode());
+            json.put("currentTitle", gptResponse.getCurrentTitle());
+            json.put("experienceYears", gptResponse.getExperienceYears());
+            json.put("education", gptResponse.getEducation());
+            json.put("availability", gptResponse.getAvailability());
+            json.put("availabilityDetails", gptResponse.getAvailabilityDetails());
+            json.put("transportation", gptResponse.getTransportation());
+            json.put("startDate", gptResponse.getStartDate());
+            json.put("workAuthorization", gptResponse.getWorkAuthorization());
+            json.put("emergencyContact", gptResponse.getEmergencyContact());
+            json.put("emergencyPhone", gptResponse.getEmergencyPhone());
+            json.put("references", gptResponse.getReferences());
+            json.put("previousRetailExperience", gptResponse.getPreviousRetailExperience());
+            json.put("languages", gptResponse.getLanguages());
+            json.put("certifications", gptResponse.getCertifications());
+            json.put("skillScore", gptResponse.getSkillScore());
+            json.put("experienceScore", gptResponse.getExperienceScore());
+            json.put("availabilityScore", gptResponse.getAvailabilityScore());
+            json.put("educationScore", gptResponse.getEducationScore());
+            json.put("overallScore", gptResponse.getOverallScore());
+            json.put("feedback", gptResponse.getFeedback());
+            json.put("recommendations", gptResponse.getRecommendations());
+            return json.toString();
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error converting GPT response to JSON: " + e.getMessage());
+            return "{}";
         }
     }
 }

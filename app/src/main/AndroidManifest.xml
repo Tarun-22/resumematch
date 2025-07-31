@@ -39,6 +39,7 @@
         <activity android:name=".JobTemplateActivity" />
         <activity android:name=".StoreProfileActivity" />
         <activity android:name=".ResumePhotoViewerActivity" />
+        <activity android:name=".ResumeImageActivity" />
     </application>
 
 </manifest>

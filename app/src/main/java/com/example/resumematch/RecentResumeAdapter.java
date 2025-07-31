@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import android.content.Intent;
 import com.example.resumematch.ResumeDetailsActivity;
+import com.example.resumematch.MatchScoreActivity;
 
 public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapter.ViewHolder> {
 
@@ -50,13 +51,58 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
         
         // Set click listener to view resume details
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ResumeDetailsActivity.class);
+            Intent intent = new Intent(context, MatchScoreActivity.class);
             intent.putExtra("resumeId", resume.getId());
+            intent.putExtra("matchScore", Integer.parseInt(resume.getMatchScore().replace("%", "")));
+            intent.putExtra("resumeText", resume.getResumeText());
             intent.putExtra("jobTitle", resume.getJobTitle());
-            intent.putExtra("resumeDate", resume.getDate());
-            intent.putExtra("matchScore", resume.getMatchScore());
-            intent.putExtra("resumeContent", resume.getResumeText());
-            // TODO: Add matched and missing keywords from database
+            intent.putExtra("date", resume.getDate());
+            intent.putExtra("photoPath", resume.getPhotoPath());
+
+            // Parse stored extracted data from JSON
+            if (resume.getExtractedDataJson() != null && !resume.getExtractedDataJson().isEmpty()) {
+                try {
+                    org.json.JSONObject extractedData = new org.json.JSONObject(resume.getExtractedDataJson());
+                    
+                    // Add extracted candidate data
+                    intent.putExtra("candidateName", extractedData.optString("candidateName", ""));
+                    intent.putExtra("candidateEmail", extractedData.optString("email", ""));
+                    intent.putExtra("candidatePhone", extractedData.optString("phone", ""));
+                    intent.putExtra("candidateAddress", extractedData.optString("address", ""));
+                    intent.putExtra("candidateCity", extractedData.optString("city", ""));
+                    intent.putExtra("candidateState", extractedData.optString("state", ""));
+                    intent.putExtra("candidateZipCode", extractedData.optString("zipCode", ""));
+                    intent.putExtra("candidateTitle", extractedData.optString("currentTitle", ""));
+                    intent.putExtra("experienceYears", extractedData.optInt("experienceYears", 0));
+                    intent.putExtra("education", extractedData.optString("education", ""));
+                    intent.putExtra("availability", extractedData.optString("availability", ""));
+                    intent.putExtra("availabilityDetails", extractedData.optString("availabilityDetails", ""));
+                    intent.putExtra("transportation", extractedData.optString("transportation", ""));
+                    intent.putExtra("startDate", extractedData.optString("startDate", ""));
+                    intent.putExtra("workAuthorization", extractedData.optString("workAuthorization", ""));
+                    intent.putExtra("emergencyContact", extractedData.optString("emergencyContact", ""));
+                    intent.putExtra("emergencyPhone", extractedData.optString("emergencyPhone", ""));
+                    intent.putExtra("references", extractedData.optString("references", ""));
+                    intent.putExtra("previousRetailExperience", extractedData.optString("previousRetailExperience", ""));
+                    intent.putExtra("languages", extractedData.optString("languages", ""));
+                    intent.putExtra("certifications", extractedData.optString("certifications", ""));
+
+                    // Add category scores
+                    intent.putExtra("skillScore", extractedData.optInt("skillScore", 0));
+                    intent.putExtra("experienceScore", extractedData.optInt("experienceScore", 0));
+                    intent.putExtra("availabilityScore", extractedData.optInt("availabilityScore", 0));
+                    intent.putExtra("educationScore", extractedData.optInt("educationScore", 0));
+                    intent.putExtra("distanceScore", extractedData.optInt("distanceScore", 0));
+
+                    // Add feedback and recommendations
+                    intent.putExtra("feedback", extractedData.optString("feedback", ""));
+                    intent.putExtra("recommendations", extractedData.optString("recommendations", ""));
+
+                } catch (Exception e) {
+                    android.util.Log.e("RecentResumeAdapter", "Error parsing extracted data: " + e.getMessage());
+                }
+            }
+            
             context.startActivity(intent);
         });
     }

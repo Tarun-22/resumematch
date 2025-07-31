@@ -12,8 +12,6 @@ import org.json.JSONArray;
 
 public class GoogleMapsDistanceCalculator {
     
-    // You would need to get a Google Maps API key
-    private static final String API_KEY = "your-google-maps-api-key-here"; // Replace with actual API key
     private static final String DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
     
     public interface DistanceCallback {
@@ -25,28 +23,110 @@ public class GoogleMapsDistanceCalculator {
      * Calculate distance between two addresses using Google Maps Distance Matrix API
      */
     public static void calculateDistance(Context context, String originAddress, String destinationAddress, DistanceCallback callback) {
-        // For now, we'll use a simplified approach since we don't have an API key
-        // In a real implementation, you would make an HTTP request to Google Maps API
-        
         try {
-            // Simulate API call (replace with actual Google Maps API call)
-            double distance = calculateDistanceFallback(originAddress, destinationAddress);
-            String duration = "30 mins"; // Placeholder
-            String distanceText = String.format("%.1f miles", distance);
+            // Get API key from Config
+            String apiKey = Config.getGoogleMapsApiKey();
+            if (apiKey == null || apiKey.isEmpty() || apiKey.equals("your-google-maps-api-key-here")) {
+                Log.w("GoogleMapsDistance", "Invalid Google Maps API key, using fallback");
+                calculateDistanceFallback(originAddress, destinationAddress, callback);
+                return;
+            }
             
-            callback.onDistanceCalculated(distance, duration, distanceText);
+            // Build the URL for Google Maps Distance Matrix API
+            String urlString = DISTANCE_MATRIX_URL + "?" +
+                "origins=" + URLEncoder.encode(originAddress, "UTF-8") +
+                "&destinations=" + URLEncoder.encode(destinationAddress, "UTF-8") +
+                "&units=imperial" +
+                "&key=" + apiKey;
+            
+            Log.d("GoogleMapsDistance", "Making request to: " + urlString);
+            
+            // Make the API call
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            
+            int responseCode = connection.getResponseCode();
+            Log.d("GoogleMapsDistance", "Response code: " + responseCode);
+            
+            if (responseCode == 200) {
+                // Read the response
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                
+                Log.d("GoogleMapsDistance", "Response: " + response.toString());
+                
+                // Parse the response
+                parseDistanceResponse(response.toString(), callback);
+                
+            } else {
+                Log.e("GoogleMapsDistance", "API error: " + responseCode);
+                // Fallback to simplified calculation
+                calculateDistanceFallback(originAddress, destinationAddress, callback);
+            }
+            
+            connection.disconnect();
             
         } catch (Exception e) {
             Log.e("GoogleMapsDistance", "Error calculating distance: " + e.getMessage());
-            callback.onError("Error calculating distance: " + e.getMessage());
+            // Fallback to simplified calculation
+            calculateDistanceFallback(originAddress, destinationAddress, callback);
+        }
+    }
+    
+    private static void parseDistanceResponse(String responseBody, DistanceCallback callback) {
+        try {
+            JSONObject response = new JSONObject(responseBody);
+            
+            if (response.getString("status").equals("OK")) {
+                JSONArray rows = response.getJSONArray("rows");
+                if (rows.length() > 0) {
+                    JSONObject row = rows.getJSONObject(0);
+                    JSONArray elements = row.getJSONArray("elements");
+                    if (elements.length() > 0) {
+                        JSONObject element = elements.getJSONObject(0);
+                        
+                        if (element.getString("status").equals("OK")) {
+                            JSONObject distance = element.getJSONObject("distance");
+                            JSONObject duration = element.getJSONObject("duration");
+                            
+                            // Convert meters to miles
+                            double distanceInMeters = distance.getDouble("value");
+                            double distanceInMiles = distanceInMeters * 0.000621371; // Convert meters to miles
+                            
+                            String distanceText = distance.getString("text");
+                            String durationText = duration.getString("text");
+                            
+                            Log.d("GoogleMapsDistance", "Distance: " + distanceInMiles + " miles, Duration: " + durationText);
+                            callback.onDistanceCalculated(distanceInMiles, durationText, distanceText);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // If we get here, there was an error in the response
+            Log.e("GoogleMapsDistance", "Invalid response: " + responseBody);
+            callback.onError("Invalid response from Google Maps API");
+            
+        } catch (Exception e) {
+            Log.e("GoogleMapsDistance", "Error parsing response: " + e.getMessage());
+            callback.onError("Error parsing Google Maps response: " + e.getMessage());
         }
     }
     
     /**
      * Fallback distance calculation using simplified geocoding
-     * In a real app, you would use Google Maps Geocoding API
+     * Used when Google Maps API is not available
      */
-    private static double calculateDistanceFallback(String originAddress, String destinationAddress) {
+    private static void calculateDistanceFallback(String originAddress, String destinationAddress, DistanceCallback callback) {
         try {
             // This is a simplified version - in reality you would:
             // 1. Use Google Geocoding API to convert addresses to coordinates
@@ -58,15 +138,25 @@ public class GoogleMapsDistanceCalculator {
             
             if (originZip != null && destZip != null) {
                 // Simple distance estimation based on ZIP code patterns
-                return estimateDistanceFromZipCodes(originZip, destZip);
+                double distance = estimateDistanceFromZipCodes(originZip, destZip);
+                String duration = "30 mins"; // Placeholder
+                String distanceText = String.format("%.1f miles", distance);
+                
+                Log.d("GoogleMapsDistance", "Fallback distance: " + distance + " miles");
+                callback.onDistanceCalculated(distance, duration, distanceText);
+            } else {
+                // Fallback to a default distance
+                double distance = 15.0; // Default 15 miles
+                String duration = "30 mins";
+                String distanceText = String.format("%.1f miles", distance);
+                
+                Log.d("GoogleMapsDistance", "Default fallback distance: " + distance + " miles");
+                callback.onDistanceCalculated(distance, duration, distanceText);
             }
-            
-            // Fallback to a default distance
-            return 15.0; // Default 15 miles
             
         } catch (Exception e) {
             Log.e("GoogleMapsDistance", "Error in fallback calculation: " + e.getMessage());
-            return 15.0; // Default distance
+            callback.onError("Error in fallback distance calculation: " + e.getMessage());
         }
     }
     
@@ -102,22 +192,23 @@ public class GoogleMapsDistanceCalculator {
     
     /**
      * Calculate distance score based on actual driving distance
+     * Returns score out of 25 points (as per new scoring system)
      */
     public static int calculateDistanceScore(double distance) {
         if (distance <= 5) {
-            return 100; // Excellent - within 5 miles
+            return 25; // Excellent - within 5 miles (25/25 points)
         } else if (distance <= 10) {
-            return 90; // Very good - within 10 miles
+            return 22; // Very good - within 10 miles (22/25 points)
         } else if (distance <= 15) {
-            return 80; // Good - within 15 miles
+            return 20; // Good - within 15 miles (20/25 points)
         } else if (distance <= 25) {
-            return 70; // Acceptable - within 25 miles
+            return 17; // Acceptable - within 25 miles (17/25 points)
         } else if (distance <= 35) {
-            return 50; // Moderate - within 35 miles
+            return 12; // Moderate - within 35 miles (12/25 points)
         } else if (distance <= 50) {
-            return 30; // Poor - within 50 miles
+            return 8; // Poor - within 50 miles (8/25 points)
         } else {
-            return 10; // Very poor - over 50 miles
+            return 3; // Very poor - over 50 miles (3/25 points)
         }
     }
     
