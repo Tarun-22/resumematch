@@ -28,7 +28,7 @@ public class JobApplicationsActivity extends AppCompatActivity {
     private RecentResumeAdapter resumeAdapter;
     private String jobId;
     private String jobTitle;
-    private String currentSortBy = "score"; // "score" or "distance"
+    private String currentSortBy = "score"; // "score", "distance", or "date"
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,22 +85,33 @@ public class JobApplicationsActivity extends AppCompatActivity {
     private void sortResumes() {
         if (resumeEntities.isEmpty()) return;
 
-        if ("score".equals(currentSortBy)) {
-            // Sort by score (highest first)
-            Collections.sort(resumeEntities, (r1, r2) -> {
-                int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
-                int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
-                return Integer.compare(score2, score1); // Descending order
-            });
-        } else if ("distance".equals(currentSortBy)) {
-            // Sort by distance (closest first)
-            // For now, we'll sort by score as a proxy since distance isn't stored separately
-            // In a real app, you'd store distance in the ResumeEntity
-            Collections.sort(resumeEntities, (r1, r2) -> {
-                int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
-                int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
-                return Integer.compare(score1, score2); // Ascending order for distance proxy
-            });
+        switch (currentSortBy) {
+            case "score":
+                // Sort by score (highest first)
+                Collections.sort(resumeEntities, (r1, r2) -> {
+                    int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
+                    int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
+                    return Integer.compare(score2, score1); // Descending order
+                });
+                break;
+                
+            case "distance":
+                // Sort by distance (closest first)
+                // For now, we'll sort by score as a proxy since distance isn't stored separately
+                // In a real app, you'd store distance in the ResumeEntity
+                Collections.sort(resumeEntities, (r1, r2) -> {
+                    int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
+                    int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
+                    return Integer.compare(score1, score2); // Ascending order for distance proxy
+                });
+                break;
+                
+            case "date":
+                // Sort by date added (newest first)
+                Collections.sort(resumeEntities, (r1, r2) -> {
+                    return Long.compare(r2.getCreatedAt(), r1.getCreatedAt()); // Descending order (newest first)
+                });
+                break;
         }
     }
 
@@ -139,6 +150,12 @@ public class JobApplicationsActivity extends AppCompatActivity {
             sortResumes();
             updateResumeAdapter();
             Snackbar.make(findViewById(android.R.id.content), "Sorted by Distance", Snackbar.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_sort_date) {
+            currentSortBy = "date";
+            sortResumes();
+            updateResumeAdapter();
+            Snackbar.make(findViewById(android.R.id.content), "Sorted by Date Added", Snackbar.LENGTH_SHORT).show();
             return true;
         } else if (id == android.R.id.home) {
             onBackPressed();

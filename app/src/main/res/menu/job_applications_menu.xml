@@ -14,4 +14,10 @@
         android:icon="@android:drawable/ic_menu_mylocation"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_sort_date"
+        android:title="Sort by Date"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        app:showAsAction="ifRoom" />
+
 </menu> 
