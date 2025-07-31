@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
@@ -21,8 +21,7 @@ public class JobApplicationsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private TextView textEmptyState;
-    private ImageView backButton;
-    private TextView titleText;
+    private Toolbar toolbar;
     private DataRepository dataRepository;
     private List<ResumeEntity> resumeEntities = new ArrayList<>();
     private RecentResumeAdapter resumeAdapter;
@@ -43,21 +42,22 @@ public class JobApplicationsActivity extends AppCompatActivity {
         dataRepository = new DataRepository(this);
 
         // Initialize views
-        backButton = findViewById(R.id.backButton);
-        titleText = findViewById(R.id.titleText);
+        toolbar = findViewById(R.id.toolbar);
         recyclerView = findViewById(R.id.recyclerApplications);
         textEmptyState = findViewById(R.id.textEmptyState);
 
-        // Set title
-        titleText.setText("Applications for " + jobTitle);
+        // Set up toolbar
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Applications for " + jobTitle);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
+        }
 
         // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
         recyclerView.setAdapter(resumeAdapter);
-
-        // Set up click listeners
-        backButton.setOnClickListener(v -> finish());
 
         // Load resumes for this specific job
         loadResumesForJob();
@@ -109,7 +109,7 @@ public class JobApplicationsActivity extends AppCompatActivity {
             case "date":
                 // Sort by date added (newest first)
                 Collections.sort(resumeEntities, (r1, r2) -> {
-                    return Long.compare(r2.getCreatedAt(), r1.getCreatedAt()); // Descending order (newest first)
+                    return Long.compare(r2.getCreatedAt(), r1.getCreatedAt()); // Descending order
                 });
                 break;
         }
