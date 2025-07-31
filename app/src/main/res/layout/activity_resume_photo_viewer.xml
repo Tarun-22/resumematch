@@ -32,6 +32,18 @@
             android:textStyle="bold"
             android:textColor="#1976D2" />
 
+        <Button
+            android:id="@+id/buttonShareResumeImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share"
+            android:textSize="12sp"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:drawableStart="@android:drawable/ic_menu_share"
+            android:drawablePadding="4dp"
+            android:padding="8dp" />
+
     </LinearLayout>
 
     <!-- Resume Information -->

@@ -98,12 +98,32 @@
             android:backgroundTint="#1976D2"
             android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/buttonViewImage"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View Resume Image"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/buttonViewImage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="View Resume Image"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#FF9800"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/buttonShareImage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Share Image"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#4CAF50"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

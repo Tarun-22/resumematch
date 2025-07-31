@@ -1,11 +1,14 @@
 package com.example.resumematch;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import java.io.File;
 
 public class ResumePhotoViewerActivity extends AppCompatActivity {
@@ -15,6 +18,7 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
     private TextView textViewJobTitle;
     private TextView textViewDate;
     private TextView textViewMatchScore;
+    private String photoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +37,7 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
         String jobTitle = getIntent().getStringExtra("jobTitle");
         String date = getIntent().getStringExtra("date");
         String matchScore = getIntent().getStringExtra("matchScore");
-        String photoPath = getIntent().getStringExtra("photoPath");
+        photoPath = getIntent().getStringExtra("photoPath");
         
         // Display resume information
         if (resumeId != null) textViewResumeId.setText("Resume ID: " + resumeId);
@@ -47,6 +51,7 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
         } else {
             textViewResumeId.setText("No photo available");
         }
+        findViewById(R.id.buttonShareResumeImage).setOnClickListener(v -> shareResumeImage());
     }
     
     private void loadResumePhoto(String photoPath) {
@@ -65,5 +70,25 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
         } catch (Exception e) {
             textViewResumeId.setText("Error: " + e.getMessage());
         }
+    }
+
+    private void shareResumeImage() {
+        if (photoPath == null || photoPath.isEmpty()) {
+            return;
+        }
+        File photoFile = new File(photoPath);
+        if (!photoFile.exists()) {
+            return;
+        }
+        Uri contentUri = FileProvider.getUriForFile(
+            this,
+            "com.example.resumematch.fileprovider",
+            photoFile
+        );
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/jpeg");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "Share Resume Image"));
     }
 } 

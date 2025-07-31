@@ -2,6 +2,7 @@ package com.example.resumematch;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -12,7 +13,9 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.ViewParent;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +25,7 @@ public class MatchScoreActivity extends AppCompatActivity {
     ImageView backArrow;
     TextView textScore;
     LinearLayout matchedContainer, missingContainer;
-    Button buttonBack, buttonViewImage;
+    Button buttonBack, buttonViewImage, buttonShareImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,7 @@ public class MatchScoreActivity extends AppCompatActivity {
         missingContainer = findViewById(R.id.missingKeywordsContainer);
         buttonBack = findViewById(R.id.buttonBack);
         buttonViewImage = findViewById(R.id.buttonViewImage);
+        buttonShareImage = findViewById(R.id.buttonShareImage); // Added this line
 
         //setting the onclick events with a function to these buttons
         backArrow.setOnClickListener(v -> finish());
@@ -48,6 +52,11 @@ public class MatchScoreActivity extends AppCompatActivity {
             intent.putExtra("photoPath", photoPath);
             intent.putExtra("resumeText", resumeText);
             startActivity(intent);
+        });
+
+        buttonShareImage.setOnClickListener(v -> {
+            String photoPath = getIntent().getStringExtra("photoPath");
+            shareResumeImage(photoPath);
         });
 
         // Get match data from intent
@@ -453,5 +462,28 @@ public class MatchScoreActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void shareResumeImage(String photoPath) {
+        if (photoPath == null || photoPath.isEmpty()) {
+            Log.e("MatchScore", "Photo path is empty for sharing.");
+            return;
+        }
+
+        File file = new File(photoPath);
+        if (!file.exists()) {
+            Log.e("MatchScore", "Image file not found at: " + photoPath);
+            return;
+        }
+
+        Uri contentUri = FileProvider.getUriForFile(this, "com.example.resumematch.fileprovider", file);
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Resume Match Score");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out my resume match score!");
+
+        startActivity(Intent.createChooser(shareIntent, "Share Resume Image"));
     }
 }
