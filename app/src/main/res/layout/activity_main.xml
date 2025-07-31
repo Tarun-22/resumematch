@@ -17,7 +17,9 @@
         android:layout_marginBottom="32dp"
         android:gravity="center">
 
-        <!-- Reusable Icon + Label Group -->
+
+        <!-- Posted Jobs -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -27,24 +29,27 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/ivJobManagement"
+                android:id="@+id/ivPostedJobs"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_job_management"
+                android:src="@drawable/ic_posted_jobs_blue"
                 android:alpha="0.6"
-                android:contentDescription="Job Management" />
+                android:contentDescription="Posted Jobs" />
 
             <TextView
-                android:id="@+id/tvJobManagement"
+                android:id="@+id/tvPostedJobs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Job Management"
+                android:text="Posted Jobs"
                 android:textSize="12sp"
                 android:textColor="#000000"
                 android:layout_marginTop="4dp"
                 android:textAlignment="center" />
         </LinearLayout>
 
+
+        <!-- Recent Resumes -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -54,24 +59,27 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/ivResumeScanning"
+                android:id="@+id/ivRecentResumes"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_camera"
+                android:src="@drawable/ic_recent_resumes_blue"
                 android:alpha="0.6"
-                android:contentDescription="Resume Scanning" />
+                android:contentDescription="Recent Resumes" />
 
             <TextView
-                android:id="@+id/tvResumeScanning"
+                android:id="@+id/tvRecentResumes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resume Scanning"
+                android:text="Recent Resumes"
                 android:textSize="12sp"
                 android:textColor="#000000"
                 android:layout_marginTop="4dp"
                 android:textAlignment="center" />
         </LinearLayout>
 
+
+        <!-- Create Job -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -81,24 +89,27 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/ivApplications"
+                android:id="@+id/ivCreateJob"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_applications"
+                android:src="@drawable/ic_create_job_blue"
                 android:alpha="0.6"
-                android:contentDescription="Applications" />
+                android:contentDescription="Create Job" />
 
             <TextView
-                android:id="@+id/tvApplications"
+                android:id="@+id/tvCreateJob"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Applications"
+                android:text="Create Job"
                 android:textSize="12sp"
                 android:textColor="#000000"
                 android:layout_marginTop="4dp"
                 android:textAlignment="center" />
         </LinearLayout>
 
+
+        <!-- Scan Resume -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -108,18 +119,18 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/ivProfileSettings"
+                android:id="@+id/ivScanResume"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_profile_settings"
+                android:src="@drawable/ic_camera_blue"
                 android:alpha="0.6"
-                android:contentDescription="Profile &amp; Settings" />
+                android:contentDescription="Scan Resume" />
 
             <TextView
-                android:id="@+id/tvProfileSettings"
+                android:id="@+id/tvScanResume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Profile &amp; Settings"
+                android:text="Scan Resume"
                 android:textSize="12sp"
                 android:textColor="#000000"
                 android:layout_marginTop="4dp"
@@ -127,13 +138,46 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
+
+    <!-- Main Page Sections Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Quick Actions"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+
+        <ImageView
+            android:id="@+id/helpButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_help"
+            android:contentDescription="Help"
+            android:padding="8dp"
+            android:background="@drawable/help_button_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- Progress Bar for Loading -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Quick Actions"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
+        android:layout_gravity="center"
+        android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
     <LinearLayout

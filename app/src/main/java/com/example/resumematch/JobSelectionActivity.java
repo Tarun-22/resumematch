@@ -2,8 +2,6 @@ package com.example.resumematch;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,45 +11,43 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmployerHomeActivity extends AppCompatActivity {
+public class JobSelectionActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private Button buttonCreateJob;
-    private JobPostAdapter jobAdapter;
-    private TextView textEmptyState;
     private ImageView backButton;
+    private TextView titleText;
+    private TextView emptyStateText;
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
+    private JobSelectionAdapter jobAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_employer_home);
+        setContentView(R.layout.activity_job_selection);
 
         // Initialize DataRepository
         dataRepository = new DataRepository(this);
 
-        recyclerView = findViewById(R.id.recyclerJobPosts);
-        buttonCreateJob = findViewById(R.id.buttonCreateJob);
-        textEmptyState = findViewById(R.id.textEmptyState);
+        // Initialize views
         backButton = findViewById(R.id.backButton);
+        titleText = findViewById(R.id.titleText);
+        recyclerView = findViewById(R.id.recyclerJobs);
+        emptyStateText = findViewById(R.id.emptyStateText);
 
+        // Set title
+        titleText.setText("Select Job for Resume");
+
+        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
-        // Create adapter with empty list initially
-        jobAdapter = new JobPostAdapter(new ArrayList<>());
+        jobAdapter = new JobSelectionAdapter(new ArrayList<>(), this);
         recyclerView.setAdapter(jobAdapter);
 
-        // Set up back button
+        // Set up click listeners
         backButton.setOnClickListener(v -> finish());
 
         // Load jobs from database
         loadJobsFromDatabase();
-
-        buttonCreateJob.setOnClickListener(v -> {
-            Intent intent = new Intent(EmployerHomeActivity.this, CreateJobActivity.class);
-            startActivity(intent);
-        });
     }
 
     private void loadJobsFromDatabase() {
@@ -68,32 +64,28 @@ public class EmployerHomeActivity extends AppCompatActivity {
     }
 
     private void updateJobAdapter() {
-        // Convert JobEntity to JobPost for the adapter
-        List<JobPost> jobPosts = new ArrayList<>();
-        for (JobEntity jobEntity : jobEntities) {
-            JobPost jobPost = new JobPost(
-                jobEntity.getId(),
-                jobEntity.getTitle(),
-                jobEntity.getDescription(), // Pass the description
-                new ArrayList<>(), // keywords (empty for now)
-                new ArrayList<>()  // resumes (empty for now)
-            );
-            jobPost.setResumeCount(jobEntity.getResumeCount());
-            jobPosts.add(jobPost);
-        }
-        
-        jobAdapter = new JobPostAdapter(jobPosts);
+        jobAdapter = new JobSelectionAdapter(jobEntities, this);
         recyclerView.setAdapter(jobAdapter);
     }
 
     private void updateEmptyState() {
         if (jobEntities.isEmpty()) {
-            textEmptyState.setVisibility(TextView.VISIBLE);
+            emptyStateText.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            textEmptyState.setVisibility(TextView.GONE);
+            emptyStateText.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
+    }
+
+    public void onJobSelected(JobEntity job) {
+        // Navigate to ScanResumeActivity with selected job details
+        Intent intent = new Intent(JobSelectionActivity.this, ScanResumeActivity.class);
+        intent.putExtra("jobId", job.getId());
+        intent.putExtra("jobTitle", job.getTitle());
+        intent.putExtra("jobDescription", job.getDescription());
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -110,4 +102,4 @@ public class EmployerHomeActivity extends AppCompatActivity {
             dataRepository.shutdown();
         }
     }
-}
+} 

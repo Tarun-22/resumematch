@@ -27,11 +27,15 @@ public class ResumeListActivity extends AppCompatActivity {
     ArrayList<Resume> resumeList;
     String jobId;
     String jobDescription;
+    DataRepository dataRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resume_list);
+
+        // Initialize DataRepository
+        dataRepository = new DataRepository(this);
 
         backArrow = findViewById(R.id.backArrow);
         buttonAddResume = findViewById(R.id.buttonAddResume);
@@ -62,33 +66,55 @@ public class ResumeListActivity extends AppCompatActivity {
             startActivity(scanIntent);
         });
 
-        // Load resumes from storage
+        // Load resumes from database
         loadResumesForJob();
     }
 
     private void loadResumesForJob() {
         if (jobId != null) {
-            List<Resume> jobResumes = JobStorage.getResumesForJob(jobId);
-            resumeList = new ArrayList<>(jobResumes);
-            Log.d("ResumeListActivity", "Loaded " + resumeList.size() + " resumes for job: " + jobId);
-            
-            // Log each resume for debugging
-            for (Resume resume : resumeList) {
-                Log.d("ResumeListActivity", "Resume: " + resume.getId() + " - " + resume.getMatch() + " - " + resume.getDate());
-            }
+            dataRepository.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
+                @Override
+                public void onResult(List<ResumeEntity> resumeEntities) {
+                    runOnUiThread(() -> {
+                        // Convert ResumeEntity to Resume for the adapter
+                        resumeList = new ArrayList<>();
+                        for (ResumeEntity entity : resumeEntities) {
+                            Resume resume = new Resume(
+                                entity.getId(),
+                                entity.getDate(),
+                                entity.getMatchScore(),
+                                entity.getJobId()
+                            );
+                            resumeList.add(resume);
+                        }
+                        
+                        Log.d("ResumeListActivity", "Loaded " + resumeList.size() + " resumes for job: " + jobId);
+                        
+                        // Log each resume for debugging
+                        for (Resume resume : resumeList) {
+                            Log.d("ResumeListActivity", "Resume: " + resume.getId() + " - " + resume.getMatch() + " - " + resume.getDate());
+                        }
+
+                        resumeAdapter = new ResumeAdapter(resumeList);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(ResumeListActivity.this));
+                        recyclerView.setAdapter(resumeAdapter);
+
+                        // Show/hide empty state
+                        updateEmptyState();
+                        
+                        Log.d("ResumeListActivity", "RecyclerView setup complete with " + resumeList.size() + " resumes");
+                    });
+                }
+            });
         } else {
             resumeList = new ArrayList<>();
             Log.d("ResumeListActivity", "No jobId provided, using empty list");
+            
+            resumeAdapter = new ResumeAdapter(resumeList);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(resumeAdapter);
+            updateEmptyState();
         }
-
-        resumeAdapter = new ResumeAdapter(resumeList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(resumeAdapter);
-
-        // Show/hide empty state
-        updateEmptyState();
-        
-        Log.d("ResumeListActivity", "RecyclerView setup complete with " + resumeList.size() + " resumes");
     }
 
     private void updateEmptyState() {
@@ -113,5 +139,13 @@ public class ResumeListActivity extends AppCompatActivity {
         super.onResume();
         // Reload resumes when returning from scan activity
         loadResumesForJob();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dataRepository != null) {
+            dataRepository.shutdown();
+        }
     }
 }

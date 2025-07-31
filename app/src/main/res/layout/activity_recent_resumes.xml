@@ -3,16 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:padding="16dp">
 
-    <!-- Header with back button -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="24dp">
 
         <ImageView
             android:id="@+id/backButton"
@@ -22,11 +22,11 @@
             android:contentDescription="Back" />
 
         <TextView
-            android:id="@+id/textViewTitle"
+            android:id="@+id/titleText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="My Job Posts"
+            android:text="Recent Resumes"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#000000"
@@ -36,10 +36,10 @@
 
     <!-- Empty state message -->
     <TextView
-        android:id="@+id/textEmptyState"
+        android:id="@+id/emptyStateText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No jobs posted yet. Create your first job!"
+        android:text="No resumes scanned yet. Scan your first resume!"
         android:textSize="16sp"
         android:textColor="#888888"
         android:gravity="center"
@@ -47,8 +47,9 @@
         android:layout_marginTop="32dp"
         android:layout_marginBottom="16dp" />
 
+    <!-- Resumes RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerJobPosts"
+        android:id="@+id/recyclerResumes"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -57,16 +58,4 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp" />
 
-    <Button
-        android:id="@+id/buttonCreateJob"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="＋  Create New Job"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1976D2"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:padding="12dp" />
-
-</LinearLayout>
+</LinearLayout> 

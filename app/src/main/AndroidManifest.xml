@@ -30,6 +30,8 @@
         <activity android:name=".MatchScoreActivity" />
         <activity android:name=".EmployerHomeActivity" />
         <activity android:name=".ResumeListActivity" />
+        <activity android:name=".RecentResumesActivity" />
+        <activity android:name=".JobSelectionActivity" />
     </application>
 
 </manifest>
