@@ -15,6 +15,9 @@ public class EnhancedScoringSystem {
         private int experienceScore;
         private int availabilityScore;
         private int educationScore;
+        private int distanceScore;
+        private double distanceMiles;
+        private String distanceDescription;
         private List<String> matchedSkills;
         private List<String> missingSkills;
         private List<String> recommendations;
@@ -43,6 +46,15 @@ public class EnhancedScoringSystem {
         public int getEducationScore() { return educationScore; }
         public void setEducationScore(int educationScore) { this.educationScore = educationScore; }
         
+        public int getDistanceScore() { return distanceScore; }
+        public void setDistanceScore(int distanceScore) { this.distanceScore = distanceScore; }
+        
+        public double getDistanceMiles() { return distanceMiles; }
+        public void setDistanceMiles(double distanceMiles) { this.distanceMiles = distanceMiles; }
+        
+        public String getDistanceDescription() { return distanceDescription; }
+        public void setDistanceDescription(String distanceDescription) { this.distanceDescription = distanceDescription; }
+        
         public List<String> getMatchedSkills() { return matchedSkills; }
         public void setMatchedSkills(List<String> matchedSkills) { this.matchedSkills = matchedSkills; }
         
@@ -56,7 +68,7 @@ public class EnhancedScoringSystem {
         public void setCategoryScores(Map<String, Integer> categoryScores) { this.categoryScores = categoryScores; }
     }
     
-    public static ScoringResult calculateEnhancedScore(String jobDescription, ResumeDataExtractor.ExtractedData resumeData) {
+    public static ScoringResult calculateEnhancedScore(String jobDescription, ResumeDataExtractor.ExtractedData resumeData, StoreProfile storeProfile) {
         ScoringResult result = new ScoringResult();
         
         try {
@@ -74,6 +86,9 @@ public class EnhancedScoringSystem {
             
             // Calculate education score
             calculateEducationScore(jobReqs, resumeData, result);
+            
+            // Calculate distance score
+            calculateDistanceScore(resumeData, storeProfile, result);
             
             // Calculate overall score
             calculateOverallScore(result);
@@ -97,6 +112,9 @@ public class EnhancedScoringSystem {
         private String preferredAvailability;
         private String educationLevel;
         private String jobType; // full-time, part-time, etc.
+        private String preferredTransportation;
+        private String preferredLanguages;
+        private String salaryRange;
         
         public JobRequirements() {
             this.requiredSkills = new ArrayList<>();
@@ -117,29 +135,24 @@ public class EnhancedScoringSystem {
         
         public String getJobType() { return jobType; }
         public void setJobType(String jobType) { this.jobType = jobType; }
+        
+        public String getPreferredTransportation() { return preferredTransportation; }
+        public void setPreferredTransportation(String preferredTransportation) { this.preferredTransportation = preferredTransportation; }
+        
+        public String getPreferredLanguages() { return preferredLanguages; }
+        public void setPreferredLanguages(String preferredLanguages) { this.preferredLanguages = preferredLanguages; }
+        
+        public String getSalaryRange() { return salaryRange; }
+        public void setSalaryRange(String salaryRange) { this.salaryRange = salaryRange; }
     }
     
     private static JobRequirements extractJobRequirements(String jobDescription) {
         JobRequirements reqs = new JobRequirements();
         String lowerDesc = jobDescription.toLowerCase();
         
-        // Extract skills from job description
-        String[] skillKeywords = {
-            "java", "python", "javascript", "react", "angular", "vue", "node.js", "spring",
-            "android", "ios", "swift", "kotlin", "sql", "mongodb", "mysql", "postgresql",
-            "aws", "azure", "docker", "kubernetes", "jenkins", "git", "agile", "scrum",
-            "rest", "api", "microservices", "machine learning", "ai", "data science",
-            "frontend", "backend", "full stack", "devops", "ui", "ux", "design",
-            "project management", "leadership", "communication", "team", "collaboration",
-            "customer service", "sales", "marketing", "analytics", "excel", "powerpoint",
-            "word", "photoshop", "illustrator", "inventory", "pos", "cash handling"
-        };
-        
-        for (String skill : skillKeywords) {
-            if (lowerDesc.contains(skill)) {
-                reqs.getRequiredSkills().add(skill);
-            }
-        }
+        // Extract skills from job description using natural language processing
+        List<String> extractedSkills = extractSkillsFromDescription(jobDescription);
+        reqs.setRequiredSkills(extractedSkills);
         
         // Extract experience requirements
         if (lowerDesc.contains("senior") || lowerDesc.contains("5+ years") || lowerDesc.contains("5 years")) {
@@ -179,7 +192,94 @@ public class EnhancedScoringSystem {
             reqs.setJobType("any");
         }
         
+        // Extract transportation preferences
+        if (lowerDesc.contains("car") || lowerDesc.contains("vehicle") || lowerDesc.contains("driving")) {
+            reqs.setPreferredTransportation("car");
+        } else if (lowerDesc.contains("public transit") || lowerDesc.contains("bus")) {
+            reqs.setPreferredTransportation("public transit");
+        } else {
+            reqs.setPreferredTransportation("any");
+        }
+        
+        // Extract language preferences
+        if (lowerDesc.contains("spanish") || lowerDesc.contains("bilingual")) {
+            reqs.setPreferredLanguages("spanish");
+        } else if (lowerDesc.contains("chinese") || lowerDesc.contains("mandarin")) {
+            reqs.setPreferredLanguages("chinese");
+        } else {
+            reqs.setPreferredLanguages("english");
+        }
+        
+        // Extract salary range
+        if (lowerDesc.contains("$15") || lowerDesc.contains("15/hour")) {
+            reqs.setSalaryRange("$15/hour");
+        } else if (lowerDesc.contains("$20") || lowerDesc.contains("20/hour")) {
+            reqs.setSalaryRange("$20/hour");
+        } else if (lowerDesc.contains("$25") || lowerDesc.contains("25/hour")) {
+            reqs.setSalaryRange("$25/hour");
+        } else {
+            reqs.setSalaryRange("negotiable");
+        }
+        
         return reqs;
+    }
+    
+    private static List<String> extractSkillsFromDescription(String jobDescription) {
+        List<String> skills = new ArrayList<>();
+        String lowerDesc = jobDescription.toLowerCase();
+        
+        // Common skill keywords that might appear in job descriptions
+        String[] skillKeywords = {
+            // Technical skills
+            "java", "python", "javascript", "react", "angular", "vue", "node.js", "spring",
+            "android", "ios", "swift", "kotlin", "sql", "mongodb", "mysql", "postgresql",
+            "aws", "azure", "docker", "kubernetes", "jenkins", "git", "agile", "scrum",
+            "rest", "api", "microservices", "machine learning", "ai", "data science",
+            "frontend", "backend", "full stack", "devops", "ui", "ux", "design",
+            
+            // Business skills
+            "project management", "leadership", "communication", "team", "collaboration",
+            "customer service", "sales", "marketing", "analytics", "excel", "powerpoint",
+            "word", "photoshop", "illustrator", "inventory", "pos", "cash handling",
+            
+            // Retail/Service skills
+            "retail", "cashier", "stock", "merchandising", "food service", "cooking",
+            "cleaning", "maintenance", "security", "driving", "delivery", "customer",
+            "cash register", "point of sale", "inventory management", "scheduling",
+            "multitasking", "problem solving", "attention to detail", "time management"
+        };
+        
+        // Check which skills are mentioned in the job description
+        for (String skill : skillKeywords) {
+            if (lowerDesc.contains(skill)) {
+                skills.add(skill);
+            }
+        }
+        
+        // Also extract any specific requirements mentioned
+        String[] requirementPatterns = {
+            "must have", "required", "needed", "essential", "preferred", "experience with",
+            "knowledge of", "familiar with", "proficient in", "skilled in"
+        };
+        
+        for (String pattern : requirementPatterns) {
+            if (lowerDesc.contains(pattern)) {
+                // Extract words after these patterns
+                int index = lowerDesc.indexOf(pattern);
+                if (index != -1) {
+                    String afterPattern = lowerDesc.substring(index + pattern.length());
+                    String[] words = afterPattern.split("\\s+");
+                    for (int i = 0; i < Math.min(5, words.length); i++) {
+                        String word = words[i].replaceAll("[^a-zA-Z]", "");
+                        if (word.length() > 2) {
+                            skills.add(word);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return skills;
     }
     
     private static void calculateSkillMatchScore(JobRequirements jobReqs, ResumeDataExtractor.ExtractedData resumeData, ScoringResult result) {
@@ -273,13 +373,67 @@ public class EnhancedScoringSystem {
         result.getCategoryScores().put("Education", result.getEducationScore());
     }
     
+    private static void calculateDistanceScore(ResumeDataExtractor.ExtractedData resumeData, StoreProfile storeProfile, ScoringResult result) {
+        if (storeProfile == null || resumeData.getAddress().isEmpty()) {
+            result.setDistanceScore(50); // Neutral score if no data
+            result.setDistanceMiles(0);
+            result.setDistanceDescription("Distance not available");
+            return;
+        }
+        
+        try {
+            // Get addresses for distance calculation
+            String candidateAddress = resumeData.getFormattedAddress();
+            String storeAddress = storeProfile.getFormattedAddress();
+            
+            if (candidateAddress.isEmpty() || storeAddress.isEmpty()) {
+                result.setDistanceScore(50);
+                result.setDistanceMiles(0);
+                result.setDistanceDescription("Address not available");
+                return;
+            }
+            
+            // Use Google Maps distance calculator
+            GoogleMapsDistanceCalculator.calculateDistance(null, candidateAddress, storeAddress, 
+                new GoogleMapsDistanceCalculator.DistanceCallback() {
+                    @Override
+                    public void onDistanceCalculated(double distance, String duration, String distanceText) {
+                        // Calculate score based on distance
+                        int distanceScore = GoogleMapsDistanceCalculator.calculateDistanceScore(distance);
+                        String distanceDescription = GoogleMapsDistanceCalculator.getDistanceDescription(distance);
+                        
+                        result.setDistanceScore(distanceScore);
+                        result.setDistanceMiles(distance);
+                        result.setDistanceDescription(distanceDescription);
+                        
+                        result.getCategoryScores().put("Distance", distanceScore);
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        Log.e("EnhancedScoring", "Error calculating distance: " + error);
+                        result.setDistanceScore(50);
+                        result.setDistanceMiles(0);
+                        result.setDistanceDescription("Distance calculation error");
+                    }
+                });
+            
+        } catch (Exception e) {
+            Log.e("EnhancedScoring", "Error calculating distance: " + e.getMessage());
+            result.setDistanceScore(50);
+            result.setDistanceMiles(0);
+            result.setDistanceDescription("Distance calculation error");
+        }
+    }
+    
     private static void calculateOverallScore(ScoringResult result) {
-        // Weighted average: Skills (40%), Experience (30%), Availability (20%), Education (10%)
+        // Weighted average: Skills (25%), Experience (20%), Availability (20%), Education (10%), Distance (25%)
         int overallScore = (int) (
-            result.getSkillMatchScore() * 0.4 +
-            result.getExperienceScore() * 0.3 +
-            result.getAvailabilityScore() * 0.2 +
-            result.getEducationScore() * 0.1
+            result.getSkillMatchScore() * 0.25 +
+            result.getExperienceScore() * 0.20 +
+            result.getAvailabilityScore() * 0.20 +
+            result.getEducationScore() * 0.10 +
+            result.getDistanceScore() * 0.25
         );
         
         result.setOverallScore(overallScore);
@@ -301,6 +455,11 @@ public class EnhancedScoringSystem {
         // Availability-based recommendations
         if (result.getAvailabilityScore() < 70) {
             recommendations.add("Check candidate's availability timeline");
+        }
+        
+        // Distance-based recommendations
+        if (result.getDistanceScore() < 70) {
+            recommendations.add("Consider commute time and transportation options");
         }
         
         // Overall recommendations

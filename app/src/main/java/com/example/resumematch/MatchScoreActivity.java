@@ -77,6 +77,13 @@ public class MatchScoreActivity extends AppCompatActivity {
             int experienceScore = intent.getIntExtra("experienceScore", 0);
             int availabilityScore = intent.getIntExtra("availabilityScore", 0);
             int educationScore = intent.getIntExtra("educationScore", 0);
+            int distanceScore = intent.getIntExtra("distanceScore", 0);
+            double distanceMiles = intent.getDoubleExtra("distanceMiles", 0.0);
+            String distanceDescription = intent.getStringExtra("distanceDescription");
+            
+            // Get store info
+            String storeName = intent.getStringExtra("storeName");
+            String storeAddress = intent.getStringExtra("storeAddress");
             
             // Get recommendations
             String[] recommendations = intent.getStringArrayExtra("recommendations");
@@ -92,7 +99,7 @@ public class MatchScoreActivity extends AppCompatActivity {
             displayCandidateInfo(candidateName, candidateEmail, candidatePhone, candidateAddress, candidateCity, candidateState, candidateZipCode, candidateTitle, experienceYears, education, availability, availabilityDetails, transportation, expectedSalary, startDate, workAuthorization, emergencyContact, emergencyPhone, references, previousRetailExperience, languages, certifications);
             
             // Display category scores
-            displayCategoryScores(skillScore, experienceScore, availabilityScore, educationScore);
+            displayCategoryScores(skillScore, experienceScore, availabilityScore, educationScore, distanceScore, distanceMiles, distanceDescription);
             
             // Display matched keywords
             if (matchedKeywords != null && matchedKeywords.length > 0) {
@@ -221,7 +228,7 @@ public class MatchScoreActivity extends AppCompatActivity {
         }
     }
     
-    private void displayCategoryScores(int skillScore, int experienceScore, int availabilityScore, int educationScore) {
+    private void displayCategoryScores(int skillScore, int experienceScore, int availabilityScore, int educationScore, int distanceScore, double distanceMiles, String distanceDescription) {
         // Create category scores section dynamically
         LinearLayout categoryContainer = new LinearLayout(this);
         categoryContainer.setOrientation(LinearLayout.VERTICAL);
@@ -242,6 +249,7 @@ public class MatchScoreActivity extends AppCompatActivity {
         addCategoryScore(categoryContainer, "Experience", experienceScore);
         addCategoryScore(categoryContainer, "Availability", availabilityScore);
         addCategoryScore(categoryContainer, "Education", educationScore);
+        addCategoryScore(categoryContainer, "Distance", distanceScore);
         
         // Add to the main layout
         ViewParent parent = findViewById(R.id.matchedKeywordsContainer).getParent();

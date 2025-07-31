@@ -13,12 +13,14 @@ import java.util.ArrayList;
 public class DataRepository {
     private JobDao jobDao;
     private ResumeDao resumeDao;
+    private StoreProfileDao storeProfileDao;
     private ExecutorService executorService;
 
     public DataRepository(Context context) {
         AppDatabase db = AppDatabase.getDatabase(context);
         jobDao = db.jobDao();
         resumeDao = db.resumeDao();
+        storeProfileDao = db.storeProfileDao();
         executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -78,6 +80,27 @@ public class DataRepository {
 
     public void getResumeCountForJob(String jobId, DatabaseCallback<Integer> callback) {
         new GetResumeCountForJobAsyncTask(resumeDao, callback).execute(jobId);
+    }
+
+    // Store Profile operations with AsyncTask
+    public void insertStore(StoreProfile store, DatabaseCallback<Void> callback) {
+        new InsertStoreAsyncTask(storeProfileDao, callback).execute(store);
+    }
+
+    public void getFirstStore(DatabaseCallback<StoreProfile> callback) {
+        new GetFirstStoreAsyncTask(storeProfileDao, callback).execute();
+    }
+
+    public void updateStore(StoreProfile store, DatabaseCallback<Void> callback) {
+        new UpdateStoreAsyncTask(storeProfileDao, callback).execute(store);
+    }
+
+    public void deleteStore(StoreProfile store, DatabaseCallback<Void> callback) {
+        new DeleteStoreAsyncTask(storeProfileDao, callback).execute(store);
+    }
+
+    public void getStoreCount(DatabaseCallback<Integer> callback) {
+        new GetStoreCountAsyncTask(storeProfileDao, callback).execute();
     }
 
     // Callback interface
@@ -402,6 +425,120 @@ public class DataRepository {
         @Override
         protected Integer doInBackground(String... jobIds) {
             return resumeDao.getResumeCountForJob(jobIds[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    // AsyncTask implementations for Store Profiles
+    private static class InsertStoreAsyncTask extends AsyncTask<StoreProfile, Void, Void> {
+        private StoreProfileDao storeProfileDao;
+        private DatabaseCallback<Void> callback;
+
+        InsertStoreAsyncTask(StoreProfileDao storeProfileDao, DatabaseCallback<Void> callback) {
+            this.storeProfileDao = storeProfileDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(StoreProfile... stores) {
+            storeProfileDao.insertStore(stores[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class GetFirstStoreAsyncTask extends AsyncTask<Void, Void, StoreProfile> {
+        private StoreProfileDao storeProfileDao;
+        private DatabaseCallback<StoreProfile> callback;
+
+        GetFirstStoreAsyncTask(StoreProfileDao storeProfileDao, DatabaseCallback<StoreProfile> callback) {
+            this.storeProfileDao = storeProfileDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected StoreProfile doInBackground(Void... voids) {
+            return storeProfileDao.getFirstStore();
+        }
+
+        @Override
+        protected void onPostExecute(StoreProfile result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class UpdateStoreAsyncTask extends AsyncTask<StoreProfile, Void, Void> {
+        private StoreProfileDao storeProfileDao;
+        private DatabaseCallback<Void> callback;
+
+        UpdateStoreAsyncTask(StoreProfileDao storeProfileDao, DatabaseCallback<Void> callback) {
+            this.storeProfileDao = storeProfileDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(StoreProfile... stores) {
+            storeProfileDao.updateStore(stores[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class DeleteStoreAsyncTask extends AsyncTask<StoreProfile, Void, Void> {
+        private StoreProfileDao storeProfileDao;
+        private DatabaseCallback<Void> callback;
+
+        DeleteStoreAsyncTask(StoreProfileDao storeProfileDao, DatabaseCallback<Void> callback) {
+            this.storeProfileDao = storeProfileDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(StoreProfile... stores) {
+            storeProfileDao.deleteStore(stores[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        }
+    }
+
+    private static class GetStoreCountAsyncTask extends AsyncTask<Void, Void, Integer> {
+        private StoreProfileDao storeProfileDao;
+        private DatabaseCallback<Integer> callback;
+
+        GetStoreCountAsyncTask(StoreProfileDao storeProfileDao, DatabaseCallback<Integer> callback) {
+            this.storeProfileDao = storeProfileDao;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            return storeProfileDao.getStoreCount();
         }
 
         @Override

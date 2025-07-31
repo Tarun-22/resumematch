@@ -6,10 +6,11 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {JobEntity.class, ResumeEntity.class}, version = 1, exportSchema = false)
+@Database(entities = {JobEntity.class, ResumeEntity.class, StoreProfile.class}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract JobDao jobDao();
     public abstract ResumeDao resumeDao();
+    public abstract StoreProfileDao storeProfileDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -18,7 +19,7 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "resumematch_database")
+                            AppDatabase.class, "resume_match_database")
                             .fallbackToDestructiveMigration()
                             .build();
                 }

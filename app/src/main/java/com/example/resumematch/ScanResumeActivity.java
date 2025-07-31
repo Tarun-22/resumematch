@@ -183,78 +183,101 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         ResumeDataExtractor.extractDataWithMLKit(this, resumeText, extractedData -> {
             try {
-                // Calculate enhanced match score
-                EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData);
-
-                // Create and save resume to database
-                String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-                String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-                String matchScore = scoringResult.getOverallScore() + "%";
-
-                ResumeEntity newResume = new ResumeEntity(
-                    resumeId,
-                    jobId,
-                    jobTitle,
-                    currentDate,
-                    matchScore,
-                    resumeText,
-                    System.currentTimeMillis()
-                );
-
-                // Save to database
-                dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+                // Get store profile for distance calculation
+                dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
                     @Override
-                    public void onResult(Void result) {
-                        runOnUiThread(() -> {
-                            // Update job resume count in database
-                            updateJobResumeCount();
+                    public void onResult(StoreProfile storeProfile) {
+                        // Calculate enhanced match score with store profile
+                        EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData, storeProfile);
 
-                            Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+                        // Create and save resume to database
+                        String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                        String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+                        String matchScore = scoringResult.getOverallScore() + "%";
 
-                            // Navigate to match score screen with enhanced data
-                            Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
-                            intent.putExtra("resumeId", resumeId);
-                            intent.putExtra("matchScore", scoringResult.getOverallScore());
-                            intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
-                            intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
-                            intent.putExtra("resumeText", resumeText);
+                        // Save resume photo
+                        String photoPath = saveResumePhoto(selectedImageUri, resumeId);
 
-                            // Add extracted data
-                            intent.putExtra("candidateName", extractedData.getName());
-                            intent.putExtra("candidateEmail", extractedData.getEmail());
-                            intent.putExtra("candidatePhone", extractedData.getPhone());
-                            intent.putExtra("candidateAddress", extractedData.getAddress());
-                            intent.putExtra("candidateCity", extractedData.getCity());
-                            intent.putExtra("candidateState", extractedData.getState());
-                            intent.putExtra("candidateZipCode", extractedData.getZipCode());
-                            intent.putExtra("candidateTitle", extractedData.getCurrentTitle());
-                            intent.putExtra("experienceYears", extractedData.getExperienceYears());
-                            intent.putExtra("education", extractedData.getEducation());
-                            intent.putExtra("availability", extractedData.getAvailability());
-                            intent.putExtra("availabilityDetails", extractedData.getAvailabilityDetails());
-                            intent.putExtra("transportation", extractedData.getTransportation());
-                            intent.putExtra("expectedSalary", extractedData.getExpectedSalary());
-                            intent.putExtra("startDate", extractedData.getStartDate());
-                            intent.putExtra("workAuthorization", extractedData.getWorkAuthorization());
-                            intent.putExtra("emergencyContact", extractedData.getEmergencyContact());
-                            intent.putExtra("emergencyPhone", extractedData.getEmergencyPhone());
-                            intent.putExtra("references", extractedData.getReferences());
-                            intent.putExtra("previousRetailExperience", extractedData.getPreviousRetailExperience());
-                            intent.putExtra("languages", extractedData.getLanguages());
-                            intent.putExtra("certifications", extractedData.getCertifications());
+                        // Convert extracted data to JSON for manual editing
+                        String extractedDataJson = convertExtractedDataToJson(extractedData);
 
-                            // Add category scores
-                            intent.putExtra("skillScore", scoringResult.getSkillMatchScore());
-                            intent.putExtra("experienceScore", scoringResult.getExperienceScore());
-                            intent.putExtra("availabilityScore", scoringResult.getAvailabilityScore());
-                            intent.putExtra("educationScore", scoringResult.getEducationScore());
+                        ResumeEntity newResume = new ResumeEntity(
+                            resumeId,
+                            jobId,
+                            jobTitle,
+                            currentDate,
+                            matchScore,
+                            resumeText,
+                            System.currentTimeMillis()
+                        );
+                        newResume.setPhotoPath(photoPath);
+                        newResume.setExtractedDataJson(extractedDataJson);
 
-                            // Add recommendations
-                            intent.putExtra("recommendations", scoringResult.getRecommendations().toArray(new String[0]));
+                        // Save to database
+                        dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+                            @Override
+                            public void onResult(Void result) {
+                                runOnUiThread(() -> {
+                                    // Update job resume count in database
+                                    updateJobResumeCount();
 
-                            progressDialog.dismiss();
-                            startActivity(intent);
-                            finish();
+                                    Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
+
+                                    // Navigate to match score screen with enhanced data
+                                    Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
+                                    intent.putExtra("resumeId", resumeId);
+                                    intent.putExtra("matchScore", scoringResult.getOverallScore());
+                                    intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
+                                    intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
+                                    intent.putExtra("resumeText", resumeText);
+
+                                    // Add extracted data
+                                    intent.putExtra("candidateName", extractedData.getName());
+                                    intent.putExtra("candidateEmail", extractedData.getEmail());
+                                    intent.putExtra("candidatePhone", extractedData.getPhone());
+                                    intent.putExtra("candidateAddress", extractedData.getAddress());
+                                    intent.putExtra("candidateCity", extractedData.getCity());
+                                    intent.putExtra("candidateState", extractedData.getState());
+                                    intent.putExtra("candidateZipCode", extractedData.getZipCode());
+                                    intent.putExtra("candidateTitle", extractedData.getCurrentTitle());
+                                    intent.putExtra("experienceYears", extractedData.getExperienceYears());
+                                    intent.putExtra("education", extractedData.getEducation());
+                                    intent.putExtra("availability", extractedData.getAvailability());
+                                    intent.putExtra("availabilityDetails", extractedData.getAvailabilityDetails());
+                                    intent.putExtra("transportation", extractedData.getTransportation());
+                                    intent.putExtra("expectedSalary", extractedData.getExpectedSalary());
+                                    intent.putExtra("startDate", extractedData.getStartDate());
+                                    intent.putExtra("workAuthorization", extractedData.getWorkAuthorization());
+                                    intent.putExtra("emergencyContact", extractedData.getEmergencyContact());
+                                    intent.putExtra("emergencyPhone", extractedData.getEmergencyPhone());
+                                    intent.putExtra("references", extractedData.getReferences());
+                                    intent.putExtra("previousRetailExperience", extractedData.getPreviousRetailExperience());
+                                    intent.putExtra("languages", extractedData.getLanguages());
+                                    intent.putExtra("certifications", extractedData.getCertifications());
+
+                                    // Add category scores
+                                    intent.putExtra("skillScore", scoringResult.getSkillMatchScore());
+                                    intent.putExtra("experienceScore", scoringResult.getExperienceScore());
+                                    intent.putExtra("availabilityScore", scoringResult.getAvailabilityScore());
+                                    intent.putExtra("educationScore", scoringResult.getEducationScore());
+                                    intent.putExtra("distanceScore", scoringResult.getDistanceScore());
+                                    intent.putExtra("distanceMiles", scoringResult.getDistanceMiles());
+                                    intent.putExtra("distanceDescription", scoringResult.getDistanceDescription());
+
+                                    // Add recommendations
+                                    intent.putExtra("recommendations", scoringResult.getRecommendations().toArray(new String[0]));
+
+                                    // Add store info
+                                    if (storeProfile != null) {
+                                        intent.putExtra("storeName", storeProfile.getStoreName());
+                                        intent.putExtra("storeAddress", storeProfile.getFullAddress());
+                                    }
+
+                                    progressDialog.dismiss();
+                                    startActivity(intent);
+                                    finish();
+                                });
+                            }
                         });
                     }
                 });
@@ -266,6 +289,78 @@ public class ScanResumeActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private String saveResumePhoto(Uri imageUri, String resumeId) {
+        try {
+            // Create a unique filename for the resume photo
+            String fileName = "resume_" + resumeId + ".jpg";
+            
+            // Get the app's internal storage directory
+            java.io.File storageDir = new java.io.File(getFilesDir(), "resume_photos");
+            if (!storageDir.exists()) {
+                storageDir.mkdirs();
+            }
+            
+            java.io.File photoFile = new java.io.File(storageDir, fileName);
+            
+            // Copy the image to internal storage
+            java.io.InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(photoFile);
+            
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            
+            inputStream.close();
+            outputStream.close();
+            
+            Log.d("ScanResume", "Resume photo saved: " + photoFile.getAbsolutePath());
+            return photoFile.getAbsolutePath();
+            
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error saving resume photo: " + e.getMessage());
+            return "";
+        }
+    }
+
+    private String convertExtractedDataToJson(ResumeDataExtractor.ExtractedData data) {
+        try {
+            // Create a simple JSON representation of the extracted data
+            // In a real app, you might use a JSON library like Gson
+            StringBuilder json = new StringBuilder();
+            json.append("{");
+            json.append("\"name\":\"").append(data.getName()).append("\",");
+            json.append("\"email\":\"").append(data.getEmail()).append("\",");
+            json.append("\"phone\":\"").append(data.getPhone()).append("\",");
+            json.append("\"address\":\"").append(data.getAddress()).append("\",");
+            json.append("\"city\":\"").append(data.getCity()).append("\",");
+            json.append("\"state\":\"").append(data.getState()).append("\",");
+            json.append("\"zipCode\":\"").append(data.getZipCode()).append("\",");
+            json.append("\"currentTitle\":\"").append(data.getCurrentTitle()).append("\",");
+            json.append("\"experienceYears\":").append(data.getExperienceYears()).append(",");
+            json.append("\"education\":\"").append(data.getEducation()).append("\",");
+            json.append("\"availability\":\"").append(data.getAvailability()).append("\",");
+            json.append("\"availabilityDetails\":\"").append(data.getAvailabilityDetails()).append("\",");
+            json.append("\"transportation\":\"").append(data.getTransportation()).append("\",");
+            json.append("\"expectedSalary\":\"").append(data.getExpectedSalary()).append("\",");
+            json.append("\"startDate\":\"").append(data.getStartDate()).append("\",");
+            json.append("\"workAuthorization\":\"").append(data.getWorkAuthorization()).append("\",");
+            json.append("\"emergencyContact\":\"").append(data.getEmergencyContact()).append("\",");
+            json.append("\"emergencyPhone\":\"").append(data.getEmergencyPhone()).append("\",");
+            json.append("\"references\":\"").append(data.getReferences()).append("\",");
+            json.append("\"previousRetailExperience\":\"").append(data.getPreviousRetailExperience()).append("\",");
+            json.append("\"languages\":\"").append(data.getLanguages()).append("\",");
+            json.append("\"certifications\":\"").append(data.getCertifications()).append("\"");
+            json.append("}");
+            
+            return json.toString();
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error converting data to JSON: " + e.getMessage());
+            return "{}";
+        }
     }
 
     private MatchResult calculateMatchScore(String jobDescription, String resumeText) {

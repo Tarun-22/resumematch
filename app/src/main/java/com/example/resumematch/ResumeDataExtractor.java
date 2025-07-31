@@ -119,6 +119,26 @@ public class ResumeDataExtractor {
         
         public Map<String, Object> getAdditionalInfo() { return additionalInfo; }
         public void setAdditionalInfo(Map<String, Object> additionalInfo) { this.additionalInfo = additionalInfo; }
+        
+        public String getFormattedAddress() {
+            StringBuilder address = new StringBuilder();
+            if (address != null && !address.isEmpty()) {
+                address.append(this.address);
+            }
+            if (city != null && !city.isEmpty()) {
+                if (address.length() > 0) address.append(", ");
+                address.append(city);
+            }
+            if (state != null && !state.isEmpty()) {
+                if (address.length() > 0) address.append(", ");
+                address.append(state);
+            }
+            if (zipCode != null && !zipCode.isEmpty()) {
+                if (address.length() > 0) address.append(" ");
+                address.append(zipCode);
+            }
+            return address.toString();
+        }
     }
     
     public static ExtractedData extractData(String resumeText) {

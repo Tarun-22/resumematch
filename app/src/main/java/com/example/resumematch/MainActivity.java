@@ -196,23 +196,27 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void showHelpDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.help_title))
-                .setMessage(getString(R.string.help_author) + "\n" +
-                        getString(R.string.help_version) + "\n\n" +
-                        getString(R.string.help_instructions) + "\n\n" +
-                        getString(R.string.help_create_jobs) + "\n" +
-                        getString(R.string.help_scan_resumes) + "\n" +
-                        getString(R.string.help_view_jobs) + "\n" +
-                        getString(R.string.help_view_resumes) + "\n\n" +
-                        getString(R.string.help_features) + "\n" +
-                        getString(R.string.help_ocr) + "\n" +
-                        getString(R.string.help_matching) + "\n" +
-                        getString(R.string.help_storage) + "\n" +
-                        getString(R.string.help_counts))
-                .setPositiveButton(getString(R.string.ok), (dialog, which) -> {
-                    // Dialog dismissed
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("ResumeMatch - Help")
+                .setMessage("Author: ResumeMatch Team\n" +
+                        "Version: 1.0\n\n" +
+                        "How to use:\n" +
+                        "1. Set up your store profile first\n" +
+                        "2. Create job postings for your store\n" +
+                        "3. Scan physical resumes using camera/gallery\n" +
+                        "4. View match scores and candidate details\n" +
+                        "5. Review all scanned resumes in Recent Resumes\n\n" +
+                        "Features:\n" +
+                        "• Distance calculation from store to candidate\n" +
+                        "• AI-powered resume data extraction\n" +
+                        "• Comprehensive scoring system\n" +
+                        "• Resume photo storage\n" +
+                        "• Manual data editing capabilities")
+                .setPositiveButton("Setup Store Profile", (dialog, which) -> {
+                    Intent intent = new Intent(MainActivity.this, StoreProfileActivity.class);
+                    startActivity(intent);
                 })
+                .setNegativeButton("Close", (dialog, which) -> {})
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show();
     }
