@@ -152,12 +152,15 @@
 
         <ImageView
             android:id="@+id/helpButton"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@android:drawable/ic_menu_help"
             android:contentDescription="Help"
-            android:padding="4dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless" />
+            android:padding="8dp"
+            android:background="@drawable/help_button_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="8dp" />
 
     </LinearLayout>
 

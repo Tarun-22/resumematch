@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
         setupMainPageSections();
         
         // Set up help button
-        helpButton.setOnClickListener(v -> showHelpDialog());
+        helpButton.setOnClickListener(v -> {
+            Toast.makeText(this, "Opening help...", Toast.LENGTH_SHORT).show();
+            showHelpDialog();
+        });
         
         // Load counts from database
         loadCountsFromDatabase();
@@ -175,20 +179,20 @@ public class MainActivity extends AppCompatActivity {
     
     private void showHelpDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("ResumeMatch - Help")
-                .setMessage("Author: Kumar Sashank\n" +
-                        "Version: 1.0\n\n" +
-                        "How to use ResumeMatch:\n\n" +
-                        "1. Create Jobs: Use 'Create Job' to add new job postings\n" +
-                        "2. Scan Resumes: Use 'Scan Resume' to upload and analyze resumes\n" +
-                        "3. View Posted Jobs: See all your created job postings\n" +
-                        "4. View Recent Resumes: See all scanned resumes with match scores\n\n" +
-                        "Features:\n" +
-                        "• OCR text extraction from resume images\n" +
-                        "• Automatic keyword matching and scoring\n" +
-                        "• Local database storage\n" +
-                        "• Real-time job and resume counts")
-                .setPositiveButton("OK", (dialog, which) -> {
+        builder.setTitle(getString(R.string.help_title))
+                .setMessage(getString(R.string.help_author) + "\n" +
+                        getString(R.string.help_version) + "\n\n" +
+                        getString(R.string.help_instructions) + "\n\n" +
+                        getString(R.string.help_create_jobs) + "\n" +
+                        getString(R.string.help_scan_resumes) + "\n" +
+                        getString(R.string.help_view_jobs) + "\n" +
+                        getString(R.string.help_view_resumes) + "\n\n" +
+                        getString(R.string.help_features) + "\n" +
+                        getString(R.string.help_ocr) + "\n" +
+                        getString(R.string.help_matching) + "\n" +
+                        getString(R.string.help_storage) + "\n" +
+                        getString(R.string.help_counts))
+                .setPositiveButton(getString(R.string.ok), (dialog, which) -> {
                     // Dialog dismissed
                 })
                 .setIcon(android.R.drawable.ic_dialog_info)
