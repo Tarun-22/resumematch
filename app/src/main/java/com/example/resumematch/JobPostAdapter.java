@@ -7,62 +7,81 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.JobViewHolder> {
+public class JobPostAdapter extends RecyclerView.Adapter<JobPostAdapter.ViewHolder> {
 
     private List<JobPost> jobList;
     private Context context;
 
     public JobPostAdapter(List<JobPost> jobList) {
         this.jobList = jobList;
-        Log.d("JobPostAdapter", "Adapter created with " + jobList.size() + " jobs");
     }
 
     @NonNull
     @Override
-    public JobViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_job_post, parent, false);
-        Log.d("JobPostAdapter", "Creating view holder");
-        return new JobViewHolder(view);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_job_post, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull JobViewHolder holder, int position) {
-        JobPost job = jobList.get(position);
-        Log.d("JobPostAdapter", "Binding job at position " + position + ": " + job.getTitle());
-        holder.title.setText(job.getTitle());
-        holder.resumeCount.setText(job.getResumeCount() + " Resumes Scanned");
-        
-        // Add click listener to navigate to resume list
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ResumeListActivity.class);
-            intent.putExtra("jobId", job.getId());
-            intent.putExtra("jobTitle", job.getTitle());
-            intent.putExtra("jobDescription", job.getDescription());
-            context.startActivity(intent);
-        });
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        try {
+            JobPost job = jobList.get(position);
+            
+            if (job != null) {
+                holder.textJobTitle.setText(job.getTitle() != null ? job.getTitle() : "Untitled Job");
+                holder.textJobDescription.setText(job.getDescription() != null ? job.getDescription() : "No description");
+                holder.textResumeCount.setText(job.getResumeCount() + " resumes");
+                
+                // Set click listener for job editing
+                holder.itemView.setOnClickListener(v -> {
+                    try {
+                        Log.d("JobPostAdapter", "Job clicked: " + job.getId());
+                        
+                        // Navigate to job editing activity
+                        Intent intent = new Intent(context, EditJobActivity.class);
+                        intent.putExtra("jobId", job.getId());
+                        intent.putExtra("jobTitle", job.getTitle());
+                        intent.putExtra("jobDescription", job.getDescription());
+                        context.startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e("JobPostAdapter", "Error navigating to edit job: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            } else {
+                Log.e("JobPostAdapter", "Job at position " + position + " is null");
+            }
+        } catch (Exception e) {
+            Log.e("JobPostAdapter", "Error binding view holder: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public int getItemCount() {
-        Log.d("JobPostAdapter", "getItemCount called: " + jobList.size());
         return jobList.size();
     }
 
-    public static class JobViewHolder extends RecyclerView.ViewHolder {
-        TextView title, resumeCount;
+    public void updateJobList(List<JobPost> newJobList) {
+        this.jobList = newJobList;
+        notifyDataSetChanged();
+    }
 
-        public JobViewHolder(@NonNull View itemView) {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView textJobTitle, textJobDescription, textResumeCount;
+
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.textJobTitle);
-            resumeCount = itemView.findViewById(R.id.textResumeCount);
+            textJobTitle = itemView.findViewById(R.id.textJobTitle);
+            textJobDescription = itemView.findViewById(R.id.textJobDescription);
+            textResumeCount = itemView.findViewById(R.id.textResumeCount);
         }
     }
 }

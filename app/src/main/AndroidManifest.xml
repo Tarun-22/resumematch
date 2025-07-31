@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.resumematch">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -32,6 +34,9 @@
         <activity android:name=".ResumeListActivity" />
         <activity android:name=".RecentResumesActivity" />
         <activity android:name=".JobSelectionActivity" />
+        <activity android:name=".EditJobActivity" />
+        <activity android:name=".ResumeDetailsActivity" />
+        <activity android:name=".JobTemplateActivity" />
     </application>
 
 </manifest>

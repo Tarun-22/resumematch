@@ -33,6 +33,16 @@ public class CreateJobActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.buttonCancel);
         backArrowbutton = findViewById(R.id.backArrow);
 
+        // Check if template data is provided
+        String templateTitle = getIntent().getStringExtra("title");
+        String templateDescription = getIntent().getStringExtra("description");
+        
+        if (templateTitle != null && templateDescription != null) {
+            // Pre-fill the form with template data
+            jobTitleInput.setText(templateTitle);
+            jobDescriptionInput.setText(templateDescription);
+        }
+
         // Set up click listeners
         backArrowbutton.setImageResource(R.drawable.back_arrow_black);
         backArrowbutton.setOnClickListener(v -> finish());

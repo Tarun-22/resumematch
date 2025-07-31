@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
         
         // Create New Job
         btnCreateJob.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
-            startActivity(intent);
+            // Show options for job creation
+            showJobCreationOptions();
         });
         
         // Scan New Resume
@@ -175,6 +175,24 @@ public class MainActivity extends AppCompatActivity {
         tvRecentResumes.setTextColor(getResources().getColor(android.R.color.black));
         tvCreateJob.setTextColor(getResources().getColor(android.R.color.black));
         tvScanResume.setTextColor(getResources().getColor(android.R.color.black));
+    }
+    
+    private void showJobCreationOptions() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Create New Job")
+                .setItems(new String[]{"Use Template", "Create Custom Job"}, (dialog, which) -> {
+                    if (which == 0) {
+                        // Use template
+                        Intent intent = new Intent(MainActivity.this, JobTemplateActivity.class);
+                        startActivity(intent);
+                    } else {
+                        // Create custom job
+                        Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
+                        startActivity(intent);
+                    }
+                })
+                .setIcon(android.R.drawable.ic_menu_edit)
+                .show();
     }
     
     private void showHelpDialog() {

@@ -8,6 +8,7 @@ import android.os.Looper;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.ArrayList;
 
 public class DataRepository {
     private JobDao jobDao;
@@ -119,13 +120,24 @@ public class DataRepository {
 
         @Override
         protected List<JobEntity> doInBackground(Void... voids) {
-            return jobDao.getAllJobs();
+            try {
+                return jobDao.getAllJobs();
+            } catch (Exception e) {
+                android.util.Log.e("GetAllJobsAsyncTask", "Error getting jobs: " + e.getMessage());
+                e.printStackTrace();
+                return new ArrayList<>();
+            }
         }
 
         @Override
         protected void onPostExecute(List<JobEntity> result) {
-            if (callback != null) {
-                callback.onResult(result);
+            try {
+                if (callback != null) {
+                    callback.onResult(result);
+                }
+            } catch (Exception e) {
+                android.util.Log.e("GetAllJobsAsyncTask", "Error in onPostExecute: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import android.content.Intent;
+import com.example.resumematch.ResumeDetailsActivity;
 
 public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapter.ViewHolder> {
 
@@ -45,6 +47,18 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
         } else {
             holder.textMatchScore.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
         }
+        
+        // Set click listener to view resume details
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ResumeDetailsActivity.class);
+            intent.putExtra("resumeId", resume.getId());
+            intent.putExtra("jobTitle", resume.getJobTitle());
+            intent.putExtra("resumeDate", resume.getDate());
+            intent.putExtra("matchScore", resume.getMatchScore());
+            intent.putExtra("resumeContent", resume.getResumeText());
+            // TODO: Add matched and missing keywords from database
+            context.startActivity(intent);
+        });
     }
 
     @Override

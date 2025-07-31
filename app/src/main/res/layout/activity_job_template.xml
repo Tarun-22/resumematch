@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/back_arrow_black"
+            android:contentDescription="Back"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Choose Job Template"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+
+    </LinearLayout>
+
+    <!-- Template Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Cashier Template -->
+        <Button
+            android:id="@+id/btnCashier"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Cashier"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Sales Associate Template -->
+        <Button
+            android:id="@+id/btnSalesAssociate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Sales Associate"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Stock Clerk Template -->
+        <Button
+            android:id="@+id/btnStockClerk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Stock Clerk"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Manager Template -->
+        <Button
+            android:id="@+id/btnManager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Store Manager"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+        <!-- Custom Template -->
+        <Button
+            android:id="@+id/btnCustom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/activity_button_background"
+            android:padding="16dp"
+            android:gravity="start|center_vertical"
+            android:text="Custom Job"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:drawablePadding="16dp"
+            android:drawableTint="@color/primary_blue" />
+
+    </LinearLayout>
+
+    <!-- Info Text -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose a template to quickly create a job post with pre-filled requirements and skills for store positions."
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="24dp"
+        android:padding="16dp" />
+
+</LinearLayout> 

@@ -24,6 +24,17 @@
             android:textColor="#000000" />
 
         <TextView
+            android:id="@+id/textJobDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Job Description"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginTop="4dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
             android:id="@+id/textResumeCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

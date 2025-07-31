@@ -38,6 +38,7 @@ public class ScanResumeActivity extends AppCompatActivity {
     DataRepository dataRepository;
 
     ActivityResultLauncher<Intent> imagePickerLauncher;
+    ActivityResultLauncher<Intent> cameraLauncher;
 
     Uri selectedImageUri;
 
@@ -87,6 +88,18 @@ public class ScanResumeActivity extends AppCompatActivity {
                     }
                 });
 
+        //creating the launcher for camera
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        selectedImageUri = result.getData().getParcelableExtra("data");
+                        if (selectedImageUri != null) {
+                            runOCR(selectedImageUri);
+                        }
+                    }
+                });
+
         //setting the onclick listener for this button which helps to upload the image
         buttonUpload.setOnClickListener(v -> {
             Intent intent2 = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -95,9 +108,36 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         textOCRPreview.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 
-        // as of now we didnt connected camera, so we just set the demo text in preview
-        buttonCamera.setOnClickListener(v ->
-                textOCRPreview.setText("Camera scanning coming soon..."));
+        // Set up camera functionality
+        buttonCamera.setOnClickListener(v -> {
+            // Check for camera permission
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 100);
+            } else {
+                openCamera();
+            }
+        });
+    }
+
+    private void openCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            cameraLauncher.launch(cameraIntent);
+        } else {
+            Toast.makeText(this, "Camera not available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+                Toast.makeText(this, "Camera permission required to scan resumes", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     //From gpt, we got this function to run the OCR by connecting ML Kit
