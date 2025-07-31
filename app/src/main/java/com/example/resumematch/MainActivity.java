@@ -11,9 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView ivJobManagement, ivResumeScanning, ivApplications, ivProfileSettings;
+    private ImageView ivPostedJobs, ivRecentResumes, ivCreateJob, ivScanResume;
     private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
-    private TextView tvJobManagement, tvResumeScanning, tvApplications, tvProfileSettings;
+    private TextView tvPostedJobs, tvRecentResumes, tvCreateJob, tvScanResume;
     private DataRepository dataRepository;
 
     @Override
@@ -25,16 +25,16 @@ public class MainActivity extends AppCompatActivity {
         dataRepository = new DataRepository(this);
         
         // Initialize navigation icons
-        ivJobManagement = findViewById(R.id.ivJobManagement);
-        ivResumeScanning = findViewById(R.id.ivResumeScanning);
-        ivApplications = findViewById(R.id.ivApplications);
-        ivProfileSettings = findViewById(R.id.ivProfileSettings);
+        ivPostedJobs = findViewById(R.id.ivPostedJobs);
+        ivRecentResumes = findViewById(R.id.ivRecentResumes);
+        ivCreateJob = findViewById(R.id.ivCreateJob);
+        ivScanResume = findViewById(R.id.ivScanResume);
         
         // Initialize navigation text labels
-        tvJobManagement = findViewById(R.id.tvJobManagement);
-        tvResumeScanning = findViewById(R.id.tvResumeScanning);
-        tvApplications = findViewById(R.id.tvApplications);
-        tvProfileSettings = findViewById(R.id.tvProfileSettings);
+        tvPostedJobs = findViewById(R.id.tvPostedJobs);
+        tvRecentResumes = findViewById(R.id.tvRecentResumes);
+        tvCreateJob = findViewById(R.id.tvCreateJob);
+        tvScanResume = findViewById(R.id.tvScanResume);
         
         // Initialize main page section buttons
         btnPostedJobs = findViewById(R.id.btnPostedJobs);
@@ -75,35 +75,31 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void setupNavigationIcons() {
-        // Job Management
-        ivJobManagement.setOnClickListener(v -> {
-            highlightNavigationIcon(ivJobManagement, tvJobManagement);
-            // Navigate to job management section
-            Intent intent = new Intent(MainActivity.this, JobManagementActivity.class);
+        // Posted Jobs
+        ivPostedJobs.setOnClickListener(v -> {
+            highlightNavigationIcon(ivPostedJobs, tvPostedJobs);
+            Intent intent = new Intent(MainActivity.this, EmployerHomeActivity.class);
             startActivity(intent);
         });
         
-        // Resume Scanning
-        ivResumeScanning.setOnClickListener(v -> {
-            highlightNavigationIcon(ivResumeScanning, tvResumeScanning);
-            // Navigate to job selection for resume scanning
+        // Recent Resumes
+        ivRecentResumes.setOnClickListener(v -> {
+            highlightNavigationIcon(ivRecentResumes, tvRecentResumes);
+            Intent intent = new Intent(MainActivity.this, RecentResumesActivity.class);
+            startActivity(intent);
+        });
+        
+        // Create Job
+        ivCreateJob.setOnClickListener(v -> {
+            highlightNavigationIcon(ivCreateJob, tvCreateJob);
+            Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
+            startActivity(intent);
+        });
+        
+        // Scan Resume
+        ivScanResume.setOnClickListener(v -> {
+            highlightNavigationIcon(ivScanResume, tvScanResume);
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
-            startActivity(intent);
-        });
-        
-        // Applications
-        ivApplications.setOnClickListener(v -> {
-            highlightNavigationIcon(ivApplications, tvApplications);
-            // Navigate to applications section (ResumeListActivity for now)
-            Intent intent = new Intent(MainActivity.this, ResumeListActivity.class);
-            startActivity(intent);
-        });
-        
-        // Profile & Settings
-        ivProfileSettings.setOnClickListener(v -> {
-            highlightNavigationIcon(ivProfileSettings, tvProfileSettings);
-            // Navigate to profile section
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
     }
@@ -145,16 +141,16 @@ public class MainActivity extends AppCompatActivity {
     
     private void resetNavigationIcons() {
         // Reset all icons to default state
-        ivJobManagement.setAlpha(0.6f);
-        ivResumeScanning.setAlpha(0.6f);
-        ivApplications.setAlpha(0.6f);
-        ivProfileSettings.setAlpha(0.6f);
+        ivPostedJobs.setAlpha(0.6f);
+        ivRecentResumes.setAlpha(0.6f);
+        ivCreateJob.setAlpha(0.6f);
+        ivScanResume.setAlpha(0.6f);
         
         // Reset all text colors
-        tvJobManagement.setTextColor(getResources().getColor(android.R.color.black));
-        tvResumeScanning.setTextColor(getResources().getColor(android.R.color.black));
-        tvApplications.setTextColor(getResources().getColor(android.R.color.black));
-        tvProfileSettings.setTextColor(getResources().getColor(android.R.color.black));
+        tvPostedJobs.setTextColor(getResources().getColor(android.R.color.black));
+        tvRecentResumes.setTextColor(getResources().getColor(android.R.color.black));
+        tvCreateJob.setTextColor(getResources().getColor(android.R.color.black));
+        tvScanResume.setTextColor(getResources().getColor(android.R.color.black));
     }
     
     @Override
