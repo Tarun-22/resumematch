@@ -28,11 +28,10 @@ public class ResumeListFragment extends Fragment {
     private TextView titleText;
     private TextView emptyStateText;
     private ProgressBar progressBar;
-    private Button buttonScanResume, buttonDeleteAll, buttonSortByScore, buttonSortByDate;
+    private Button buttonScanResume, buttonDeleteAll;
     private DataRepository dataRepository;
     private List<ResumeEntity> resumeEntities = new ArrayList<>();
     private RecentResumeAdapter resumeAdapter;
-    private String currentSortBy = "date"; // "score", "date"
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,8 +48,6 @@ public class ResumeListFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
         buttonScanResume = view.findViewById(R.id.buttonScanResume);
         buttonDeleteAll = view.findViewById(R.id.buttonDeleteAll);
-        buttonSortByScore = view.findViewById(R.id.buttonSortByScore);
-        buttonSortByDate = view.findViewById(R.id.buttonSortByDate);
 
         // Set title
         titleText.setText("Recent Resumes");
@@ -84,18 +81,6 @@ public class ResumeListFragment extends Fragment {
             showDeleteConfirmationDialog();
         });
 
-        buttonSortByScore.setOnClickListener(v -> {
-            currentSortBy = "score";
-            sortResumes();
-            Toast.makeText(requireContext(), "Sorted by Score", Toast.LENGTH_SHORT).show();
-        });
-
-        buttonSortByDate.setOnClickListener(v -> {
-            currentSortBy = "date";
-            sortResumes();
-            Toast.makeText(requireContext(), "Sorted by Date", Toast.LENGTH_SHORT).show();
-        });
-
         // Load resumes from database
         loadResumesFromDatabase();
         
@@ -117,7 +102,6 @@ public class ResumeListFragment extends Fragment {
                                 resumeEntities = resumes != null ? resumes : new ArrayList<>();
                                 Log.d("ResumeListFragment", "Loaded " + resumeEntities.size() + " resumes from database");
                                 
-                                sortResumes();
                                 updateResumeAdapter();
                                 updateEmptyState();
                                 progressBar.setVisibility(View.GONE);
@@ -142,32 +126,6 @@ public class ResumeListFragment extends Fragment {
         }
     }
 
-    private void sortResumes() {
-        if (resumeEntities.isEmpty()) return;
-
-        switch (currentSortBy) {
-            case "score":
-                // Sort by score (highest first)
-                Collections.sort(resumeEntities, (r1, r2) -> {
-                    try {
-                        int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
-                        int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
-                        return Integer.compare(score2, score1); // Descending order
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                });
-                break;
-
-            case "date":
-                // Sort by date added (newest first)
-                Collections.sort(resumeEntities, (r1, r2) -> {
-                    return Long.compare(r2.getCreatedAt(), r1.getCreatedAt()); // Descending order
-                });
-                break;
-        }
-    }
-
     private void updateResumeAdapter() {
         try {
             resumeAdapter = new RecentResumeAdapter(resumeEntities);
@@ -184,14 +142,10 @@ public class ResumeListFragment extends Fragment {
             emptyStateText.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
             buttonDeleteAll.setVisibility(View.GONE);
-            buttonSortByScore.setVisibility(View.GONE);
-            buttonSortByDate.setVisibility(View.GONE);
         } else {
             emptyStateText.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
             buttonDeleteAll.setVisibility(View.VISIBLE);
-            buttonSortByScore.setVisibility(View.VISIBLE);
-            buttonSortByDate.setVisibility(View.VISIBLE);
         }
     }
 

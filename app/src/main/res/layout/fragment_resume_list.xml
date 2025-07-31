@@ -64,39 +64,6 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
-    <!-- Action Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <Button
-            android:id="@+id/buttonSortByScore"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Sort by Score"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/buttonSortByDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Sort by Date"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2196F3"
-            android:layout_marginStart="8dp"
-            android:padding="8dp"
-            android:textSize="12sp" />
-
-    </LinearLayout>
-
     <!-- Empty state message -->
     <TextView
         android:id="@+id/emptyStateText"
