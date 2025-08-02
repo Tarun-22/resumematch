@@ -60,7 +60,7 @@ public class ResumeListFragment extends Fragment {
         resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
         recyclerView.setAdapter(resumeAdapter);
 
-        resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
+        resumeAdapter.delete_resume_listener((resume, position) -> {
             show_delete_individual(resume, position);
         });
 
@@ -128,7 +128,7 @@ public class ResumeListFragment extends Fragment {
         try {
             resumeAdapter = new RecentResumeAdapter(resumeEntities);
             
-            resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
+            resumeAdapter.delete_resume_listener((resume, position) -> {
                 show_delete_individual(resume, position);
             });
             

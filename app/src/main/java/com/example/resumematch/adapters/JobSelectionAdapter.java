@@ -16,12 +16,12 @@ import java.util.List;
 
 public class JobSelectionAdapter extends RecyclerView.Adapter<JobSelectionAdapter.ViewHolder> {
 
-    private List<JobEntity> jobList;
+    private List<JobEntity> job_list;
     private Context context;
     private JobSelectionActivity activity;
 
-    public JobSelectionAdapter(List<JobEntity> jobList, JobSelectionActivity activity) {
-        this.jobList = jobList;
+    public JobSelectionAdapter(List<JobEntity> job_list, JobSelectionActivity activity) {
+        this.job_list = job_list;
         this.activity = activity;
     }
 
@@ -35,13 +35,12 @@ public class JobSelectionAdapter extends RecyclerView.Adapter<JobSelectionAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        JobEntity job = jobList.get(position);
+        JobEntity job = job_list.get(position);
         
-        holder.textJobTitle.setText(job.getTitle());
+        holder.job_title.setText(job.getTitle());
         holder.textJobDescription.setText(job.getDescription());
-        holder.textResumeCount.setText(job.getResumeCount() + " resumes");
+        holder.resume_count.setText(job.getResumeCount() + " resumes");
         
-        // Set click listener to select this job
         holder.itemView.setOnClickListener(v -> {
             activity.onJobSelected(job);
         });
@@ -49,22 +48,22 @@ public class JobSelectionAdapter extends RecyclerView.Adapter<JobSelectionAdapte
 
     @Override
     public int getItemCount() {
-        return jobList.size();
+        return job_list.size();
     }
 
     public void updateJobList(List<JobEntity> newJobList) {
-        this.jobList = newJobList;
+        this.job_list = newJobList;
         notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textJobTitle, textJobDescription, textResumeCount;
+        TextView job_title, textJobDescription, resume_count;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            textJobTitle = itemView.findViewById(R.id.textJobTitle);
+            job_title = itemView.findViewById(R.id.textJobTitle);
             textJobDescription = itemView.findViewById(R.id.textJobDescription);
-            textResumeCount = itemView.findViewById(R.id.textResumeCount);
+            resume_count = itemView.findViewById(R.id.textResumeCount);
         }
     }
 } 

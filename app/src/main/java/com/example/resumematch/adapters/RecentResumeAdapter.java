@@ -16,20 +16,20 @@ import com.example.resumematch.activities.MatchScoreActivity;
 
 public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapter.ViewHolder> {
 
-    private List<ResumeEntity> resumeList;
+    private List<ResumeEntity> resume_list;
     private Context context;
-    private OnResumeDeleteListener deleteListener;
+    private OnResumeDeleteListener delete_listener;
 
     public interface OnResumeDeleteListener {
         void onResumeDelete(ResumeEntity resume, int position);
     }
 
-    public RecentResumeAdapter(List<ResumeEntity> resumeList) {
-        this.resumeList = resumeList;
+    public RecentResumeAdapter(List<ResumeEntity> resume_list) {
+        this.resume_list = resume_list;
     }
 
-    public void setOnResumeDeleteListener(OnResumeDeleteListener listener) {
-        this.deleteListener = listener;
+    public void delete_resume_listener(OnResumeDeleteListener listener) {
+        this.delete_listener = listener;
     }
 
     @NonNull
@@ -42,24 +42,22 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ResumeEntity resume = resumeList.get(position);
+        ResumeEntity resume = resume_list.get(position);
         
-        holder.textResumeId.setText("Resume #" + resume.getId().substring(0, 8));
-        holder.textResumeDate.setText(resume.getDate());
-        holder.textMatchScore.setText(resume.getMatchScore() + "% Match");
-        holder.textJobTitle.setText("Applied for: " + resume.getJobTitle());
+        holder.resume_id.setText("Resume #" + resume.getId().substring(0, 8));
+        holder.resume_date.setText(resume.getDate());
+        holder.match_score.setText(resume.getMatchScore() + "% Match");
+        holder.job_title.setText("Applied for: " + resume.getJobTitle());
         
-        // Set color based on match score
         int matchScore = Integer.parseInt(resume.getMatchScore().replace("%", ""));
         if (matchScore >= 80) {
-            holder.textMatchScore.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
+            holder.match_score.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
         } else if (matchScore >= 60) {
-            holder.textMatchScore.setTextColor(context.getResources().getColor(android.R.color.holo_orange_dark));
+            holder.match_score.setTextColor(context.getResources().getColor(android.R.color.holo_orange_dark));
         } else {
-            holder.textMatchScore.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+            holder.match_score.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
         }
         
-        // Set click listener to view resume details
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MatchScoreActivity.class);
             intent.putExtra("resumeId", resume.getId());
@@ -69,12 +67,10 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
             intent.putExtra("date", resume.getDate());
             intent.putExtra("photoPath", resume.getPhotoPath());
 
-            // Parse stored extracted data from JSON
             if (resume.getExtractedDataJson() != null && !resume.getExtractedDataJson().isEmpty()) {
                 try {
                     org.json.JSONObject extractedData = new org.json.JSONObject(resume.getExtractedDataJson());
                     
-                    // Add extracted candidate data
                     intent.putExtra("candidateName", extractedData.optString("candidateName", ""));
                     intent.putExtra("candidateEmail", extractedData.optString("email", ""));
                     intent.putExtra("candidatePhone", extractedData.optString("phone", ""));
@@ -97,14 +93,12 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
                     intent.putExtra("languages", extractedData.optString("languages", ""));
                     intent.putExtra("certifications", extractedData.optString("certifications", ""));
 
-                    // Add category scores
                     intent.putExtra("skillScore", extractedData.optInt("skillScore", 0));
                     intent.putExtra("experienceScore", extractedData.optInt("experienceScore", 0));
                     intent.putExtra("availabilityScore", extractedData.optInt("availabilityScore", 0));
                     intent.putExtra("educationScore", extractedData.optInt("educationScore", 0));
                     intent.putExtra("distanceScore", extractedData.optInt("distanceScore", 0));
 
-                    // Add feedback and recommendations
                     intent.putExtra("feedback", extractedData.optString("feedback", ""));
                     intent.putExtra("recommendations", extractedData.optString("recommendations", ""));
 
@@ -116,42 +110,41 @@ public class RecentResumeAdapter extends RecyclerView.Adapter<RecentResumeAdapte
             context.startActivity(intent);
         });
 
-        // Set click listener for Delete button
-        holder.buttonDeleteResume.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onResumeDelete(resume, position);
+        holder.delete_resume.setOnClickListener(v -> {
+            if (delete_listener != null) {
+                delete_listener.onResumeDelete(resume, position);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return resumeList.size();
+        return resume_list.size();
     }
 
     public void updateResumeList(List<ResumeEntity> newResumeList) {
-        this.resumeList = newResumeList;
+        this.resume_list = newResumeList;
         notifyDataSetChanged();
     }
 
     public void removeResume(int position) {
-        if (position >= 0 && position < resumeList.size()) {
-            resumeList.remove(position);
+        if (position >= 0 && position < resume_list.size()) {
+            resume_list.remove(position);
             notifyItemRemoved(position);
         }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textResumeId, textResumeDate, textMatchScore, textJobTitle;
-        android.widget.Button buttonDeleteResume;
+        TextView resume_id, resume_date, match_score, job_title;
+        android.widget.Button delete_resume;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            textResumeId = itemView.findViewById(R.id.textResumeId);
-            textResumeDate = itemView.findViewById(R.id.textResumeDate);
-            textMatchScore = itemView.findViewById(R.id.textMatchScore);
-            textJobTitle = itemView.findViewById(R.id.textJobTitle);
-            buttonDeleteResume = itemView.findViewById(R.id.buttonDeleteResume);
+            resume_id = itemView.findViewById(R.id.textResumeId);
+            resume_date = itemView.findViewById(R.id.textResumeDate);
+            match_score = itemView.findViewById(R.id.textMatchScore);
+            job_title = itemView.findViewById(R.id.textJobTitle);
+            delete_resume = itemView.findViewById(R.id.buttonDeleteResume);
         }
     }
 } 

@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.resumematch.R;
-import com.example.resumematch.adapters.JobPostAdapter;
+import com.example.resumematch.adapters.job_post_adapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
 import com.example.resumematch.models.JobPost;
@@ -23,7 +23,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private Button buttonCreateJob;
-    private JobPostAdapter jobAdapter;
+    private job_post_adapter jobAdapter;
     private TextView text_state;
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
@@ -42,7 +42,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
 
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             
-            jobAdapter = new JobPostAdapter(new ArrayList<>());
+            jobAdapter = new job_post_adapter(new ArrayList<>());
             recyclerView.setAdapter(jobAdapter);
 
             // backButton.setOnClickListener(v -> finish());
@@ -123,7 +123,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
             }
             
             Log.d("EmployerHome", "Created " + jobPosts.size() + " JobPost objects");
-            jobAdapter = new JobPostAdapter(jobPosts);
+            jobAdapter = new job_post_adapter(jobPosts);
             recyclerView.setAdapter(jobAdapter);
         } catch (Exception e) {
             Log.e("EmployerHome", "Error updating job adapter: " + e.getMessage());

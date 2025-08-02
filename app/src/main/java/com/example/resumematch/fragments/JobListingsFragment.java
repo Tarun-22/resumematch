@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.resumematch.R;
-import com.example.resumematch.adapters.JobPostAdapter;
+import com.example.resumematch.adapters.job_post_adapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
 import com.example.resumematch.models.JobPost;
@@ -33,7 +33,7 @@ public class JobListingsFragment extends Fragment {
     private RecyclerView recyclerView;
     private Button create_job, delete_button;
     private ImageView back;
-    private JobPostAdapter jobAdapter;
+    private job_post_adapter jobAdapter;
     private TextView empty_state;
     private ProgressBar progressBar;
     private DataRepository dataRepository;
@@ -54,10 +54,10 @@ public class JobListingsFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         
-        jobAdapter = new JobPostAdapter(new ArrayList<>());
+        jobAdapter = new job_post_adapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
-        jobAdapter.setOnJobDeleteListener((job, position) -> {
+        jobAdapter.job_delete_listener((job, position) -> {
             show_delete_confirmation_individual(job, position);
         });
 
@@ -114,9 +114,9 @@ public class JobListingsFragment extends Fragment {
             jobPost.setResumeCount(jobEntity.getResumeCount());
             jobPosts.add(jobPost);
         }
-        jobAdapter = new JobPostAdapter(jobPosts);
+        jobAdapter = new job_post_adapter(jobPosts);
         
-        jobAdapter.setOnJobDeleteListener((job, position) -> {
+        jobAdapter.job_delete_listener((job, position) -> {
             show_delete_confirmation_individual(job, position);
         });
         

@@ -41,22 +41,21 @@ public class ResumeAdapter extends RecyclerView.Adapter<ResumeAdapter.ResumeView
     public void onBindViewHolder(@NonNull ResumeViewHolder holder, int position) {
         ResumeEntity resume = resumeList.get(position);
         Log.d("ResumeAdapter", "Binding resume at position " + position + ": " + resume.getId());
-        holder.textResumeId.setText(resume.getId());
-        holder.textResumeDate.setText(resume.getDate());
-        holder.textMatchScore.setText(String.valueOf(resume.getMatchScore()));
+        holder.resume_id.setText(resume.getId());
+        holder.resume_date.setText(resume.getDate());
+        holder.match_score.setText(String.valueOf(resume.getMatchScore()));
         
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MatchScoreActivity.class);
             intent.putExtra("resumeId", resume.getId());
             intent.putExtra("jobId", resume.getJobId());
-            intent.putExtra("matchScore", extractScoreFromMatch(resume.getMatchScore()));
+            intent.putExtra("matchScore", extract_score(resume.getMatchScore()));
             context.startActivity(intent);
         });
     }
 
-    private int extractScoreFromMatch(String matchString) {
+    private int extract_score(String matchString) {
         try {
-            // Extract number from "85% Match" format
             String numberStr = matchString.replaceAll("[^0-9]", "");
             return Integer.parseInt(numberStr);
         } catch (NumberFormatException e) {
@@ -71,13 +70,13 @@ public class ResumeAdapter extends RecyclerView.Adapter<ResumeAdapter.ResumeView
     }
 
     public static class ResumeViewHolder extends RecyclerView.ViewHolder {
-        TextView textResumeId, textResumeDate, textMatchScore;
+        TextView resume_id, resume_date, match_score;
 
         public ResumeViewHolder(@NonNull View itemView) {
             super(itemView);
-            textResumeId = itemView.findViewById(R.id.textResumeId);
-            textResumeDate = itemView.findViewById(R.id.textResumeDate);
-            textMatchScore = itemView.findViewById(R.id.textMatchScore);
+            resume_id = itemView.findViewById(R.id.textResumeId);
+            resume_date = itemView.findViewById(R.id.textResumeDate);
+            match_score = itemView.findViewById(R.id.textMatchScore);
         }
     }
 }
