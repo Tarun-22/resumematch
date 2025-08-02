@@ -1,13 +1,9 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,9 +17,9 @@ import java.util.UUID;
 
 public class CreateJobActivity extends AppCompatActivity {
 
-    private EditText jobTitleInput, jobDescriptionInput;
-    private Button createJobButton, cancelButton;
-    private ImageView backArrowbutton;
+    private EditText jobInput, jd;
+    private Button create, cancel;
+    private ImageView back;
     private DataRepository dataRepository;
 
     @Override
@@ -31,77 +27,67 @@ public class CreateJobActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_job);
 
-        // Initialize DataRepository
+        //connecting with ui elements
         dataRepository = new DataRepository(this);
+        jobInput = findViewById(R.id.editTextJobTitle);
+        jd = findViewById(R.id.editTextJobDescription);
+        create = findViewById(R.id.buttonCreateJob);
+        cancel = findViewById(R.id.buttonCancel);
+        back = findViewById(R.id.backArrow);
 
-        // Connect variables to UI elements
-        jobTitleInput = findViewById(R.id.editTextJobTitle);
-        jobDescriptionInput = findViewById(R.id.editTextJobDescription);
-        createJobButton = findViewById(R.id.buttonCreateJob);
-        cancelButton = findViewById(R.id.buttonCancel);
-        backArrowbutton = findViewById(R.id.backArrow);
-
-        // Check if template data is provided
         String templateTitle = getIntent().getStringExtra("title");
         String templateDescription = getIntent().getStringExtra("description");
         
         if (templateTitle != null && templateDescription != null) {
-            // Pre-fill the form with template data
-            jobTitleInput.setText(templateTitle);
-            jobDescriptionInput.setText(templateDescription);
+            jobInput.setText(templateTitle);
+            jd.setText(templateDescription);
         }
 
-        // Set up click listeners
-        backArrowbutton.setImageResource(R.drawable.back_arrow_black);
-        backArrowbutton.setOnClickListener(v -> finish());
+        back.setImageResource(R.drawable.back_arrow_black);
+        back.setOnClickListener(v -> finish());
 
-        cancelButton.setOnClickListener(v -> {
-            // Show confirmation dialog
-            showCancelConfirmationDialog();
+        //setting all onclick listeners
+        cancel.setOnClickListener(v -> {
+            showcancel();
         });
 
-        createJobButton.setOnClickListener(v -> {
-            String title = jobTitleInput.getText().toString().trim();
-            String desc = jobDescriptionInput.getText().toString().trim();
+        create.setOnClickListener(v -> {
+            String title = jobInput.getText().toString().trim();
+            String desc = jd.getText().toString().trim();
 
             if (!title.isEmpty()) {
-                // Show progress with Snackbar
-                Snackbar.make(createJobButton, "Creating job...", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(create, "Creating job...", Snackbar.LENGTH_SHORT).show();
                 
-                // Create JobEntity and save to database
                 String jobId = UUID.randomUUID().toString();
                 JobEntity newJob = new JobEntity(
                     jobId,
                     title,
                     desc,
-                    "", // keywords (empty for now)
-                    0,  // resumeCount
-                    System.currentTimeMillis() // createdAt
+                    "",
+                    0,
+                    System.currentTimeMillis()
                 );
 
                 dataRepository.insertJob(newJob, new DataRepository.DatabaseCallback<Void>() {
                     @Override
                     public void onResult(Void result) {
                         runOnUiThread(() -> {
-                            // Show success Toast
                             Toast.makeText(CreateJobActivity.this, "Job created successfully!", Toast.LENGTH_SHORT).show();
                             
-                            // Show success Snackbar
-                            Snackbar.make(createJobButton, "Job '" + title + "' has been created!", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(create, "Job '" + title + "' has been created!", Snackbar.LENGTH_LONG).show();
                             
                             finish();
                         });
                     }
                 });
             } else {
-                // Show error Toast
                 Toast.makeText(this, "Job title is required!", Toast.LENGTH_SHORT).show();
-                jobTitleInput.setError("Job title required");
+                jobInput.setError("Job title required");
             }
         });
     }
 
-    private void showCancelConfirmationDialog() {
+    private void showcancel() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Cancel Job Creation")
                 .setMessage("Are you sure you want to cancel? All entered data will be lost.")
@@ -110,7 +96,6 @@ public class CreateJobActivity extends AppCompatActivity {
                     finish();
                 })
                 .setNegativeButton("Continue Editing", (dialog, which) -> {
-                    // Do nothing, just dismiss dialog
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
