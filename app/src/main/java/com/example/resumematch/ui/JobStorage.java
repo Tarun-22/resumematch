@@ -10,7 +10,7 @@ public class JobStorage {
     public static List<JobPost> jobList = new ArrayList<>();
     public static List<Resume> resumeList = new ArrayList<>();
 
-    public static void addJob(JobPost job) {
+    public static void addjob(JobPost job) {
         jobList.add(job);
     }
 

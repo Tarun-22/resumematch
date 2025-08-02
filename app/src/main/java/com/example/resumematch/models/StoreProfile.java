@@ -33,7 +33,6 @@ public class StoreProfile {
         this.createdAt = System.currentTimeMillis();
     }
 
-    // Getters and Setters
     @NonNull
     public String getId() { return id; }
     public void setId(@NonNull String id) { this.id = id; }

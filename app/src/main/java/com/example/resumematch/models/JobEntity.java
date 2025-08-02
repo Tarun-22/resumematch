@@ -11,7 +11,7 @@ public class JobEntity {
     private String id;
     private String title;
     private String description;
-    private String keywords; // Store as JSON string
+    private String keywords;
     private int resumeCount;
     private long createdAt;
 
@@ -24,7 +24,6 @@ public class JobEntity {
         this.createdAt = createdAt;
     }
 
-    // Getters
     @NonNull
     public String getId() { return id; }
     public String getTitle() { return title; }
@@ -33,7 +32,6 @@ public class JobEntity {
     public int getResumeCount() { return resumeCount; }
     public long getCreatedAt() { return createdAt; }
 
-    // Setters
     public void setId(@NonNull String id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }

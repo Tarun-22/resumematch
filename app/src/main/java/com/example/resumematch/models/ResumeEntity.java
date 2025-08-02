@@ -10,12 +10,12 @@ public class ResumeEntity {
     @NonNull
     private String id;
     private String jobId;
-    private String jobTitle; // Store job title for easy display
+    private String jobTitle;
     private String date;
     private String matchScore;
-    private String resumeText; // Store the scanned resume text
-    private String photoPath; // Path to stored resume photo
-    private String extractedDataJson; // JSON string of extracted data for manual editing
+    private String resumeText;
+    private String photoPath;
+    private String extractedDataJson;
     private long createdAt;
 
     public ResumeEntity(@NonNull String id, String jobId, String jobTitle, String date, 
@@ -29,7 +29,7 @@ public class ResumeEntity {
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters
+
     @NonNull
     public String getId() { return id; }
     public void setId(@NonNull String id) { this.id = id; }
