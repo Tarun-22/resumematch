@@ -1,44 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group android:scaleX="0.6"
-        android:scaleY="0.6"
-        android:translateX="21.6"
-        android:translateY="21.6">
-        <!-- Document background -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M24,4H12C10.9,4 10,4.9 10,6V42C10,43.1 10.9,44 12,44H36C37.1,44 38,43.1 38,42V16L24,4Z"/>
-        
-        <!-- Document fold -->
-        <path
-            android:fillColor="#E0E0E0"
-            android:pathData="M24,4V16H38L24,4Z"/>
-        
-        <!-- Document lines -->
-        <path
-            android:fillColor="#1976D2"
-            android:pathData="M16,24H32V26H16V24Z"/>
-        <path
-            android:fillColor="#1976D2"
-            android:pathData="M16,28H32V30H16V28Z"/>
-        <path
-            android:fillColor="#1976D2"
-            android:pathData="M16,32H28V34H16V32Z"/>
-        
-        <!-- Checkmark -->
-        <path
-            android:fillColor="#4CAF50"
-            android:pathData="M42,20L38,16L36.59,17.41L38,18.83L42,22.83L50.59,14.24L52,15.66L42,25.66L42,20Z"/>
-        
-        <!-- Resume text -->
-        <path
-            android:fillColor="#1976D2"
-            android:pathData="M18,36H30V38H18V36Z"/>
-        <path
-            android:fillColor="#1976D2"
-            android:pathData="M18,40H26V42H18V40Z"/>
-    </group>
+    
+    <!-- Background circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-48,0a48,48 0,1 1,96 0a48,48 0,1 1,-96 0" />
+    
+    <!-- User profile icon -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M54,30c-13.25,0 -24,10.75 -24,24s10.75,24 24,24s24,-10.75 24,-24S67.25,30 54,30zM54,72c-9.94,0 -18,-8.06 -18,-18s8.06,-18 18,-18s18,8.06 18,18S63.94,72 54,72z" />
+    
+    <!-- Profile details -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M54,42c-6.63,0 -12,5.37 -12,12s5.37,12 12,12s12,-5.37 12,-12S60.63,42 54,42zM54,60c-3.31,0 -6,-2.69 -6,-6s2.69,-6 6,-6s6,2.69 6,6S57.31,60 54,60z" />
 </vector>

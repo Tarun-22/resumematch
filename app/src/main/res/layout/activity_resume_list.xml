@@ -55,7 +55,7 @@
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/resume_icon"
+            android:src="@drawable/user_profile"
             android:alpha="0.3"
             android:layout_marginBottom="16dp"
             android:contentDescription="Empty state icon" />
