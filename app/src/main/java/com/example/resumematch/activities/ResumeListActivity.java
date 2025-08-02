@@ -1,0 +1,152 @@
+package com.example.resumematch.activities;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.resumematch.R;
+import com.example.resumematch.adapters.ResumeAdapter;
+import com.example.resumematch.database.DataRepository;
+import com.example.resumematch.models.Resume;
+import com.example.resumematch.models.ResumeEntity;
+import com.example.resumematch.activities.JobSelectionActivity;
+import com.example.resumematch.activities.MatchScoreActivity;
+
+public class ResumeListActivity extends AppCompatActivity {
+
+    ImageView backArrow;
+    Button buttonAddResume;
+    TextView textJobTitle;
+    RecyclerView recyclerView;
+    LinearLayout emptyStateLayout;
+    ResumeAdapter resumeAdapter;
+    ArrayList<ResumeEntity> resumeList;
+    String jobId;
+    String jobDescription;
+    DataRepository dataRepository;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_resume_list);
+
+        // Initialize data
+        resumeList = new ArrayList<>();
+        dataRepository = new DataRepository(this);
+
+        backArrow = findViewById(R.id.backArrow);
+        buttonAddResume = findViewById(R.id.buttonAddResume);
+        textJobTitle = findViewById(R.id.textJobTitle);
+        recyclerView = findViewById(R.id.recyclerResumes);
+        emptyStateLayout = findViewById(R.id.emptyStateLayout);
+
+        // Get job details from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            jobId = intent.getStringExtra("jobId");
+            String jobTitle = intent.getStringExtra("jobTitle");
+            jobDescription = intent.getStringExtra("jobDescription");
+            Log.d("ResumeListActivity", "Received jobId: " + jobId + ", jobTitle: " + jobTitle);
+            if (jobTitle != null) {
+                textJobTitle.setText("  " + jobTitle);
+            }
+        }
+
+        backArrow.setOnClickListener(v -> finish());
+
+        // Add resume button click listener
+        buttonAddResume.setOnClickListener(v -> {
+            Intent scanIntent = new Intent(ResumeListActivity.this, ScanResumeActivity.class);
+            scanIntent.putExtra("jobId", jobId);
+            scanIntent.putExtra("jobTitle", textJobTitle.getText().toString().trim());
+            scanIntent.putExtra("jobDescription", jobDescription);
+            startActivity(scanIntent);
+        });
+
+        // Load resumes from database
+        loadResumesForJob();
+    }
+
+    private void loadResumesForJob() {
+        if (jobId != null) {
+            dataRepository.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
+                @Override
+                public void onResult(List<ResumeEntity> resumeEntities) {
+                    runOnUiThread(() -> {
+                        resumeList = new ArrayList<>(resumeEntities);
+                        
+                        Log.d("ResumeListActivity", "Loaded " + resumeList.size() + " resumes for job: " + jobId);
+                        
+                        // Log each resume for debugging
+                        for (ResumeEntity entity : resumeList) {
+                            Log.d("ResumeListActivity", "Resume: " + entity.getId() + " - " + entity.getMatchScore() + " - " + entity.getDate());
+                        }
+
+                        resumeAdapter = new ResumeAdapter(resumeEntities);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(ResumeListActivity.this));
+                        recyclerView.setAdapter(resumeAdapter);
+
+                        // Show/hide empty state
+                        updateEmptyState();
+                        
+                        Log.d("ResumeListActivity", "RecyclerView setup complete with " + resumeList.size() + " resumes");
+                    });
+                }
+            });
+        } else {
+            resumeList = new ArrayList<>();
+            Log.d("ResumeListActivity", "No jobId provided, using empty list");
+            
+            resumeAdapter = new ResumeAdapter(resumeList);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(resumeAdapter);
+            updateEmptyState();
+        }
+    }
+
+    private void updateEmptyState() {
+        Log.d("ResumeListActivity", "Updating empty state. Resume count: " + resumeList.size());
+        if (resumeList.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            if (emptyStateLayout != null) {
+                emptyStateLayout.setVisibility(View.VISIBLE);
+                Log.d("ResumeListActivity", "Showing empty state");
+            }
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            if (emptyStateLayout != null) {
+                emptyStateLayout.setVisibility(View.GONE);
+                Log.d("ResumeListActivity", "Hiding empty state");
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload resumes when returning from scan activity
+        loadResumesForJob();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dataRepository != null) {
+            dataRepository.shutdown();
+        }
+    }
+}
