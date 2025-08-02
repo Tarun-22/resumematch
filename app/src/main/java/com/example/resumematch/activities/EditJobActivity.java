@@ -1,12 +1,8 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,9 +15,10 @@ import android.widget.ImageView;
 
 public class EditJobActivity extends AppCompatActivity {
 
-    private EditText jobTitleInput, jobDescriptionInput;
-    private Button updateJobButton, deleteJobButton, cancelButton;
-    private ImageView backArrowbutton;
+    //declaring the variables here
+    private EditText job, jd;
+    private Button update, deleteJobButton, cancelButton;
+    private ImageView back;
     private DataRepository dataRepository;
     private String jobId;
 
@@ -30,10 +27,9 @@ public class EditJobActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_job);
 
-        // Initialize DataRepository
+        //created data repo
         dataRepository = new DataRepository(this);
 
-        // Get job details from intent
         jobId = getIntent().getStringExtra("jobId");
         String jobTitle = getIntent().getStringExtra("jobTitle");
         String jobDescription = getIntent().getStringExtra("jobDescription");
@@ -44,33 +40,29 @@ public class EditJobActivity extends AppCompatActivity {
             return;
         }
 
-        // Connect variables to UI elements
-        jobTitleInput = findViewById(R.id.editTextJobTitle);
-        jobDescriptionInput = findViewById(R.id.editTextJobDescription);
-        updateJobButton = findViewById(R.id.buttonUpdateJob);
+        //connecting variables with UI elements
+        job = findViewById(R.id.editTextJobTitle);
+        jd = findViewById(R.id.editTextJobDescription);
+        update = findViewById(R.id.buttonUpdateJob);
         deleteJobButton = findViewById(R.id.buttonDeleteJob);
         cancelButton = findViewById(R.id.buttonCancel);
-        backArrowbutton = findViewById(R.id.backArrow);
+        back = findViewById(R.id.backArrow);
 
-        // Pre-fill the form with existing data
-        jobTitleInput.setText(jobTitle);
-        jobDescriptionInput.setText(jobDescription);
+        job.setText(jobTitle);
+        jd.setText(jobDescription);
 
-        // Set up click listeners
-        backArrowbutton.setImageResource(R.drawable.back_arrow_black);
-        backArrowbutton.setOnClickListener(v -> finish());
+        back.setImageResource(R.drawable.back_arrow_black);
+        back.setOnClickListener(v -> finish());
 
         cancelButton.setOnClickListener(v -> finish());
 
-        updateJobButton.setOnClickListener(v -> {
-            String title = jobTitleInput.getText().toString().trim();
-            String desc = jobDescriptionInput.getText().toString().trim();
+        update.setOnClickListener(v -> {
+            String title = job.getText().toString().trim();
+            String desc = jd.getText().toString().trim();
 
             if (!title.isEmpty()) {
-                // Show progress with Snackbar
-                Snackbar.make(updateJobButton, "Updating job...", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(update, "Updating job...", Snackbar.LENGTH_SHORT).show();
                 
-                // Get the job from database and update it
                 dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                     @Override
                     public void onResult(JobEntity jobEntity) {
@@ -83,7 +75,7 @@ public class EditJobActivity extends AppCompatActivity {
                                 public void onResult(Void result) {
                                     runOnUiThread(() -> {
                                         Toast.makeText(EditJobActivity.this, "Job updated successfully!", Toast.LENGTH_SHORT).show();
-                                        Snackbar.make(updateJobButton, "Job '" + title + "' has been updated!", Snackbar.LENGTH_LONG).show();
+                                        Snackbar.make(update, "Job '" + title + "' has been updated!", Snackbar.LENGTH_LONG).show();
                                         finish();
                                     });
                                 }
@@ -93,21 +85,20 @@ public class EditJobActivity extends AppCompatActivity {
                 });
             } else {
                 Toast.makeText(this, "Job title is required!", Toast.LENGTH_SHORT).show();
-                jobTitleInput.setError("Job title required");
+                job.setError("Job title required");
             }
         });
 
         deleteJobButton.setOnClickListener(v -> {
-            showDeleteConfirmationDialog();
+            delete_dia();
         });
     }
 
-    private void showDeleteConfirmationDialog() {
+    private void delete_dia() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Job")
                 .setMessage("Are you sure you want to delete this job? This action cannot be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    // Get the job and delete it
                     dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                         @Override
                         public void onResult(JobEntity jobEntity) {
@@ -126,7 +117,6 @@ public class EditJobActivity extends AppCompatActivity {
                     });
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    // Do nothing, just dismiss dialog
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();

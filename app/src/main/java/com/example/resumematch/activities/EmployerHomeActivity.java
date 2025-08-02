@@ -3,12 +3,9 @@ package com.example.resumematch.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,8 +15,6 @@ import com.example.resumematch.adapters.JobPostAdapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
 import com.example.resumematch.models.JobPost;
-import com.example.resumematch.activities.CreateJobActivity;
-import com.example.resumematch.activities.JobApplicationsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +24,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private Button buttonCreateJob;
     private JobPostAdapter jobAdapter;
-    private TextView textEmptyState;
+    private TextView text_state;
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
 
@@ -39,22 +34,18 @@ public class EmployerHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_employer_home);
 
         try {
-            // Initialize DataRepository
             dataRepository = new DataRepository(this);
 
             recyclerView = findViewById(R.id.recyclerJobPosts);
             buttonCreateJob = findViewById(R.id.buttonCreateJob);
-            textEmptyState = findViewById(R.id.textEmptyState);
-            // backButton = findViewById(R.id.backButton); // This line was removed from the new_code
+            text_state = findViewById(R.id.textEmptyState);
 
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             
-            // Create adapter with empty list initially
             jobAdapter = new JobPostAdapter(new ArrayList<>());
             recyclerView.setAdapter(jobAdapter);
 
-            // Set up back button
-            // backButton.setOnClickListener(v -> finish()); // This line was removed from the new_code
+            // backButton.setOnClickListener(v -> finish());
 
             // Load jobs from database
             loadJobsFromDatabase();
@@ -67,9 +58,9 @@ public class EmployerHomeActivity extends AppCompatActivity {
             Log.e("EmployerHome", "Error in onCreate: " + e.getMessage());
             e.printStackTrace();
             // Show empty state if there's an error
-            if (textEmptyState != null) {
-                textEmptyState.setVisibility(TextView.VISIBLE);
-                textEmptyState.setText("Error loading jobs. Please try again.");
+            if (text_state != null) {
+                text_state.setVisibility(TextView.VISIBLE);
+                text_state.setText("Error loading jobs. Please try again.");
             }
         }
     }
@@ -142,10 +133,10 @@ public class EmployerHomeActivity extends AppCompatActivity {
 
     private void updateEmptyState() {
         if (jobEntities.isEmpty()) {
-            textEmptyState.setVisibility(TextView.VISIBLE);
+            text_state.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            textEmptyState.setVisibility(TextView.GONE);
+            text_state.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
     }
@@ -153,7 +144,6 @@ public class EmployerHomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload jobs when returning to this activity
         loadJobsFromDatabase();
     }
 
