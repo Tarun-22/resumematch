@@ -1,5 +1,6 @@
 package com.example.resumematch.api;
-
+//we used gpt to know how to connect gpt api to our code
+//We used same extracted fields from resume extractor, then we added the same here.
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -63,7 +64,6 @@ public class GPTApiService {
         private String feedback;
         private String recommendations;
         
-        // Getters and Setters
         public String getCandidateName() { return candidateName; }
         public void setCandidateName(String candidateName) { this.candidateName = candidateName; }
         
@@ -159,7 +159,6 @@ public class GPTApiService {
             Log.d("GPTApi", "Job description: " + jobDescription);
             Log.d("GPTApi", "Store address: " + storeAddress);
             
-            // Validate API key
             String apiKey = Config.getOpenAIApiKey();
             if (apiKey == null || apiKey.isEmpty() || apiKey.equals("your-openai-api-key-here")) {
                 Log.e("GPTApi", "Invalid API key");
@@ -167,7 +166,6 @@ public class GPTApiService {
                 return;
             }
             
-            // Validate inputs
             if (resumeText == null || resumeText.trim().isEmpty()) {
                 Log.e("GPTApi", "Empty resume text");
                 callback.onError("Resume text is empty. Please try again.");
@@ -180,37 +178,30 @@ public class GPTApiService {
                 return;
             }
             
-            // Create the prompt for GPT
             String prompt = createAnalysisPrompt(resumeText, jobDescription, storeAddress);
             Log.d("GPTApi", "Prompt created, length: " + prompt.length());
             
-            // Create JSON request
             JSONObject requestBody = new JSONObject();
             requestBody.put("model", "gpt-4");
             
-            // Create messages array properly
             JSONArray messagesArray = new JSONArray();
             
-            // Add system message
             JSONObject systemMessage = new JSONObject();
             systemMessage.put("role", "system");
             systemMessage.put("content", "You are an expert HR analyst specializing in resume analysis and candidate scoring for small retail businesses. Extract accurate information and provide detailed scoring.");
             messagesArray.put(systemMessage);
             
-            // Add user message
             JSONObject userMessage = new JSONObject();
             userMessage.put("role", "user");
             userMessage.put("content", prompt);
             messagesArray.put(userMessage);
             
-            // Add messages array to request body
             requestBody.put("messages", messagesArray);
             requestBody.put("temperature", 0.1);
             requestBody.put("max_tokens", 2000);
             
             Log.d("GPTApi", "Request body created");
             
-            // Create HTTP request
             RequestBody body = RequestBody.create(
                 MediaType.parse("application/json; charset=utf-8"),
                 requestBody.toString()
@@ -225,7 +216,6 @@ public class GPTApiService {
             
             Log.d("GPTApi", "Making API request to: " + BASE_URL);
             
-            // Execute request asynchronously
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -342,7 +332,6 @@ public class GPTApiService {
             
             JSONObject response = new JSONObject(responseBody);
             
-            // Check if there are choices
             if (!response.has("choices") || response.getJSONArray("choices").length() == 0) {
                 throw new RuntimeException("No choices in GPT response");
             }
@@ -355,14 +344,11 @@ public class GPTApiService {
             String content = choice.getJSONObject("message").getString("content");
             Log.d("GPTApi", "GPT content: " + content.substring(0, Math.min(200, content.length())));
             
-            // Try to parse the content as JSON first
             GPTResponse gptResponse = new GPTResponse();
             
             try {
-                // The content should be a JSON object
                 JSONObject analysis = new JSONObject(content);
                 
-                // Parse all fields with proper error handling
                 gptResponse.setCandidateName(analysis.optString("candidateName", ""));
                 gptResponse.setEmail(analysis.optString("email", ""));
                 gptResponse.setPhone(analysis.optString("phone", ""));
@@ -399,7 +385,6 @@ public class GPTApiService {
                 Log.e("GPTApi", "Error parsing JSON content: " + e.getMessage());
                 Log.e("GPTApi", "Content was: " + content);
                 
-                // If JSON parsing fails, create a basic response
                 gptResponse.setCandidateName("Unknown");
                 gptResponse.setEmail("");
                 gptResponse.setPhone("");
