@@ -10,7 +10,7 @@ import java.net.URLEncoder;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
-public class GoogleMapsDistanceCalculator {
+public class  GoogleMapsDistanceCalculator {
     
     private static final String DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
     

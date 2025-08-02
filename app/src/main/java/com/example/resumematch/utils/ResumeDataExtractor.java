@@ -4,15 +4,12 @@ package com.example.resumematch.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.resumematch.models.ResumeEntity;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.google.mlkit.nl.entityextraction.*;
 
 public class ResumeDataExtractor {
     
@@ -153,23 +150,23 @@ public class ResumeDataExtractor {
             data.setAddress(extractAddress(resumeText));
             data.setCity(extractCity(resumeText));
             data.setState(extractState(resumeText));
-            data.setZipCode(extractZipCode(resumeText));
-            data.setCurrentTitle(extractCurrentTitle(resumeText));
-            data.setExperienceYears(extractExperienceYears(resumeText));
-            data.setEducation(extractEducation(resumeText));
+            data.setZipCode(extractzipcode(resumeText));
+            data.setCurrentTitle(extractcurrenttitle(resumeText));
+            data.setExperienceYears(extractexperienceyears(resumeText));
+            data.setEducation(extracteducation(resumeText));
             data.setSkills(extractSkills(resumeText));
-            data.setAvailability(extractAvailability(resumeText));
-            data.setAvailabilityDetails(extractAvailabilityDetails(resumeText));
+            data.setAvailability(extractavailability(resumeText));
+            data.setAvailabilityDetails(extractavailabilitydetails(resumeText));
             data.setTransportation(extractTransportation(resumeText));
-            data.setExpectedSalary(extractExpectedSalary(resumeText));
-            data.setStartDate(extractStartDate(resumeText));
-            data.setWorkAuthorization(extractWorkAuthorization(resumeText));
-            data.setEmergencyContact(extractEmergencyContact(resumeText));
-            data.setEmergencyPhone(extractEmergencyPhone(resumeText));
-            data.setReferences(extractReferences(resumeText));
-            data.setPreviousRetailExperience(extractPreviousRetailExperience(resumeText));
-            data.setLanguages(extractLanguages(resumeText));
-            data.setCertifications(extractCertifications(resumeText));
+            data.setExpectedSalary(extractexpectedsalary(resumeText));
+            data.setStartDate(extractstartdate(resumeText));
+            data.setWorkAuthorization(extractworkauthorization(resumeText));
+            data.setEmergencyContact(extractemergencycontact(resumeText));
+            data.setEmergencyPhone(extractemergencyphone(resumeText));
+            data.setReferences(extractreferences(resumeText));
+            data.setPreviousRetailExperience(extractpreviousretailexperience(resumeText));
+            data.setLanguages(extractlanguages(resumeText));
+            data.setCertifications(extractcertifications(resumeText));
             
             Log.d("ResumeDataExtractor", "Extracted data: " + data.getName() + ", " + data.getEmail());
             
@@ -208,7 +205,7 @@ public class ResumeDataExtractor {
         }
         
         if (data.getAvailabilityDetails().isEmpty()) {
-            data.setAvailabilityDetails(extractAvailabilityDetails(resumeText));
+            data.setAvailabilityDetails(extractavailabilitydetails(resumeText));
         }
         
         if (data.getTransportation().isEmpty()) {
@@ -216,27 +213,27 @@ public class ResumeDataExtractor {
         }
         
         if (data.getWorkAuthorization().isEmpty()) {
-            data.setWorkAuthorization(extractWorkAuthorization(resumeText));
+            data.setWorkAuthorization(extractworkauthorization(resumeText));
         }
         
         if (data.getEmergencyContact().isEmpty()) {
-            data.setEmergencyContact(extractEmergencyContact(resumeText));
+            data.setEmergencyContact(extractemergencycontact(resumeText));
         }
         
         if (data.getReferences().isEmpty()) {
-            data.setReferences(extractReferences(resumeText));
+            data.setReferences(extractreferences(resumeText));
         }
         
         if (data.getPreviousRetailExperience().isEmpty()) {
-            data.setPreviousRetailExperience(extractPreviousRetailExperience(resumeText));
+            data.setPreviousRetailExperience(extractpreviousretailexperience(resumeText));
         }
         
         if (data.getLanguages().isEmpty()) {
-            data.setLanguages(extractLanguages(resumeText));
+            data.setLanguages(extractlanguages(resumeText));
         }
         
         if (data.getCertifications().isEmpty()) {
-            data.setCertifications(extractCertifications(resumeText));
+            data.setCertifications(extractcertifications(resumeText));
         }
     }
     
@@ -320,7 +317,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractZipCode(String text) {
+    private static String extractzipcode(String text) {
         Pattern zipPattern = Pattern.compile("\\b\\d{5}(?:-\\d{4})?\\b");
         Matcher matcher = zipPattern.matcher(text);
         if (matcher.find()) {
@@ -330,7 +327,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractCurrentTitle(String text) {
+    private static String extractcurrenttitle(String text) {
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
@@ -352,7 +349,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static int extractExperienceYears(String text) {
+    private static int extractexperienceyears(String text) {
         Pattern expPattern = Pattern.compile("(\\d+)\\s*(?:years?|yrs?)\\s*(?:of\\s*)?experience", Pattern.CASE_INSENSITIVE);
         Matcher matcher = expPattern.matcher(text);
         if (matcher.find()) {
@@ -365,7 +362,7 @@ public class ResumeDataExtractor {
         return 0;
     }
     
-    private static String extractEducation(String text) {
+    private static String extracteducation(String text) {
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
@@ -407,7 +404,7 @@ public class ResumeDataExtractor {
         return skills;
     }
     
-    private static String extractAvailability(String text) {
+    private static String extractavailability(String text) {
         String lowerText = text.toLowerCase();
         
         if (lowerText.contains("immediate") || lowerText.contains("available now")) {
@@ -423,7 +420,7 @@ public class ResumeDataExtractor {
         return "Not specified";
     }
     
-    private static String extractAvailabilityDetails(String text) {
+    private static String extractavailabilitydetails(String text) {
         String lowerText = text.toLowerCase();
         
         if (lowerText.contains("monday") || lowerText.contains("tuesday") || lowerText.contains("wednesday") ||
@@ -462,7 +459,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractExpectedSalary(String text) {
+    private static String extractexpectedsalary(String text) {
         Pattern salaryPattern = Pattern.compile("\\$?(\\d{1,3}(?:,\\d{3})*(?:k)?)\\s*-\\s*\\$?(\\d{1,3}(?:,\\d{3})*(?:k)?)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = salaryPattern.matcher(text);
         if (matcher.find()) {
@@ -478,7 +475,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractStartDate(String text) {
+    private static String extractstartdate(String text) {
         String lowerText = text.toLowerCase();
         
         if (lowerText.contains("immediate") || lowerText.contains("available now")) {
@@ -500,7 +497,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractWorkAuthorization(String text) {
+    private static String extractworkauthorization(String text) {
         String lowerText = text.toLowerCase();
         
         if (lowerText.contains("us citizen") || lowerText.contains("citizen")) {
@@ -516,7 +513,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractEmergencyContact(String text) {
+    private static String extractemergencycontact(String text) {
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
@@ -535,7 +532,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractEmergencyPhone(String text) {
+    private static String extractemergencyphone(String text) {
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
@@ -554,7 +551,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractReferences(String text) {
+    private static String extractreferences(String text) {
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
@@ -573,7 +570,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractPreviousRetailExperience(String text) {
+    private static String extractpreviousretailexperience(String text) {
         String lowerText = text.toLowerCase();
         
         if (lowerText.contains("retail") || lowerText.contains("cashier") || lowerText.contains("sales") ||
@@ -600,7 +597,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractLanguages(String text) {
+    private static String extractlanguages(String text) {
         String[] languages = {"english", "spanish", "french", "german", "italian", "portuguese", "chinese", "japanese", "korean", "arabic", "russian", "hindi"};
         List<String> foundLanguages = new ArrayList<>();
         
@@ -618,7 +615,7 @@ public class ResumeDataExtractor {
         return "";
     }
     
-    private static String extractCertifications(String text) {
+    private static String extractcertifications(String text) {
         String[] certifications = {"food handler", "servsafe", "first aid", "cpr", "customer service", "sales", "management"};
         List<String> foundCertifications = new ArrayList<>();
         
