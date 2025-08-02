@@ -1,31 +1,21 @@
 package com.example.resumematch.activities;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import com.google.android.material.snackbar.Snackbar;
 
 import com.example.resumematch.R;
 import com.example.resumematch.api.GPTApiService;
@@ -33,7 +23,6 @@ import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.ResumeEntity;
 import com.example.resumematch.models.StoreProfile;
 import com.example.resumematch.models.JobEntity;
-import com.example.resumematch.utils.Config;
 import com.example.resumematch.utils.GoogleMapsDistanceCalculator;
 import com.example.resumematch.utils.ResumeDataExtractor;
 import com.example.resumematch.utils.EnhancedScoringSystem;
@@ -42,8 +31,6 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -380,10 +367,10 @@ public class ScanResumeActivity extends AppCompatActivity {
                             gptResponse.getAddress(), storeProfile.getFullAddress(),
                             new GoogleMapsDistanceCalculator.DistanceCallback() {
                                 @Override
-                                public void onDistanceCalculated(double distance, String duration, String distanceText) {
+                                public void distancecalulate(double distance, String duration, String distanceText) {
                                     // Calculate distance score out of 25 points
                                     int calculatedDistanceScore = GoogleMapsDistanceCalculator.calculateDistanceScore(distance);
-                                    String calculatedDistanceDescription = GoogleMapsDistanceCalculator.getDistanceDescription(distance);
+                                    String calculatedDistanceDescription = GoogleMapsDistanceCalculator.getDes(distance);
                                     
                                     // Calculate final overall score: GPT (75) + Distance (25) = 100
                                     int finalOverallScore = gptResponse.getOverallScore() + calculatedDistanceScore;

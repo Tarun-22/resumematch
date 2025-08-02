@@ -1,16 +1,11 @@
 package com.example.resumematch.utils;
-
-import android.content.Context;
-import android.os.AsyncTask;
+// this is the static enhancing score one, we used gpt to extract certain fields to calculate the score
 import android.util.Log;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.resumematch.api.GPTApiService;
-import com.example.resumematch.utils.GoogleMapsDistanceCalculator;
 import com.example.resumematch.models.StoreProfile;
 
 public class EnhancedScoringSystem {
@@ -78,28 +73,21 @@ public class EnhancedScoringSystem {
         ScoringResult result = new ScoringResult();
         
         try {
-            // Extract job requirements
             JobRequirements jobReqs = extractJobRequirements(jobDescription);
             
-            // Calculate skill match score
             calculateSkillMatchScore(jobReqs, resumeData, result);
             
-            // Calculate experience score
             calculateExperienceScore(jobReqs, resumeData, result);
             
-            // Calculate availability score
             calculateAvailabilityScore(jobReqs, resumeData, result);
             
-            // Calculate education score
             calculateEducationScore(jobReqs, resumeData, result);
             
-            // Calculate distance score
             calculateDistanceScore(resumeData, storeProfile, result);
             
-            // Calculate overall score
+
             calculateOverallScore(result);
             
-            // Generate recommendations
             generateRecommendations(jobReqs, resumeData, result);
             
             Log.d("EnhancedScoring", "Overall score: " + result.getOverallScore() + "%");
@@ -117,7 +105,7 @@ public class EnhancedScoringSystem {
         private int minExperienceYears;
         private String preferredAvailability;
         private String educationLevel;
-        private String jobType; // full-time, part-time, etc.
+        private String jobType;
         private String preferredTransportation;
         private String preferredLanguages;
         private String salaryRange;
@@ -126,7 +114,7 @@ public class EnhancedScoringSystem {
             this.requiredSkills = new ArrayList<>();
         }
         
-        // Getters and Setters
+
         public List<String> getRequiredSkills() { return requiredSkills; }
         public void setRequiredSkills(List<String> requiredSkills) { this.requiredSkills = requiredSkills; }
         
@@ -156,11 +144,9 @@ public class EnhancedScoringSystem {
         JobRequirements reqs = new JobRequirements();
         String lowerDesc = jobDescription.toLowerCase();
         
-        // Extract skills from job description using natural language processing
         List<String> extractedSkills = extractSkillsFromDescription(jobDescription);
         reqs.setRequiredSkills(extractedSkills);
         
-        // Extract experience requirements
         if (lowerDesc.contains("senior") || lowerDesc.contains("5+ years") || lowerDesc.contains("5 years")) {
             reqs.setMinExperienceYears(5);
         } else if (lowerDesc.contains("mid-level") || lowerDesc.contains("3+ years") || lowerDesc.contains("3 years")) {
@@ -171,7 +157,6 @@ public class EnhancedScoringSystem {
             reqs.setMinExperienceYears(0);
         }
         
-        // Extract availability preferences
         if (lowerDesc.contains("immediate") || lowerDesc.contains("available now")) {
             reqs.setPreferredAvailability("immediate");
         } else if (lowerDesc.contains("flexible") || lowerDesc.contains("negotiable")) {
@@ -180,7 +165,6 @@ public class EnhancedScoringSystem {
             reqs.setPreferredAvailability("any");
         }
         
-        // Extract education requirements
         if (lowerDesc.contains("bachelor") || lowerDesc.contains("degree")) {
             reqs.setEducationLevel("bachelor");
         } else if (lowerDesc.contains("high school") || lowerDesc.contains("diploma")) {
@@ -189,7 +173,6 @@ public class EnhancedScoringSystem {
             reqs.setEducationLevel("any");
         }
         
-        // Extract job type
         if (lowerDesc.contains("full-time") || lowerDesc.contains("full time")) {
             reqs.setJobType("full-time");
         } else if (lowerDesc.contains("part-time") || lowerDesc.contains("part time")) {
@@ -198,7 +181,6 @@ public class EnhancedScoringSystem {
             reqs.setJobType("any");
         }
         
-        // Extract transportation preferences
         if (lowerDesc.contains("car") || lowerDesc.contains("vehicle") || lowerDesc.contains("driving")) {
             reqs.setPreferredTransportation("car");
         } else if (lowerDesc.contains("public transit") || lowerDesc.contains("bus")) {
@@ -207,7 +189,6 @@ public class EnhancedScoringSystem {
             reqs.setPreferredTransportation("any");
         }
         
-        // Extract language preferences
         if (lowerDesc.contains("spanish") || lowerDesc.contains("bilingual")) {
             reqs.setPreferredLanguages("spanish");
         } else if (lowerDesc.contains("chinese") || lowerDesc.contains("mandarin")) {
@@ -216,7 +197,6 @@ public class EnhancedScoringSystem {
             reqs.setPreferredLanguages("english");
         }
         
-        // Extract salary range
         if (lowerDesc.contains("$15") || lowerDesc.contains("15/hour")) {
             reqs.setSalaryRange("$15/hour");
         } else if (lowerDesc.contains("$20") || lowerDesc.contains("20/hour")) {
@@ -234,35 +214,30 @@ public class EnhancedScoringSystem {
         List<String> skills = new ArrayList<>();
         String lowerDesc = jobDescription.toLowerCase();
         
-        // Common skill keywords that might appear in job descriptions
+
         String[] skillKeywords = {
-            // Technical skills
             "java", "python", "javascript", "react", "angular", "vue", "node.js", "spring",
             "android", "ios", "swift", "kotlin", "sql", "mongodb", "mysql", "postgresql",
             "aws", "azure", "docker", "kubernetes", "jenkins", "git", "agile", "scrum",
             "rest", "api", "microservices", "machine learning", "ai", "data science",
             "frontend", "backend", "full stack", "devops", "ui", "ux", "design",
             
-            // Business skills
             "project management", "leadership", "communication", "team", "collaboration",
             "customer service", "sales", "marketing", "analytics", "excel", "powerpoint",
             "word", "photoshop", "illustrator", "inventory", "pos", "cash handling",
             
-            // Retail/Service skills
             "retail", "cashier", "stock", "merchandising", "food service", "cooking",
             "cleaning", "maintenance", "security", "driving", "delivery", "customer",
             "cash register", "point of sale", "inventory management", "scheduling",
             "multitasking", "problem solving", "attention to detail", "time management"
         };
         
-        // Check which skills are mentioned in the job description
         for (String skill : skillKeywords) {
             if (lowerDesc.contains(skill)) {
                 skills.add(skill);
             }
         }
         
-        // Also extract any specific requirements mentioned
         String[] requirementPatterns = {
             "must have", "required", "needed", "essential", "preferred", "experience with",
             "knowledge of", "familiar with", "proficient in", "skilled in"
@@ -270,7 +245,6 @@ public class EnhancedScoringSystem {
         
         for (String pattern : requirementPatterns) {
             if (lowerDesc.contains(pattern)) {
-                // Extract words after these patterns
                 int index = lowerDesc.indexOf(pattern);
                 if (index != -1) {
                     String afterPattern = lowerDesc.substring(index + pattern.length());
@@ -303,9 +277,8 @@ public class EnhancedScoringSystem {
         result.setMatchedSkills(matchedSkills);
         result.setMissingSkills(missingSkills);
         
-        // Calculate skill match percentage
         if (jobReqs.getRequiredSkills().isEmpty()) {
-            result.setSkillMatchScore(100); // No skills required
+            result.setSkillMatchScore(100);
         } else {
             double skillMatchPercentage = (double) matchedSkills.size() / jobReqs.getRequiredSkills().size() * 100;
             result.setSkillMatchScore((int) skillMatchPercentage);
@@ -319,15 +292,15 @@ public class EnhancedScoringSystem {
         int actualYears = resumeData.getExperienceYears();
         
         if (requiredYears == 0) {
-            result.setExperienceScore(100); // No experience required
+            result.setExperienceScore(100);
         } else if (actualYears >= requiredYears) {
-            result.setExperienceScore(100); // Meets or exceeds requirement
+            result.setExperienceScore(100);
         } else if (actualYears >= requiredYears * 0.7) {
-            result.setExperienceScore(80); // Close to requirement
+            result.setExperienceScore(80);
         } else if (actualYears >= requiredYears * 0.5) {
-            result.setExperienceScore(60); // Some experience
+            result.setExperienceScore(60);
         } else {
-            result.setExperienceScore(30); // Limited experience
+            result.setExperienceScore(30);
         }
         
         result.getCategoryScores().put("Experience", result.getExperienceScore());
@@ -338,13 +311,13 @@ public class EnhancedScoringSystem {
         String actual = resumeData.getAvailability().toLowerCase();
         
         if (preferred.equals("any")) {
-            result.setAvailabilityScore(100); // No specific requirement
+            result.setAvailabilityScore(100);
         } else if (preferred.equals("immediate") && actual.contains("immediate")) {
             result.setAvailabilityScore(100);
         } else if (preferred.equals("flexible") && (actual.contains("flexible") || actual.contains("negotiable"))) {
             result.setAvailabilityScore(100);
         } else if (actual.contains("immediate")) {
-            result.setAvailabilityScore(90); // Immediate availability is always good
+            result.setAvailabilityScore(90);
         } else if (actual.contains("flexible") || actual.contains("negotiable")) {
             result.setAvailabilityScore(80);
         } else if (actual.contains("2 weeks")) {
@@ -352,7 +325,7 @@ public class EnhancedScoringSystem {
         } else if (actual.contains("1 month")) {
             result.setAvailabilityScore(60);
         } else {
-            result.setAvailabilityScore(50); // Not specified
+            result.setAvailabilityScore(50);
         }
         
         result.getCategoryScores().put("Availability", result.getAvailabilityScore());
@@ -363,17 +336,17 @@ public class EnhancedScoringSystem {
         String actual = resumeData.getEducation().toLowerCase();
         
         if (required.equals("any")) {
-            result.setEducationScore(100); // No specific requirement
+            result.setEducationScore(100);
         } else if (required.equals("bachelor") && actual.contains("bachelor")) {
             result.setEducationScore(100);
         } else if (required.equals("high school") && (actual.contains("high school") || actual.contains("diploma"))) {
             result.setEducationScore(100);
         } else if (actual.contains("bachelor") || actual.contains("university")) {
-            result.setEducationScore(90); // Higher education is always good
+            result.setEducationScore(90);
         } else if (actual.contains("high school") || actual.contains("diploma")) {
             result.setEducationScore(70);
         } else {
-            result.setEducationScore(50); // Not specified
+            result.setEducationScore(50);
         }
         
         result.getCategoryScores().put("Education", result.getEducationScore());
@@ -381,14 +354,13 @@ public class EnhancedScoringSystem {
     
     private static void calculateDistanceScore(ResumeDataExtractor.ExtractedData resumeData, StoreProfile storeProfile, ScoringResult result) {
         if (storeProfile == null || resumeData.getAddress().isEmpty()) {
-            result.setDistanceScore(50); // Neutral score if no data
+            result.setDistanceScore(50);
             result.setDistanceMiles(0);
             result.setDistanceDescription("Distance not available");
             return;
         }
         
         try {
-            // Get addresses for distance calculation
             String candidateAddress = resumeData.getFormattedAddress();
             String storeAddress = storeProfile.getFormattedAddress();
             
@@ -399,14 +371,12 @@ public class EnhancedScoringSystem {
                 return;
             }
             
-            // Use Google Maps distance calculator
-            GoogleMapsDistanceCalculator.calculateDistance(null, candidateAddress, storeAddress, 
+            GoogleMapsDistanceCalculator.calculateDistance(null, candidateAddress, storeAddress,
                 new GoogleMapsDistanceCalculator.DistanceCallback() {
                     @Override
-                    public void onDistanceCalculated(double distance, String duration, String distanceText) {
-                        // Calculate score based on distance
+                    public void distancecalulate(double distance, String duration, String distanceText) {
                         int distanceScore = GoogleMapsDistanceCalculator.calculateDistanceScore(distance);
-                        String distanceDescription = GoogleMapsDistanceCalculator.getDistanceDescription(distance);
+                        String distanceDescription = GoogleMapsDistanceCalculator.getDes(distance);
                         
                         result.setDistanceScore(distanceScore);
                         result.setDistanceMiles(distance);
@@ -433,7 +403,6 @@ public class EnhancedScoringSystem {
     }
     
     private static void calculateOverallScore(ScoringResult result) {
-        // Weighted average: Skills (25%), Experience (20%), Availability (20%), Education (10%), Distance (25%)
         int overallScore = (int) (
             result.getSkillMatchScore() * 0.25 +
             result.getExperienceScore() * 0.20 +
@@ -448,27 +417,22 @@ public class EnhancedScoringSystem {
     private static void generateRecommendations(JobRequirements jobReqs, ResumeDataExtractor.ExtractedData resumeData, ScoringResult result) {
         List<String> recommendations = new ArrayList<>();
         
-        // Skill-based recommendations
         if (result.getSkillMatchScore() < 70) {
             recommendations.add("Consider candidates with more relevant skills");
         }
         
-        // Experience-based recommendations
         if (result.getExperienceScore() < 70) {
             recommendations.add("May need additional training for required experience level");
         }
         
-        // Availability-based recommendations
         if (result.getAvailabilityScore() < 70) {
             recommendations.add("Check candidate's availability timeline");
         }
         
-        // Distance-based recommendations
         if (result.getDistanceScore() < 70) {
             recommendations.add("Consider commute time and transportation options");
         }
         
-        // Overall recommendations
         if (result.getOverallScore() >= 90) {
             recommendations.add("Strong candidate - recommend for interview");
         } else if (result.getOverallScore() >= 70) {

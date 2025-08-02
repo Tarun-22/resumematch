@@ -1,5 +1,6 @@
 package com.example.resumematch.utils;
-
+//used gpt to write this huge static logic for extracting key words,
+//but we are not using this code as we connected to ai api to get the data
 import android.content.Context;
 import android.util.Log;
 
@@ -46,7 +47,6 @@ public class ResumeDataExtractor {
             this.additionalInfo = new HashMap<>();
         }
         
-        // Getters and Setters
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
         
@@ -147,7 +147,6 @@ public class ResumeDataExtractor {
         ExtractedData data = new ExtractedData();
         
         try {
-            // Extract basic information
             data.setName(extractName(resumeText));
             data.setEmail(extractEmail(resumeText));
             data.setPhone(extractPhone(resumeText));
@@ -187,19 +186,14 @@ public class ResumeDataExtractor {
     }
 
     public static void extractDataWithMLKit(Context context, String resumeText, EntityExtractionCallback callback) {
-        ExtractedData data = extractData(resumeText); // Use regex/keyword extraction for now
-        
-        // TODO: Add ML Kit integration once API is verified
-        // For now, we'll use the regex extraction which is already comprehensive
-        
-        // Post-process extracted data
+        ExtractedData data = extractData(resumeText);
+
         postProcessExtractedData(data, resumeText);
         
         callback.onExtracted(data);
     }
     
     private static void postProcessExtractedData(ExtractedData data, String resumeText) {
-        // Enhance address parsing
         if (!data.getAddress().isEmpty()) {
             String[] addressParts = data.getAddress().split(",");
             if (addressParts.length >= 3) {
@@ -213,54 +207,44 @@ public class ResumeDataExtractor {
             }
         }
         
-        // Enhance availability details if not already extracted
         if (data.getAvailabilityDetails().isEmpty()) {
             data.setAvailabilityDetails(extractAvailabilityDetails(resumeText));
         }
         
-        // Enhance transportation if not already extracted
         if (data.getTransportation().isEmpty()) {
             data.setTransportation(extractTransportation(resumeText));
         }
         
-        // Enhance work authorization if not already extracted
         if (data.getWorkAuthorization().isEmpty()) {
             data.setWorkAuthorization(extractWorkAuthorization(resumeText));
         }
         
-        // Enhance emergency contact if not already extracted
         if (data.getEmergencyContact().isEmpty()) {
             data.setEmergencyContact(extractEmergencyContact(resumeText));
         }
         
-        // Enhance references if not already extracted
         if (data.getReferences().isEmpty()) {
             data.setReferences(extractReferences(resumeText));
         }
         
-        // Enhance previous retail experience if not already extracted
         if (data.getPreviousRetailExperience().isEmpty()) {
             data.setPreviousRetailExperience(extractPreviousRetailExperience(resumeText));
         }
         
-        // Enhance languages if not already extracted
         if (data.getLanguages().isEmpty()) {
             data.setLanguages(extractLanguages(resumeText));
         }
         
-        // Enhance certifications if not already extracted
         if (data.getCertifications().isEmpty()) {
             data.setCertifications(extractCertifications(resumeText));
         }
     }
     
     private static String extractName(String text) {
-        // Look for name patterns at the beginning of the resume
         String[] lines = text.split("\n");
         for (String line : lines) {
             line = line.trim();
             if (line.length() > 0 && line.length() < 50) {
-                // Check if it looks like a name (contains letters, no special characters except spaces)
                 if (line.matches("^[A-Za-z\\s]+$") && line.split("\\s+").length >= 2) {
                     return line;
                 }
@@ -279,7 +263,6 @@ public class ResumeDataExtractor {
     }
     
     private static String extractPhone(String text) {
-        // Match various phone number formats
         Pattern phonePattern = Pattern.compile("\\b(\\+?1[-.]?)?\\(?([0-9]{3})\\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\\b");
         Matcher matcher = phonePattern.matcher(text);
         if (matcher.find()) {
@@ -289,14 +272,12 @@ public class ResumeDataExtractor {
     }
     
     private static String extractAddress(String text) {
-        // Look for full address patterns
         Pattern addressPattern = Pattern.compile("\\d+\\s+[A-Za-z\\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|Place|Pl|Way|Terrace|Ter|Circle|Cir|Trail|Trl)\\s*,\\s*[A-Za-z\\s]+,\\s*[A-Z]{2}\\s*\\d{5}(?:-\\d{4})?", Pattern.CASE_INSENSITIVE);
         Matcher matcher = addressPattern.matcher(text);
         if (matcher.find()) {
             return matcher.group();
         }
         
-        // Look for simpler address patterns
         Pattern simpleAddressPattern = Pattern.compile("\\d+\\s+[A-Za-z\\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|Place|Pl|Way|Terrace|Ter|Circle|Cir|Trail|Trl)", Pattern.CASE_INSENSITIVE);
         Matcher simpleMatcher = simpleAddressPattern.matcher(text);
         if (simpleMatcher.find()) {
@@ -307,14 +288,12 @@ public class ResumeDataExtractor {
     }
     
     private static String extractCity(String text) {
-        // Look for city patterns near address
         Pattern cityPattern = Pattern.compile("\\b[A-Za-z\\s]+(?:City|Town|Village|Borough|County)\\b", Pattern.CASE_INSENSITIVE);
         Matcher matcher = cityPattern.matcher(text);
         if (matcher.find()) {
             return matcher.group();
         }
         
-        // Look for city names near commas (common in addresses)
         String[] lines = text.split("\n");
         for (String line : lines) {
             if (line.contains(",")) {
@@ -332,7 +311,6 @@ public class ResumeDataExtractor {
     }
     
     private static String extractState(String text) {
-        // Look for state abbreviations
         Pattern statePattern = Pattern.compile("\\b[A-Z]{2}\\b");
         Matcher matcher = statePattern.matcher(text);
         if (matcher.find()) {
@@ -343,7 +321,6 @@ public class ResumeDataExtractor {
     }
     
     private static String extractZipCode(String text) {
-        // Look for ZIP code patterns
         Pattern zipPattern = Pattern.compile("\\b\\d{5}(?:-\\d{4})?\\b");
         Matcher matcher = zipPattern.matcher(text);
         if (matcher.find()) {
@@ -358,12 +335,10 @@ public class ResumeDataExtractor {
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
             if (line.toLowerCase().contains("experience") || line.toLowerCase().contains("work")) {
-                // Look for job titles in the next few lines
                 for (int j = i + 1; j < Math.min(i + 5, lines.length); j++) {
                     String nextLine = lines[j].trim();
                     if (nextLine.length() > 0 && nextLine.length() < 100) {
-                        // Check if it looks like a job title
-                        if (nextLine.contains("-") || nextLine.contains("at") || 
+                        if (nextLine.contains("-") || nextLine.contains("at") ||
                             nextLine.toLowerCase().contains("engineer") || 
                             nextLine.toLowerCase().contains("developer") ||
                             nextLine.toLowerCase().contains("manager") ||
@@ -378,7 +353,6 @@ public class ResumeDataExtractor {
     }
     
     private static int extractExperienceYears(String text) {
-        // Look for experience patterns
         Pattern expPattern = Pattern.compile("(\\d+)\\s*(?:years?|yrs?)\\s*(?:of\\s*)?experience", Pattern.CASE_INSENSITIVE);
         Matcher matcher = expPattern.matcher(text);
         if (matcher.find()) {
@@ -396,7 +370,6 @@ public class ResumeDataExtractor {
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
             if (line.toLowerCase().contains("education")) {
-                // Look for education details in the next few lines
                 StringBuilder education = new StringBuilder();
                 for (int j = i + 1; j < Math.min(i + 5, lines.length); j++) {
                     String nextLine = lines[j].trim();
@@ -413,7 +386,6 @@ public class ResumeDataExtractor {
     private static List<String> extractSkills(String text) {
         List<String> skills = new ArrayList<>();
         
-        // Common skills to look for
         String[] skillKeywords = {
             "java", "python", "javascript", "react", "angular", "vue", "node.js", "spring",
             "android", "ios", "swift", "kotlin", "sql", "mongodb", "mysql", "postgresql",
@@ -454,12 +426,10 @@ public class ResumeDataExtractor {
     private static String extractAvailabilityDetails(String text) {
         String lowerText = text.toLowerCase();
         
-        // Look for specific availability patterns
-        if (lowerText.contains("monday") || lowerText.contains("tuesday") || lowerText.contains("wednesday") || 
+        if (lowerText.contains("monday") || lowerText.contains("tuesday") || lowerText.contains("wednesday") ||
             lowerText.contains("thursday") || lowerText.contains("friday") || lowerText.contains("saturday") || 
             lowerText.contains("sunday")) {
             
-            // Extract the line containing availability details
             String[] lines = text.split("\n");
             for (String line : lines) {
                 String lowerLine = line.toLowerCase();
@@ -493,14 +463,12 @@ public class ResumeDataExtractor {
     }
     
     private static String extractExpectedSalary(String text) {
-        // Look for salary patterns
         Pattern salaryPattern = Pattern.compile("\\$?(\\d{1,3}(?:,\\d{3})*(?:k)?)\\s*-\\s*\\$?(\\d{1,3}(?:,\\d{3})*(?:k)?)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = salaryPattern.matcher(text);
         if (matcher.find()) {
             return "$" + matcher.group(1) + " - $" + matcher.group(2);
         }
         
-        // Look for single salary values
         Pattern singleSalaryPattern = Pattern.compile("\\$?(\\d{1,3}(?:,\\d{3})*(?:k)?)", Pattern.CASE_INSENSITIVE);
         Matcher singleMatcher = singleSalaryPattern.matcher(text);
         if (singleMatcher.find()) {
@@ -523,7 +491,6 @@ public class ResumeDataExtractor {
             return "Flexible";
         }
         
-        // Look for specific dates
         Pattern datePattern = Pattern.compile("\\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\\s+\\d{1,2},?\\s+\\d{4}\\b", Pattern.CASE_INSENSITIVE);
         Matcher matcher = datePattern.matcher(text);
         if (matcher.find()) {
@@ -550,16 +517,13 @@ public class ResumeDataExtractor {
     }
     
     private static String extractEmergencyContact(String text) {
-        // Look for emergency contact patterns
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
             if (line.contains("emergency") || line.contains("contact") || line.contains("reference")) {
-                // Look for name in next few lines
                 for (int j = i + 1; j < Math.min(i + 3, lines.length); j++) {
                     String nextLine = lines[j].trim();
                     if (nextLine.length() > 0 && nextLine.length() < 100) {
-                        // Check if it looks like a name
                         if (nextLine.matches("^[A-Za-z\\s]+$") && nextLine.split("\\s+").length >= 2) {
                             return nextLine;
                         }
@@ -572,12 +536,10 @@ public class ResumeDataExtractor {
     }
     
     private static String extractEmergencyPhone(String text) {
-        // Look for phone numbers near emergency contact
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
             if (line.contains("emergency") || line.contains("contact")) {
-                // Look for phone in next few lines
                 for (int j = i + 1; j < Math.min(i + 3, lines.length); j++) {
                     String nextLine = lines[j].trim();
                     Pattern phonePattern = Pattern.compile("\\b(\\+?1[-.]?)?\\(?([0-9]{3})\\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\\b");
@@ -593,13 +555,11 @@ public class ResumeDataExtractor {
     }
     
     private static String extractReferences(String text) {
-        // Look for references section
         String[] lines = text.split("\n");
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].toLowerCase();
             if (line.contains("reference") || line.contains("referee")) {
                 StringBuilder references = new StringBuilder();
-                // Collect next few lines as references
                 for (int j = i + 1; j < Math.min(i + 6, lines.length); j++) {
                     String nextLine = lines[j].trim();
                     if (nextLine.length() > 0 && !nextLine.toLowerCase().contains("experience")) {
@@ -616,8 +576,7 @@ public class ResumeDataExtractor {
     private static String extractPreviousRetailExperience(String text) {
         String lowerText = text.toLowerCase();
         
-        // Look for retail-related experience
-        if (lowerText.contains("retail") || lowerText.contains("cashier") || lowerText.contains("sales") || 
+        if (lowerText.contains("retail") || lowerText.contains("cashier") || lowerText.contains("sales") ||
             lowerText.contains("customer service") || lowerText.contains("store") || lowerText.contains("shop")) {
             
             String[] lines = text.split("\n");
@@ -627,7 +586,6 @@ public class ResumeDataExtractor {
                     line.contains("customer service") || line.contains("store") || line.contains("shop")) {
                     
                     StringBuilder experience = new StringBuilder();
-                    // Collect this line and next few lines
                     for (int j = i; j < Math.min(i + 4, lines.length); j++) {
                         String nextLine = lines[j].trim();
                         if (nextLine.length() > 0) {
@@ -643,7 +601,6 @@ public class ResumeDataExtractor {
     }
     
     private static String extractLanguages(String text) {
-        // Look for language patterns
         String[] languages = {"english", "spanish", "french", "german", "italian", "portuguese", "chinese", "japanese", "korean", "arabic", "russian", "hindi"};
         List<String> foundLanguages = new ArrayList<>();
         
@@ -662,7 +619,6 @@ public class ResumeDataExtractor {
     }
     
     private static String extractCertifications(String text) {
-        // Look for certification patterns
         String[] certifications = {"food handler", "servsafe", "first aid", "cpr", "customer service", "sales", "management"};
         List<String> foundCertifications = new ArrayList<>();
         
