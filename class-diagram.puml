@@ -1,0 +1,432 @@
+@startuml ResumeMatch Class Diagram
+
+!define RECTANGLE class
+
+package "Activities" {
+    class WelcomeActivity {
+        +onCreate(Bundle)
+        +startSlideUpAnimation()
+        +navigateToMainActivity()
+    }
+    
+    class MainActivity {
+        +onCreate(Bundle)
+        +loadCountsFromDatabase()
+        +refreshCounts()
+        +hideProgressBar()
+    }
+    
+    class ScanResumeActivity {
+        +onCreate(Bundle)
+        +openCamera()
+        +runOCR(Uri)
+        +processOCRResult(String)
+        +processGPTResponse(GPTResponse, String, ProgressDialog)
+        +saveResumeWithScore(String, String, int, String, GPTResponse, int, double, String)
+        +processWithFallback(String, StoreProfile)
+        +enhanceBitmapForOCR(Bitmap)
+        +enhanceContrast(Bitmap)
+    }
+    
+    class MatchScoreActivity {
+        +onCreate(Bundle)
+        +displayResumeDetails()
+        +showResumeImage()
+    }
+    
+    class StoreProfileActivity {
+        +onCreate(Bundle)
+        +searchAddress()
+        +onActivityResult(int, int, Intent)
+        +saveStoreProfile()
+        +loadExistingStoreProfile()
+    }
+    
+    class JobApplicationsActivity {
+        +onCreate(Bundle)
+        +loadResumesForJob(String)
+        +sortResumes(String)
+    }
+    
+    class ResumeDetailsActivity {
+        +onCreate(Bundle)
+        +displayResumeDetails()
+        +shareResumeImage()
+    }
+    
+    class ResumePhotoViewerActivity {
+        +onCreate(Bundle)
+        +loadImage(String)
+    }
+    
+    class EditJobActivity {
+        +onCreate(Bundle)
+        +loadJobDetails(String)
+        +updateJob()
+    }
+    
+    class CreateJobActivity {
+        +onCreate(Bundle)
+        +createJob()
+    }
+    
+    class JobSelectionActivity {
+        +onCreate(Bundle)
+        +loadJobs()
+        +selectJob(JobEntity)
+    }
+    
+    class JobTemplateActivity {
+        +onCreate(Bundle)
+        +loadTemplates()
+        +useTemplate(String)
+    }
+}
+
+package "Fragments" {
+    class JobListingsFragment {
+        +onCreateView(ViewGroup, Bundle)
+        +loadJobsFromDatabase()
+        +updateJobAdapter()
+        +deleteAllJobs()
+        +deleteJob(JobEntity, int)
+        +showIndividualDeleteConfirmationDialog(JobEntity, int)
+    }
+    
+    class CreateJobFragment {
+        +onCreateView(ViewGroup, Bundle)
+        +createJobAsync()
+        +validateForm()
+    }
+    
+    class ResumeListFragment {
+        +onCreateView(ViewGroup, Bundle)
+        +loadResumesFromDatabase()
+        +updateResumeAdapter()
+        +deleteAllResumes()
+        +deleteResume(ResumeEntity, int)
+        +showIndividualDeleteConfirmationDialog(ResumeEntity, int)
+    }
+}
+
+package "Models" {
+    class JobEntity {
+        +String id
+        +String title
+        +String description
+        +String requirements
+        +String location
+        +String salary
+        +String availability
+        +int resumeCount
+        +long createdAt
+        +getters() setters()
+    }
+    
+    class ResumeEntity {
+        +String id
+        +String jobId
+        +String jobTitle
+        +String date
+        +String matchScore
+        +String resumeText
+        +String photoPath
+        +String extractedDataJson
+        +long timestamp
+        +getters() setters()
+    }
+    
+    class StoreProfile {
+        +String id
+        +String storeName
+        +String fullAddress
+        +String phone
+        +String email
+        +String description
+        +long createdAt
+        +getters() setters()
+    }
+}
+
+package "Database" {
+    class AppDatabase {
+        +JobDao jobDao
+        +ResumeDao resumeDao
+        +StoreProfileDao storeProfileDao
+        +static getInstance(Context)
+    }
+    
+    class JobDao {
+        +insert(JobEntity)
+        +getAll()
+        +getById(String)
+        +update(JobEntity)
+        +delete(JobEntity)
+        +getCount()
+    }
+    
+    class ResumeDao {
+        +insert(ResumeEntity)
+        +getAll()
+        +getById(String)
+        +getByJobId(String)
+        +update(ResumeEntity)
+        +delete(ResumeEntity)
+        +getCount()
+        +getCountForJob(String)
+    }
+    
+    class StoreProfileDao {
+        +insert(StoreProfile)
+        +getFirst()
+        +update(StoreProfile)
+        +delete(StoreProfile)
+        +getCount()
+    }
+    
+    class DataRepository {
+        +JobDao jobDao
+        +ResumeDao resumeDao
+        +StoreProfileDao storeProfileDao
+        +insertJob(JobEntity, DatabaseCallback)
+        +getAllJobs(DatabaseCallback)
+        +getJobById(String, DatabaseCallback)
+        +updateJob(JobEntity, DatabaseCallback)
+        +deleteJob(JobEntity, DatabaseCallback)
+        +getJobCount(DatabaseCallback)
+        +insertResume(ResumeEntity, DatabaseCallback)
+        +getAllResumes(DatabaseCallback)
+        +getResumeById(String, DatabaseCallback)
+        +getResumesByJobId(String, DatabaseCallback)
+        +updateResume(ResumeEntity, DatabaseCallback)
+        +deleteResume(ResumeEntity, DatabaseCallback)
+        +getResumeCount(DatabaseCallback)
+        +getResumeCountForJob(String, DatabaseCallback)
+        +getFirstStore(DatabaseCallback)
+        +insertStoreProfile(StoreProfile, DatabaseCallback)
+        +updateStoreProfile(StoreProfile, DatabaseCallback)
+        +shutdown()
+    }
+}
+
+package "Adapters" {
+    class JobPostAdapter {
+        +List<JobEntity> jobList
+        +OnJobDeleteListener deleteListener
+        +onCreateViewHolder(ViewGroup, int)
+        +onBindViewHolder(JobViewHolder, int)
+        +getItemCount()
+        +setOnJobDeleteListener(OnJobDeleteListener)
+    }
+    
+    class RecentResumeAdapter {
+        +List<ResumeEntity> resumeList
+        +OnResumeDeleteListener deleteListener
+        +onCreateViewHolder(ViewGroup, int)
+        +onBindViewHolder(ResumeViewHolder, int)
+        +getItemCount()
+        +setOnResumeDeleteListener(OnResumeDeleteListener)
+    }
+}
+
+package "API Services" {
+    class GPTApiService {
+        +static analyzeResume(String, String, String, GPTCallback)
+        +static createAnalysisPrompt(String, String, String)
+        +static parseGPTResponse(String)
+    }
+    
+    class GPTResponse {
+        +String candidateName
+        +String email
+        +String phone
+        +String address
+        +String city
+        +String state
+        +String zipCode
+        +String currentTitle
+        +int experienceYears
+        +String education
+        +String availability
+        +String availabilityDetails
+        +String transportation
+        +String startDate
+        +String workAuthorization
+        +String emergencyContact
+        +String emergencyPhone
+        +String references
+        +String previousRetailExperience
+        +String languages
+        +String certifications
+        +String skills
+        +int skillScore
+        +int experienceScore
+        +int availabilityScore
+        +int educationScore
+        +int overallScore
+        +String feedback
+        +String recommendations
+        +getters() setters()
+    }
+}
+
+package "Utilities" {
+    class GoogleMapsDistanceCalculator {
+        +static calculateDistance(Context, String, String, DistanceCallback)
+        +static calculateDistanceScore(double)
+        +static getDes(double)
+        +static calculateDistanceFallback(String, String, DistanceCallback)
+        +static zipcodes(String)
+        +static estimatefromzip(String, String)
+    }
+    
+    class EnhancedScoringSystem {
+        +static calculateEnhancedScore(String, ExtractedData, StoreProfile)
+        +static calculateSkillMatchScore(JobRequirements, ExtractedData, ScoringResult)
+        +static calculateExperienceScore(JobRequirements, ExtractedData, ScoringResult)
+        +static calculateAvailabilityScore(JobRequirements, ExtractedData, ScoringResult)
+        +static calculateEducationScore(JobRequirements, ExtractedData, ScoringResult)
+        +static calculateDistanceScore(ExtractedData, StoreProfile, ScoringResult)
+        +static calculateOverallScore(ScoringResult)
+        +static generateRecommendations(JobRequirements, ExtractedData, ScoringResult)
+    }
+    
+    class ResumeDataExtractor {
+        +static extractDataWithMLKit(Context, String, ExtractedDataCallback)
+        +static extractKeywords(String)
+        +static extractAddress(String)
+        +static extractContactInfo(String)
+        +static extractExperience(String)
+        +static extractEducation(String)
+        +static extractAvailability(String)
+    }
+    
+    class Config {
+        +static getOpenAIApiKey()
+        +static getGoogleMapsApiKey()
+        +static loadEnvironmentVariables()
+    }
+}
+
+package "Interfaces" {
+    interface DatabaseCallback<T> {
+        +onResult(T)
+    }
+    
+    interface GPTCallback {
+        +onSuccess(GPTResponse)
+        +onError(String)
+    }
+    
+    interface DistanceCallback {
+        +distancecalulate(double, String, String)
+        +onError(String)
+    }
+    
+    interface OnJobDeleteListener {
+        +onJobDelete(JobEntity, int)
+    }
+    
+    interface OnResumeDeleteListener {
+        +onResumeDelete(ResumeEntity, int)
+    }
+    
+    interface ExtractedDataCallback {
+        +onExtracted(ExtractedData)
+    }
+}
+
+package "Data Classes" {
+    class ExtractedData {
+        +String name
+        +String email
+        +String phone
+        +String address
+        +String city
+        +String state
+        +String zipCode
+        +String currentTitle
+        +int experienceYears
+        +String education
+        +String availability
+        +String availabilityDetails
+        +String transportation
+        +String expectedSalary
+        +String startDate
+        +String workAuthorization
+        +String emergencyContact
+        +String emergencyPhone
+        +String references
+        +String previousRetailExperience
+        +String languages
+        +String certifications
+        +getters() setters()
+    }
+    
+    class ScoringResult {
+        +int overallScore
+        +int skillMatchScore
+        +int experienceScore
+        +int availabilityScore
+        +int educationScore
+        +int distanceScore
+        +double distanceMiles
+        +String distanceDescription
+        +List<String> matchedSkills
+        +List<String> missingSkills
+        +List<String> recommendations
+        +getters() setters()
+    }
+    
+    class JobRequirements {
+        +String requiredSkills
+        +int minExperienceYears
+        +String requiredEducation
+        +String availabilityRequirements
+        +getters() setters()
+    }
+}
+
+' Relationships
+WelcomeActivity --> MainActivity : navigates to
+MainActivity --> JobListingsFragment : contains
+MainActivity --> CreateJobFragment : contains
+MainActivity --> ResumeListFragment : contains
+
+ScanResumeActivity --> GPTApiService : uses
+ScanResumeActivity --> GoogleMapsDistanceCalculator : uses
+ScanResumeActivity --> ResumeDataExtractor : uses
+ScanResumeActivity --> EnhancedScoringSystem : uses
+ScanResumeActivity --> MatchScoreActivity : navigates to
+
+StoreProfileActivity --> GoogleMapsDistanceCalculator : uses
+JobApplicationsActivity --> ResumeDetailsActivity : navigates to
+
+JobListingsFragment --> JobPostAdapter : uses
+ResumeListFragment --> RecentResumeAdapter : uses
+
+JobPostAdapter --> JobEntity : displays
+RecentResumeAdapter --> ResumeEntity : displays
+
+DataRepository --> AppDatabase : manages
+AppDatabase --> JobDao : contains
+AppDatabase --> ResumeDao : contains
+AppDatabase --> StoreProfileDao : contains
+
+GPTApiService --> GPTResponse : returns
+GoogleMapsDistanceCalculator --> DistanceCallback : calls
+ResumeDataExtractor --> ExtractedData : returns
+EnhancedScoringSystem --> ScoringResult : returns
+
+JobEntity --> ResumeEntity : has many
+StoreProfile --> JobEntity : owns
+StoreProfile --> ResumeEntity : processes
+
+' Interface implementations
+ScanResumeActivity ..|> GPTCallback : implements
+ScanResumeActivity ..|> DistanceCallback : implements
+JobListingsFragment ..|> OnJobDeleteListener : implements
+ResumeListFragment ..|> OnResumeDeleteListener : implements
+DataRepository ..|> DatabaseCallback : uses
+
+@enduml 
