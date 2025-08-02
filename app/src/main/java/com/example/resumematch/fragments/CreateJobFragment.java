@@ -22,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.example.resumematch.R;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
+import com.example.resumematch.activities.MainActivity;
 
 import java.util.UUID;
 
@@ -53,8 +54,8 @@ public class CreateJobFragment extends Fragment {
                 jobTitle = params[0];
                 jobDescription = params[1];
                 
-                // Simulate some processing time
-                Thread.sleep(1000);
+                // Simulate some processing time - increased to 3 seconds
+                Thread.sleep(3000);
                 
                 // Create job entity
                 JobEntity jobEntity = new JobEntity(
@@ -83,25 +84,33 @@ public class CreateJobFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Boolean success) {
-            progressBar.setVisibility(View.GONE);
-            statusText.setVisibility(View.GONE);
-            
-            if (success) {
-                Toast.makeText(requireContext(), "Job created successfully!", Toast.LENGTH_SHORT).show();
-                Snackbar.make(createJobButton, "Job '" + jobTitle + "' has been created!", Snackbar.LENGTH_LONG).show();
+            // Add delay before hiding progress bar and updating UI
+            new android.os.Handler().postDelayed(() -> {
+                progressBar.setVisibility(View.GONE);
+                statusText.setVisibility(View.GONE);
                 
-                // Clear form
-                editTextJobTitle.setText("");
-                editTextJobDescription.setText("");
-                
-                // Navigate back
-                if (getActivity() != null) {
-                    getActivity().onBackPressed();
+                if (success) {
+                    Toast.makeText(requireContext(), "Job created successfully!", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(createJobButton, "Job '" + jobTitle + "' has been created!", Snackbar.LENGTH_LONG).show();
+                    
+                    // Clear form
+                    editTextJobTitle.setText("");
+                    editTextJobDescription.setText("");
+                    
+                    // Refresh MainActivity counts
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).refreshCounts();
+                    }
+                    
+                    // Navigate back
+                    if (getActivity() != null) {
+                        getActivity().onBackPressed();
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Failed to create job", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(createJobButton, "Error creating job", Snackbar.LENGTH_LONG).show();
                 }
-            } else {
-                Toast.makeText(requireContext(), "Failed to create job", Toast.LENGTH_SHORT).show();
-                Snackbar.make(createJobButton, "Error creating job", Snackbar.LENGTH_LONG).show();
-            }
+            }, 3000); // Match the 3-second delay from doInBackground
         }
     }
 

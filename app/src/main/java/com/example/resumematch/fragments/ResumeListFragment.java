@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import android.os.Handler;
 
 import com.example.resumematch.R;
 import com.example.resumematch.adapters.RecentResumeAdapter;
@@ -27,6 +28,7 @@ import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.ResumeEntity;
 import com.example.resumematch.activities.JobSelectionActivity;
 import com.example.resumematch.activities.MatchScoreActivity;
+import com.example.resumematch.activities.MainActivity;
 
 public class ResumeListFragment extends Fragment {
 
@@ -106,17 +108,20 @@ public class ResumeListFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                resumeEntities = resumes != null ? resumes : new ArrayList<>();
-                                Log.d("ResumeListFragment", "Loaded " + resumeEntities.size() + " resumes from database");
-                                
-                                updateResumeAdapter();
-                                updateEmptyState();
-                                progressBar.setVisibility(View.GONE);
-                                
-                                // Show success message
-                                if (resumeEntities.size() > 0) {
-                                    Snackbar.make(requireView(), "Loaded " + resumeEntities.size() + " resumes", Snackbar.LENGTH_SHORT).show();
-                                }
+                                // Add delay before updating UI and hiding progress bar
+                                new Handler().postDelayed(() -> {
+                                    resumeEntities = resumes != null ? resumes : new ArrayList<>();
+                                    Log.d("ResumeListFragment", "Loaded " + resumeEntities.size() + " resumes from database");
+                                    
+                                    updateResumeAdapter();
+                                    updateEmptyState();
+                                    progressBar.setVisibility(View.GONE);
+                                    
+                                    // Show success message
+                                    if (resumeEntities.size() > 0) {
+                                        Snackbar.make(requireView(), "Loaded " + resumeEntities.size() + " resumes", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }, 2000);
                             } catch (Exception e) {
                                 Log.e("ResumeListFragment", "Error updating UI: " + e.getMessage());
                                 e.printStackTrace();
@@ -136,6 +141,12 @@ public class ResumeListFragment extends Fragment {
     private void updateResumeAdapter() {
         try {
             resumeAdapter = new RecentResumeAdapter(resumeEntities);
+            
+            // Set up delete listener
+            resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
+                showIndividualDeleteConfirmationDialog(resume, position);
+            });
+            
             recyclerView.setAdapter(resumeAdapter);
             Log.d("ResumeListFragment", "Updated resume adapter with " + resumeEntities.size() + " resumes");
         } catch (Exception e) {
@@ -183,18 +194,26 @@ public class ResumeListFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                progressBar.setVisibility(View.GONE);
-                                
-                                // Clear local list
-                                resumeEntities.clear();
-                                updateResumeAdapter();
-                                updateEmptyState();
-                                
-                                // Show success messages
-                                Toast.makeText(requireContext(), "All resumes deleted successfully!", Toast.LENGTH_SHORT).show();
-                                Snackbar.make(requireView(), "All resumes have been deleted", Snackbar.LENGTH_LONG).show();
-                                
-                                Log.d("ResumeListFragment", "All resumes deleted successfully");
+                                // Add delay before updating UI and hiding progress bar
+                                new Handler().postDelayed(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    
+                                    // Clear local list
+                                    resumeEntities.clear();
+                                    updateResumeAdapter();
+                                    updateEmptyState();
+                                    
+                                    // Refresh MainActivity counts
+                                    if (getActivity() instanceof MainActivity) {
+                                        ((MainActivity) getActivity()).refreshCounts();
+                                    }
+                                    
+                                    // Show success messages
+                                    Toast.makeText(requireContext(), "All resumes deleted successfully!", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(requireView(), "All resumes have been deleted", Snackbar.LENGTH_LONG).show();
+                                    
+                                    Log.d("ResumeListFragment", "All resumes deleted successfully");
+                                }, 2000);
                             } catch (Exception e) {
                                 Log.e("ResumeListFragment", "Error updating UI after delete: " + e.getMessage());
                                 e.printStackTrace();
@@ -244,6 +263,11 @@ public class ResumeListFragment extends Fragment {
                                 resumeEntities.remove(position);
                                 updateResumeAdapter();
                                 updateEmptyState();
+                                
+                                // Refresh MainActivity counts
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).refreshCounts();
+                                }
                                 
                                 // Show success message
                                 Toast.makeText(requireContext(), "Resume deleted successfully!", Toast.LENGTH_SHORT).show();

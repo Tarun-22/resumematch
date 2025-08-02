@@ -80,6 +80,10 @@ public class EditJobActivity extends AppCompatActivity {
                                     });
                                 }
                             });
+                        } else {
+                            runOnUiThread(() -> {
+                                Toast.makeText(EditJobActivity.this, "Job not found in database", Toast.LENGTH_SHORT).show();
+                            });
                         }
                     }
                 });

@@ -28,6 +28,7 @@ import com.example.resumematch.models.JobEntity;
 import com.example.resumematch.models.JobPost;
 import com.example.resumematch.activities.CreateJobActivity;
 import com.example.resumematch.activities.JobApplicationsActivity;
+import com.example.resumematch.activities.MainActivity;
 
 public class JobListingsFragment extends Fragment {
 
@@ -39,10 +40,6 @@ public class JobListingsFragment extends Fragment {
     private ProgressBar progressBar;
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
-
-    // Add ListView for requirement
-    private android.widget.ListView listViewJobs;
-    private android.widget.ArrayAdapter<String> listViewAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +54,6 @@ public class JobListingsFragment extends Fragment {
         backButton = view.findViewById(R.id.backButton);
         textEmptyState = view.findViewById(R.id.textEmptyState);
         progressBar = view.findViewById(R.id.progressBar);
-        listViewJobs = view.findViewById(R.id.listViewJobs);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         
@@ -65,20 +61,9 @@ public class JobListingsFragment extends Fragment {
         jobAdapter = new JobPostAdapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
-        // Initialize ListView adapter
-        listViewAdapter = new android.widget.ArrayAdapter<>(requireContext(), 
-            android.R.layout.simple_list_item_1, new ArrayList<>());
-        listViewJobs.setAdapter(listViewAdapter);
-
         // Set up delete listener
         jobAdapter.setOnJobDeleteListener((job, position) -> {
             showIndividualDeleteConfirmationDialog(job, position);
-        });
-
-        // Set up ListView item click listener
-        listViewJobs.setOnItemClickListener((parent, view1, position, id) -> {
-            String jobTitle = listViewAdapter.getItem(position);
-            Toast.makeText(requireContext(), "Selected: " + jobTitle, Toast.LENGTH_SHORT).show();
         });
 
         // Load jobs from database
@@ -113,11 +98,13 @@ public class JobListingsFragment extends Fragment {
             public void onResult(List<JobEntity> jobs) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        jobEntities = jobs;
-                        updateJobAdapter();
-                        updateListViewAdapter();
-                        updateEmptyState();
-                        progressBar.setVisibility(View.GONE);
+                        // Add delay before updating UI and hiding progress bar
+                        new android.os.Handler().postDelayed(() -> {
+                            jobEntities = jobs;
+                            updateJobAdapter();
+                            updateEmptyState();
+                            progressBar.setVisibility(View.GONE);
+                        }, 2000);
                     });
                 }
             }
@@ -139,18 +126,13 @@ public class JobListingsFragment extends Fragment {
             jobPosts.add(jobPost);
         }
         jobAdapter = new JobPostAdapter(jobPosts);
+        
+        // Set up delete listener
+        jobAdapter.setOnJobDeleteListener((job, position) -> {
+            showIndividualDeleteConfirmationDialog(job, position);
+        });
+        
         recyclerView.setAdapter(jobAdapter);
-    }
-
-    private void updateListViewAdapter() {
-        // Update ListView with job titles
-        List<String> jobTitles = new ArrayList<>();
-        for (JobEntity job : jobEntities) {
-            jobTitles.add(job.getTitle());
-        }
-        listViewAdapter.clear();
-        listViewAdapter.addAll(jobTitles);
-        listViewAdapter.notifyDataSetChanged();
     }
 
     private void updateEmptyState() {
@@ -192,19 +174,26 @@ public class JobListingsFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                progressBar.setVisibility(View.GONE);
-                                
-                                // Clear local list
-                                jobEntities.clear();
-                                updateJobAdapter();
-                                updateListViewAdapter(); // Also clear ListView
-                                updateEmptyState();
-                                
-                                // Show success messages
-                                Toast.makeText(requireContext(), "All jobs deleted successfully!", Toast.LENGTH_SHORT).show();
-                                Snackbar.make(requireView(), "All jobs have been deleted", Snackbar.LENGTH_LONG).show();
-                                
-                                Log.d("JobListingsFragment", "All jobs deleted successfully");
+                                // Add delay before updating UI and hiding progress bar
+                                new android.os.Handler().postDelayed(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    
+                                    // Clear local list
+                                    jobEntities.clear();
+                                    updateJobAdapter();
+                                    updateEmptyState();
+                                    
+                                    // Refresh MainActivity counts
+                                    if (getActivity() instanceof MainActivity) {
+                                        ((MainActivity) getActivity()).refreshCounts();
+                                    }
+                                    
+                                    // Show success messages
+                                    Toast.makeText(requireContext(), "All jobs deleted successfully!", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(requireView(), "All jobs have been deleted", Snackbar.LENGTH_LONG).show();
+                                    
+                                    Log.d("JobListingsFragment", "All jobs deleted successfully");
+                                }, 2000);
                             } catch (Exception e) {
                                 Log.e("JobListingsFragment", "Error updating UI after delete: " + e.getMessage());
                                 e.printStackTrace();
@@ -253,8 +242,12 @@ public class JobListingsFragment extends Fragment {
                                 // Remove from local list
                                 jobEntities.remove(position);
                                 updateJobAdapter();
-                                updateListViewAdapter(); // Also update ListView
                                 updateEmptyState();
+                                
+                                // Refresh MainActivity counts
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).refreshCounts();
+                                }
                                 
                                 // Show success message
                                 Toast.makeText(requireContext(), "Job deleted successfully!", Toast.LENGTH_SHORT).show();

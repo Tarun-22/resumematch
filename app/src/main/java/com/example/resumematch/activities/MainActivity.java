@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.widget.Toast;
+import android.os.Handler;
 
 import com.example.resumematch.R;
 import com.example.resumematch.database.DataRepository;
@@ -123,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
             public void onResult(Integer jobCount) {
                 runOnUiThread(() -> {
                     btnPostedJobs.setText("Posted Jobs (" + jobCount + " active)");
-                    hideProgressBar();
+                    // Add delay before hiding progress bar
+                    new Handler().postDelayed(() -> hideProgressBar(), 2000);
                 });
             }
         });
@@ -134,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
             public void onResult(Integer resumeCount) {
                 runOnUiThread(() -> {
                     btnRecentResumes.setText("Recent Resumes (" + resumeCount + " scanned)");
-                    hideProgressBar();
+                    // Add delay before hiding progress bar
+                    new Handler().postDelayed(() -> hideProgressBar(), 2000);
                 });
             }
         });
@@ -143,6 +146,11 @@ public class MainActivity extends AppCompatActivity {
     private void hideProgressBar() {
         // Hide progress bar after both counts are loaded
         progressBar.setVisibility(View.GONE);
+    }
+    
+    // Add method to refresh counts
+    public void refreshCounts() {
+        loadCountsFromDatabase();
     }
     
     private void setupNavigationIcons() {
