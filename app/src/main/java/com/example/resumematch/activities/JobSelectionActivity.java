@@ -2,13 +2,9 @@ package com.example.resumematch.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +13,6 @@ import com.example.resumematch.R;
 import com.example.resumematch.adapters.JobSelectionAdapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
-import com.example.resumematch.activities.ScanResumeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +57,7 @@ public class JobSelectionActivity extends AppCompatActivity {
     }
 
     private void loadJobsFromDatabase() {
-        dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+        dataRepository.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
             @Override
             public void onResult(List<JobEntity> jobs) {
                 runOnUiThread(() -> {

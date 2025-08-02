@@ -68,7 +68,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
     private void loadJobsFromDatabase() {
         try {
             Log.d("EmployerHome", "Starting to load jobs from database");
-            dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+            dataRepository.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
                 @Override
                 public void onResult(List<JobEntity> jobs) {
                     Log.d("EmployerHome", "Database callback received, jobs: " + (jobs != null ? jobs.size() : "null"));

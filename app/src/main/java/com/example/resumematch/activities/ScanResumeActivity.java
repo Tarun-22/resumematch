@@ -750,12 +750,12 @@ public class ScanResumeActivity extends AppCompatActivity {
                 @Override
                 public void onResult(Integer resumeCount) {
                     // Update the job's resume count in database
-                    dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
+                    dataRepository.get_job_id(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                         @Override
                         public void onResult(JobEntity jobEntity) {
                             if (jobEntity != null) {
                                 jobEntity.setResumeCount(resumeCount);
-                                dataRepository.updateJob(jobEntity, null);
+                                dataRepository.update_Job(jobEntity, null);
                             }
                         }
                     });

@@ -1,5 +1,6 @@
 package com.example.resumematch.database;
-
+//we used genAI on how to perfectly setup the data repository
+//we created our strucuture, and asked genAI to properly strucuture,
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -14,120 +15,115 @@ import java.util.concurrent.Executors;
 import java.util.ArrayList;
 
 public class DataRepository {
-    private JobDao jobDao;
-    private ResumeDao resumeDao;
-    private StoreProfileDao storeProfileDao;
-    private ExecutorService executorService;
+    private JobDao job_dao;
+    private ResumeDao resume_dao;
+    private StoreProfileDao store_dao;
+    private ExecutorService executor_service;
 
     public DataRepository(Context context) {
         AppDatabase db = AppDatabase.getDatabase(context);
-        jobDao = db.jobDao();
-        resumeDao = db.resumeDao();
-        storeProfileDao = db.storeProfileDao();
-        executorService = Executors.newSingleThreadExecutor();
+        job_dao = db.jobDao();
+        resume_dao = db.resumeDao();
+        store_dao = db.storeProfileDao();
+        executor_service = Executors.newSingleThreadExecutor();
     }
 
-    // Job operations with AsyncTask
     public void insertJob(JobEntity job, DatabaseCallback<Void> callback) {
-        new InsertJobAsyncTask(jobDao, callback).execute(job);
+        new InsertJobAsyncTask(job_dao, callback).execute(job);
     }
 
-    public void getAllJobs(DatabaseCallback<List<JobEntity>> callback) {
-        new GetAllJobsAsyncTask(jobDao, callback).execute();
+    public void get_all_jobs(DatabaseCallback<List<JobEntity>> callback) {
+        new GetAllJobsAsyncTask(job_dao, callback).execute();
     }
 
-    public void getJobById(String jobId, DatabaseCallback<JobEntity> callback) {
-        new GetJobByIdAsyncTask(jobDao, callback).execute(jobId);
+    public void get_job_id(String jobId, DatabaseCallback<JobEntity> callback) {
+        new GetJobByIdAsyncTask(job_dao, callback).execute(jobId);
     }
 
-    public void updateJob(JobEntity job, DatabaseCallback<Void> callback) {
-        new UpdateJobAsyncTask(jobDao, callback).execute(job);
+    public void update_Job(JobEntity job, DatabaseCallback<Void> callback) {
+        new UpdateJobAsyncTask(job_dao, callback).execute(job);
     }
 
-    public void deleteJob(JobEntity job, DatabaseCallback<Void> callback) {
-        new DeleteJobAsyncTask(jobDao, callback).execute(job);
+    public void delete_Job(JobEntity job, DatabaseCallback<Void> callback) {
+        new DeleteJobAsyncTask(job_dao, callback).execute(job);
     }
 
     public void deleteJob(String jobId, DatabaseCallback<Void> callback) {
-        new DeleteJobByIdAsyncTask(jobDao, callback).execute(jobId);
+        new DeleteJobByIdAsyncTask(job_dao, callback).execute(jobId);
     }
 
     public void getJobCount(DatabaseCallback<Integer> callback) {
-        new GetJobCountAsyncTask(jobDao, callback).execute();
+        new GetJobCountAsyncTask(job_dao, callback).execute();
     }
 
     public void deleteAllJobs(DatabaseCallback<Void> callback) {
-        new DeleteAllJobsAsyncTask(jobDao, callback).execute();
+        new DeleteAllJobsAsyncTask(job_dao, callback).execute();
     }
 
-    // Resume operations with AsyncTask
     public void insertResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
-        new InsertResumeAsyncTask(resumeDao, callback).execute(resume);
+        new InsertResumeAsyncTask(resume_dao, callback).execute(resume);
     }
 
     public void getAllResumes(DatabaseCallback<List<ResumeEntity>> callback) {
-        new GetAllResumesAsyncTask(resumeDao, callback).execute();
+        new GetAllResumesAsyncTask(resume_dao, callback).execute();
     }
 
     public void getResumesForJob(String jobId, DatabaseCallback<List<ResumeEntity>> callback) {
-        new GetResumesForJobAsyncTask(resumeDao, callback).execute(jobId);
+        new GetResumesForJobAsyncTask(resume_dao, callback).execute(jobId);
     }
 
     public void getResumeById(String resumeId, DatabaseCallback<ResumeEntity> callback) {
-        new GetResumeByIdAsyncTask(resumeDao, callback).execute(resumeId);
+        new GetResumeByIdAsyncTask(resume_dao, callback).execute(resumeId);
     }
 
     public void updateResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
-        new UpdateResumeAsyncTask(resumeDao, callback).execute(resume);
+        new UpdateResumeAsyncTask(resume_dao, callback).execute(resume);
     }
 
     public void deleteResume(ResumeEntity resume, DatabaseCallback<Void> callback) {
-        new DeleteResumeAsyncTask(resumeDao, callback).execute(resume);
+        new DeleteResumeAsyncTask(resume_dao, callback).execute(resume);
     }
 
     public void deleteResume(String resumeId, DatabaseCallback<Void> callback) {
-        new DeleteResumeByIdAsyncTask(resumeDao, callback).execute(resumeId);
+        new DeleteResumeByIdAsyncTask(resume_dao, callback).execute(resumeId);
     }
 
     public void deleteAllResumes(DatabaseCallback<Void> callback) {
-        new DeleteAllResumesAsyncTask(resumeDao, callback).execute();
+        new DeleteAllResumesAsyncTask(resume_dao, callback).execute();
     }
 
     public void getcount(DatabaseCallback<Integer> callback) {
-        new GetResumeCountAsyncTask(resumeDao, callback).execute();
+        new GetResumeCountAsyncTask(resume_dao, callback).execute();
     }
 
     public void getResumeCountForJob(String jobId, DatabaseCallback<Integer> callback) {
-        new GetResumeCountForJobAsyncTask(resumeDao, callback).execute(jobId);
+        new GetResumeCountForJobAsyncTask(resume_dao, callback).execute(jobId);
     }
 
-    // Store Profile operations with AsyncTask
     public void insertStore(StoreProfile store, DatabaseCallback<Void> callback) {
-        new InsertStoreAsyncTask(storeProfileDao, callback).execute(store);
+        new InsertStoreAsyncTask(store_dao, callback).execute(store);
     }
 
     public void getFirstStore(DatabaseCallback<StoreProfile> callback) {
-        new GetFirstStoreAsyncTask(storeProfileDao, callback).execute();
+        new GetFirstStoreAsyncTask(store_dao, callback).execute();
     }
 
     public void updateStore(StoreProfile store, DatabaseCallback<Void> callback) {
-        new UpdateStoreAsyncTask(storeProfileDao, callback).execute(store);
+        new UpdateStoreAsyncTask(store_dao, callback).execute(store);
     }
 
     public void deleteStore(StoreProfile store, DatabaseCallback<Void> callback) {
-        new DeleteStoreAsyncTask(storeProfileDao, callback).execute(store);
+        new DeleteStoreAsyncTask(store_dao, callback).execute(store);
     }
 
     public void getStoreCount(DatabaseCallback<Integer> callback) {
-        new GetStoreCountAsyncTask(storeProfileDao, callback).execute();
+        new GetStoreCountAsyncTask(store_dao, callback).execute();
     }
 
-    // Callback interface
     public interface DatabaseCallback<T> {
         void onResult(T result);
     }
 
-    // AsyncTask implementations for Jobs
     private static class InsertJobAsyncTask extends AsyncTask<JobEntity, Void, Void> {
         private JobDao jobDao;
         private DatabaseCallback<Void> callback;
@@ -297,7 +293,6 @@ public class DataRepository {
         }
     }
 
-    // AsyncTask implementations for Resumes
     private static class InsertResumeAsyncTask extends AsyncTask<ResumeEntity, Void, Void> {
         private ResumeDao resumeDao;
         private DatabaseCallback<Void> callback;
@@ -500,7 +495,6 @@ public class DataRepository {
         }
     }
 
-    // AsyncTask implementations for Store Profiles
     private static class InsertStoreAsyncTask extends AsyncTask<StoreProfile, Void, Void> {
         private StoreProfileDao storeProfileDao;
         private DatabaseCallback<Void> callback;
@@ -661,6 +655,6 @@ public class DataRepository {
     }
 
     public void shutdown() {
-        executorService.shutdown();
+        executor_service.shutdown();
     }
 } 

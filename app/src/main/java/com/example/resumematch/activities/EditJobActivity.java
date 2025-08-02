@@ -63,14 +63,14 @@ public class EditJobActivity extends AppCompatActivity {
             if (!title.isEmpty()) {
                 Snackbar.make(update, "Updating job...", Snackbar.LENGTH_SHORT).show();
                 
-                dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
+                dataRepository.get_job_id(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                     @Override
                     public void onResult(JobEntity jobEntity) {
                         if (jobEntity != null) {
                             jobEntity.setTitle(title);
                             jobEntity.setDescription(desc);
                             
-                            dataRepository.updateJob(jobEntity, new DataRepository.DatabaseCallback<Void>() {
+                            dataRepository.update_Job(jobEntity, new DataRepository.DatabaseCallback<Void>() {
                                 @Override
                                 public void onResult(Void result) {
                                     runOnUiThread(() -> {
@@ -103,11 +103,11 @@ public class EditJobActivity extends AppCompatActivity {
         builder.setTitle("Delete Job")
                 .setMessage("Are you sure you want to delete this job? This action cannot be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    dataRepository.getJobById(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
+                    dataRepository.get_job_id(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                         @Override
                         public void onResult(JobEntity jobEntity) {
                             if (jobEntity != null) {
-                                dataRepository.deleteJob(jobEntity, new DataRepository.DatabaseCallback<Void>() {
+                                dataRepository.delete_Job(jobEntity, new DataRepository.DatabaseCallback<Void>() {
                                     @Override
                                     public void onResult(Void result) {
                                         runOnUiThread(() -> {

@@ -84,7 +84,7 @@ public class JobListingsFragment extends Fragment {
     private void loadjobs() {
         progressBar.setVisibility(View.VISIBLE);
         
-        dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+        dataRepository.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
             @Override
             public void onResult(List<JobEntity> jobs) {
                 if (getActivity() != null) {
