@@ -1,7 +1,6 @@
 package com.example.resumematch.fragments;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,16 +26,15 @@ import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.JobEntity;
 import com.example.resumematch.models.JobPost;
 import com.example.resumematch.activities.CreateJobActivity;
-import com.example.resumematch.activities.JobApplicationsActivity;
 import com.example.resumematch.activities.MainActivity;
 
 public class JobListingsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private Button buttonCreateJob, buttonDeleteSelected;
-    private ImageView backButton;
+    private Button create_job, delete_button;
+    private ImageView back;
     private JobPostAdapter jobAdapter;
-    private TextView textEmptyState;
+    private TextView empty_state;
     private ProgressBar progressBar;
     private DataRepository dataRepository;
     private List<JobEntity> jobEntities = new ArrayList<>();
@@ -45,43 +43,36 @@ public class JobListingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_job_listings, container, false);
         
-        // Initialize DataRepository
         dataRepository = new DataRepository(requireContext());
 
         recyclerView = view.findViewById(R.id.recyclerJobPosts);
-        buttonCreateJob = view.findViewById(R.id.buttonCreateJob);
-        buttonDeleteSelected = view.findViewById(R.id.buttonDeleteSelected);
-        backButton = view.findViewById(R.id.backButton);
-        textEmptyState = view.findViewById(R.id.textEmptyState);
+        create_job = view.findViewById(R.id.buttonCreateJob);
+        delete_button = view.findViewById(R.id.buttonDeleteSelected);
+        back = view.findViewById(R.id.backButton);
+        empty_state = view.findViewById(R.id.textEmptyState);
         progressBar = view.findViewById(R.id.progressBar);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         
-        // Create adapter with empty list initially
         jobAdapter = new JobPostAdapter(new ArrayList<>());
         recyclerView.setAdapter(jobAdapter);
 
-        // Set up delete listener
         jobAdapter.setOnJobDeleteListener((job, position) -> {
-            showIndividualDeleteConfirmationDialog(job, position);
+            show_delete_confirmation_individual(job, position);
         });
 
-        // Load jobs from database
-        loadJobsFromDatabase();
+        loadjobs();
 
-        buttonCreateJob.setOnClickListener(v -> {
-            // Navigate to job creation
+        create_job.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), CreateJobActivity.class);
             startActivity(intent);
         });
 
-        buttonDeleteSelected.setOnClickListener(v -> {
-            // Show delete confirmation dialog
-            showDeleteConfirmationDialog();
+        delete_button.setOnClickListener(v -> {
+            show_delete_confirmation();
         });
 
-        backButton.setOnClickListener(v -> {
-            // Navigate back to main content
+        back.setOnClickListener(v -> {
             if (getActivity() != null) {
                 getActivity().onBackPressed();
             }
@@ -90,7 +81,7 @@ public class JobListingsFragment extends Fragment {
         return view;
     }
 
-    private void loadJobsFromDatabase() {
+    private void loadjobs() {
         progressBar.setVisibility(View.VISIBLE);
         
         dataRepository.getAllJobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
@@ -98,11 +89,10 @@ public class JobListingsFragment extends Fragment {
             public void onResult(List<JobEntity> jobs) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        // Add delay before updating UI and hiding progress bar
                         new android.os.Handler().postDelayed(() -> {
                             jobEntities = jobs;
-                            updateJobAdapter();
-                            updateEmptyState();
+                            update_job_adapter();
+                            update_emmpty_state();
                             progressBar.setVisibility(View.GONE);
                         }, 2000);
                     });
@@ -111,61 +101,58 @@ public class JobListingsFragment extends Fragment {
         });
     }
 
-    private void updateJobAdapter() {
-        // Convert JobEntity to JobPost for the adapter
+    private void update_job_adapter() {
         List<JobPost> jobPosts = new ArrayList<>();
         for (JobEntity jobEntity : jobEntities) {
             JobPost jobPost = new JobPost(
                 jobEntity.getId(),
                 jobEntity.getTitle(),
                 jobEntity.getDescription(),
-                new ArrayList<>(), // keywords (empty for now)
-                new ArrayList<>()  // resumes (empty for now)
+                new ArrayList<>(),
+                new ArrayList<>()
             );
             jobPost.setResumeCount(jobEntity.getResumeCount());
             jobPosts.add(jobPost);
         }
         jobAdapter = new JobPostAdapter(jobPosts);
         
-        // Set up delete listener
         jobAdapter.setOnJobDeleteListener((job, position) -> {
-            showIndividualDeleteConfirmationDialog(job, position);
+            show_delete_confirmation_individual(job, position);
         });
         
         recyclerView.setAdapter(jobAdapter);
     }
 
-    private void updateEmptyState() {
+    private void update_emmpty_state() {
         if (jobEntities.isEmpty()) {
-            textEmptyState.setVisibility(TextView.VISIBLE);
+            empty_state.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
-            buttonDeleteSelected.setVisibility(View.GONE);
+            delete_button.setVisibility(View.GONE);
         } else {
-            textEmptyState.setVisibility(TextView.GONE);
+            empty_state.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
-            buttonDeleteSelected.setVisibility(View.VISIBLE);
+            delete_button.setVisibility(View.VISIBLE);
         }
     }
 
-    private void showDeleteConfirmationDialog() {
+    private void show_delete_confirmation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Delete Jobs")
                 .setMessage("Are you sure you want to delete all jobs? This action cannot be undone.")
                 .setPositiveButton("Yes, Delete All", (dialog, which) -> {
-                    deleteAllJobs();
+                    delete_all();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    // Do nothing
+
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
 
-    private void deleteAllJobs() {
+    private void delete_all() {
         try {
             progressBar.setVisibility(View.VISIBLE);
             
-            // Show progress message
             Snackbar.make(requireView(), "Deleting jobs...", Snackbar.LENGTH_SHORT).show();
             
             dataRepository.deleteAllJobs(new DataRepository.DatabaseCallback<Void>() {
@@ -174,21 +161,17 @@ public class JobListingsFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                // Add delay before updating UI and hiding progress bar
                                 new android.os.Handler().postDelayed(() -> {
                                     progressBar.setVisibility(View.GONE);
                                     
-                                    // Clear local list
                                     jobEntities.clear();
-                                    updateJobAdapter();
-                                    updateEmptyState();
+                                    update_job_adapter();
+                                    update_emmpty_state();
                                     
-                                    // Refresh MainActivity counts
                                     if (getActivity() instanceof MainActivity) {
                                         ((MainActivity) getActivity()).refreshCounts();
                                     }
                                     
-                                    // Show success messages
                                     Toast.makeText(requireContext(), "All jobs deleted successfully!", Toast.LENGTH_SHORT).show();
                                     Snackbar.make(requireView(), "All jobs have been deleted", Snackbar.LENGTH_LONG).show();
                                     
@@ -210,7 +193,7 @@ public class JobListingsFragment extends Fragment {
         }
     }
 
-    private void showIndividualDeleteConfirmationDialog(JobPost job, int position) {
+    private void show_delete_confirmation_individual(JobPost job, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Delete Job")
                 .setMessage("Are you sure you want to delete this job?")
@@ -218,7 +201,6 @@ public class JobListingsFragment extends Fragment {
                     deleteJob(job.getId(), position);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    // Do nothing
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
@@ -228,7 +210,6 @@ public class JobListingsFragment extends Fragment {
         try {
             progressBar.setVisibility(View.VISIBLE);
             
-            // Show progress message
             Snackbar.make(requireView(), "Deleting job...", Snackbar.LENGTH_SHORT).show();
             
             dataRepository.deleteJob(jobId, new DataRepository.DatabaseCallback<Void>() {
@@ -239,17 +220,14 @@ public class JobListingsFragment extends Fragment {
                             try {
                                 progressBar.setVisibility(View.GONE);
                                 
-                                // Remove from local list
                                 jobEntities.remove(position);
-                                updateJobAdapter();
-                                updateEmptyState();
+                                update_job_adapter();
+                                update_emmpty_state();
                                 
-                                // Refresh MainActivity counts
                                 if (getActivity() instanceof MainActivity) {
                                     ((MainActivity) getActivity()).refreshCounts();
                                 }
                                 
-                                // Show success message
                                 Toast.makeText(requireContext(), "Job deleted successfully!", Toast.LENGTH_SHORT).show();
                                 Snackbar.make(requireView(), "Job has been deleted", Snackbar.LENGTH_LONG).show();
                                 
@@ -273,8 +251,7 @@ public class JobListingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Reload jobs when returning to this fragment
-        loadJobsFromDatabase();
+        loadjobs();
     }
 
     @Override
