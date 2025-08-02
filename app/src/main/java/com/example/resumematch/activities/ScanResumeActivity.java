@@ -469,6 +469,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                     intent.putExtra("resumeId", resumeId);
                     intent.putExtra("matchScore", finalOverallScore);
                     intent.putExtra("resumeText", resumeText);
+                    intent.putExtra("photoPath", photoPath); // Add photo path to intent
 
                     // Add GPT extracted data
                     intent.putExtra("candidateName", gptResponse.getCandidateName());
@@ -562,6 +563,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                             intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
                             intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
                             intent.putExtra("resumeText", resumeText);
+                            intent.putExtra("photoPath", photoPath); // Add photo path to intent
 
                             // Add extracted data
                             intent.putExtra("candidateName", extractedData.getName());
