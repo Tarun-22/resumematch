@@ -17,24 +17,20 @@
         app:title="ResumeMatch"
         app:titleTextColor="#FFFFFF" />
 
+    <!-- Main Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Status Bar Space -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
-
-        <!-- Main Navigation Icons Section -->
+        <!-- Top Navigation Icons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="32dp"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
 
             <!-- Posted Jobs -->
             <LinearLayout
@@ -57,11 +53,12 @@
                     android:id="@+id/tvPostedJobs"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Posted Jobs"
+                    android:text="Posted\nJobs"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:textSize="12sp"
                     android:textColor="#000000"
                     android:layout_marginTop="4dp" />
-
             </LinearLayout>
 
             <!-- Recent Resumes -->
@@ -85,11 +82,12 @@
                     android:id="@+id/tvRecentResumes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Recent Resumes"
+                    android:text="Recent\nResumes"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:textSize="12sp"
                     android:textColor="#000000"
                     android:layout_marginTop="4dp" />
-
             </LinearLayout>
 
             <!-- Create Job -->
@@ -113,11 +111,12 @@
                     android:id="@+id/tvCreateJob"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Create Job"
+                    android:text="Create\nJob"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:textSize="12sp"
                     android:textColor="#000000"
                     android:layout_marginTop="4dp" />
-
             </LinearLayout>
 
             <!-- Scan Resume -->
@@ -141,35 +140,26 @@
                     android:id="@+id/tvScanResume"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Scan Resume"
+                    android:text="Scan\nResume"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:textSize="12sp"
                     android:textColor="#000000"
                     android:layout_marginTop="4dp" />
-
             </LinearLayout>
-
         </LinearLayout>
 
-        <!-- Main Page Sections Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Section Header -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:text="Quick Actions"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="16dp" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Quick Actions"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#000000" />
-
-        </LinearLayout>
-
-        <!-- Progress Bar for Loading -->
+        <!-- Progress Bar -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -178,7 +168,7 @@
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
 
-        <!-- Fragment Container -->
+        <!-- Fragment Container (Initially hidden) -->
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
@@ -186,74 +176,67 @@
             android:layout_weight="1"
             android:visibility="gone" />
 
-        <!-- Activity List Section -->
+        <!-- Action Buttons Section -->
         <LinearLayout
             android:id="@+id/activity_list_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Posted Jobs -->
             <Button
                 android:id="@+id/btnPostedJobs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/activity_button_background"
-                android:padding="16dp"
-                android:gravity="start|center_vertical"
                 android:text="Posted Jobs (3 active)"
-                android:textColor="#000000"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                android:padding="16dp"
+                android:backgroundTint="#1976D2"
                 android:drawableStart="@drawable/ic_posted_jobs_blue"
                 android:drawablePadding="16dp"
-                android:drawableTint="@color/primary_blue" />
+                android:gravity="start|center_vertical" />
 
-            <!-- Recent Resumes -->
             <Button
                 android:id="@+id/btnRecentResumes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/activity_button_background"
-                android:padding="16dp"
-                android:gravity="start|center_vertical"
                 android:text="Recent Resumes (12 scanned)"
-                android:textColor="#000000"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                android:padding="16dp"
+                android:backgroundTint="#1976D2"
                 android:drawableStart="@drawable/ic_recent_resumes_blue"
                 android:drawablePadding="16dp"
-                android:drawableTint="@color/primary_blue" />
+                android:gravity="start|center_vertical" />
 
-            <!-- Create New Job -->
             <Button
                 android:id="@+id/btnCreateJob"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/activity_button_background"
-                android:padding="16dp"
-                android:gravity="start|center_vertical"
                 android:text="Create New Job"
-                android:textColor="#000000"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                android:padding="16dp"
+                android:backgroundTint="#1976D2"
                 android:drawableStart="@drawable/ic_create_job_blue"
                 android:drawablePadding="16dp"
-                android:drawableTint="@color/primary_blue" />
+                android:gravity="start|center_vertical" />
 
-            <!-- Scan Resume -->
             <Button
                 android:id="@+id/btnScanResume"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Scan New Resume"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#FF9800"
-                android:layout_marginStart="8dp" />
-
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:backgroundTint="#1976D2"
+                android:drawableStart="@drawable/ic_camera_blue"
+                android:drawablePadding="16dp"
+                android:gravity="start|center_vertical" />
         </LinearLayout>
-
     </LinearLayout>
-
 </LinearLayout>

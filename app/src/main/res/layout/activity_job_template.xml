@@ -30,7 +30,6 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#000000" />
-
     </LinearLayout>
 
     <!-- Template Buttons -->
@@ -45,15 +44,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/activity_button_background"
             android:padding="16dp"
             android:gravity="start|center_vertical"
             android:text="Cashier"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
+            android:backgroundTint="#1976D2"
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
+            android:drawableTint="#FFFFFF" />
 
         <!-- Sales Associate Template -->
         <Button
@@ -61,15 +60,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/activity_button_background"
             android:padding="16dp"
             android:gravity="start|center_vertical"
             android:text="Sales Associate"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
+            android:backgroundTint="#1976D2"
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
+            android:drawableTint="#FFFFFF" />
 
         <!-- Stock Clerk Template -->
         <Button
@@ -77,15 +76,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/activity_button_background"
             android:padding="16dp"
             android:gravity="start|center_vertical"
             android:text="Stock Clerk"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
+            android:backgroundTint="#1976D2"
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
+            android:drawableTint="#FFFFFF" />
 
         <!-- Manager Template -->
         <Button
@@ -93,31 +92,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/activity_button_background"
             android:padding="16dp"
             android:gravity="start|center_vertical"
             android:text="Store Manager"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
+            android:backgroundTint="#1976D2"
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
+            android:drawableTint="#FFFFFF" />
 
         <!-- Custom Template -->
         <Button
             android:id="@+id/btnCustom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/activity_button_background"
             android:padding="16dp"
             android:gravity="start|center_vertical"
             android:text="Custom Job"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
+            android:backgroundTint="#1976D2"
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawablePadding="16dp"
-            android:drawableTint="@color/primary_blue" />
-
+            android:drawableTint="#FFFFFF" />
     </LinearLayout>
 
     <!-- Info Text -->
@@ -130,5 +128,4 @@
         android:gravity="center"
         android:layout_marginTop="24dp"
         android:padding="16dp" />
-
-</LinearLayout> 
+</LinearLayout>

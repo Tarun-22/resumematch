@@ -65,6 +65,7 @@ public class ScanResumeActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> cameraLauncher;
 
     Uri selectedImageUri;
+    java.io.File currentPhotoFile; // Store the current photo file
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,11 +117,12 @@ public class ScanResumeActivity extends AppCompatActivity {
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        selectedImageUri = result.getData().getParcelableExtra("data");
-                        if (selectedImageUri != null) {
-                            runOCR(selectedImageUri);
-                        }
+                    if (result.getResultCode() == RESULT_OK) {
+                        // Camera saves the full-resolution image to the file we specified
+                        // We need to find the saved file and process it
+                        processCameraResult();
+                    } else {
+                        Toast.makeText(this, "Camera capture cancelled", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -134,9 +136,13 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         // Set up camera functionality
         buttonCamera.setOnClickListener(v -> {
-            // Check for camera permission
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 100);
+            // Check for camera and storage permissions
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                    android.Manifest.permission.CAMERA,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 100);
             } else {
                 openCamera();
             }
@@ -144,11 +150,74 @@ public class ScanResumeActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            cameraLauncher.launch(cameraIntent);
-        } else {
-            Toast.makeText(this, "Camera not available", Toast.LENGTH_SHORT).show();
+        try {
+            // Create a file to store the high-quality image
+            currentPhotoFile = createImageFile();
+            if (currentPhotoFile == null) {
+                Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Get the URI for the file using FileProvider
+            Uri photoURI = FileProvider.getUriForFile(this, 
+                "com.example.resumematch.fileprovider", currentPhotoFile);
+
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            
+            // Request high quality
+            cameraIntent.putExtra("android.intent.extras.CAMERA_FACING", 0); // Back camera
+            cameraIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 0);
+            cameraIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", false);
+            cameraIntent.putExtra("android.intent.extras.CAPTURE_STABLE_IMAGE", true);
+            
+            // Grant permissions for the camera app
+            cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                cameraLauncher.launch(cameraIntent);
+            } else {
+                Toast.makeText(this, "Camera not available", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error opening camera: " + e.getMessage());
+            Toast.makeText(this, "Error opening camera", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private java.io.File createImageFile() {
+        try {
+            // Create an image file name
+            String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            java.io.File storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+            java.io.File image = java.io.File.createTempFile(imageFileName, ".jpg", storageDir);
+            return image;
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error creating image file: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void processCameraResult() {
+        try {
+            if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                // Convert the file to URI
+                selectedImageUri = Uri.fromFile(currentPhotoFile);
+                
+                // Log the file size and dimensions for debugging
+                Log.d("ScanResume", "Photo file size: " + currentPhotoFile.length() + " bytes");
+                Log.d("ScanResume", "Photo file path: " + currentPhotoFile.getAbsolutePath());
+                
+                // Process the high-quality image
+                runOCR(selectedImageUri);
+            } else {
+                Toast.makeText(this, "Error: Photo file not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error processing camera result: " + e.getMessage());
+            Toast.makeText(this, "Error processing camera image", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -156,10 +225,12 @@ public class ScanResumeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 100) {
-            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && 
+                grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+                grantResults[1] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 openCamera();
             } else {
-                Toast.makeText(this, "Camera permission required to scan resumes", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Camera and storage permissions required to scan resumes", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -174,18 +245,32 @@ public class ScanResumeActivity extends AppCompatActivity {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
             }
 
+            // Log image dimensions for debugging
+            Log.d("OCR", "Image dimensions: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+
             InputImage image = InputImage.fromBitmap(bitmap, 0);
             TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
                         String resumeText = visionText.getText();
-                        Log.d("OCR", "Extracted text: " + resumeText.substring(0, Math.min(100, resumeText.length())) + "...");
+                        Log.d("OCR", "Extracted text length: " + resumeText.length());
+                        Log.d("OCR", "Extracted text: " + resumeText.substring(0, Math.min(200, resumeText.length())) + "...");
+                        
+                        if (resumeText.length() < 50) {
+                            // Text is too short, might be poor quality image
+                            Toast.makeText(ScanResumeActivity.this, 
+                                "Warning: Very little text detected. Please ensure the resume is clearly visible and well-lit.", 
+                                Toast.LENGTH_LONG).show();
+                        }
+                        
                         processOCRResult(resumeText);
                     })
                     .addOnFailureListener(e -> {
                         Log.e("OCR", "Error processing image: " + e.getMessage());
-                        Toast.makeText(ScanResumeActivity.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ScanResumeActivity.this, 
+                            "Error processing image. Please try again with better lighting and focus.", 
+                            Toast.LENGTH_LONG).show();
                     });
         } catch (Exception e) {
             Log.e("OCR", "Error loading image: " + e.getMessage());
@@ -233,7 +318,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                 timeoutHandler.postDelayed(timeoutRunnable, 30000);
 
                 // Use GPT API for analysis
-                GPTApiService.analyzeResume(resumeText, jobDescription, storeProfile.getFormattedAddress(),
+                GPTApiService.analyzeResume(resumeText, jobDescription, storeProfile.getFullAddress(),
                     new GPTApiService.GPTCallback() {
                         @Override
                         public void onSuccess(GPTApiService.GPTResponse gptResponse) {
@@ -292,7 +377,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                     if (storeProfile != null && !gptResponse.getAddress().isEmpty()) {
                         // Calculate distance using Google Maps
                         GoogleMapsDistanceCalculator.calculateDistance(ScanResumeActivity.this, 
-                            gptResponse.getAddress(), storeProfile.getFormattedAddress(),
+                            gptResponse.getAddress(), storeProfile.getFullAddress(),
                             new GoogleMapsDistanceCalculator.DistanceCallback() {
                                 @Override
                                 public void onDistanceCalculated(double distance, String duration, String distanceText) {
@@ -749,6 +834,113 @@ public class ScanResumeActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("ScanResume", "Error converting GPT response to JSON: " + e.getMessage());
             return "{}";
+        }
+    }
+
+    private Uri getImageUriFromBitmap(Bitmap bitmap) {
+        try {
+            // Enhance the bitmap for better OCR
+            Bitmap enhancedBitmap = enhanceBitmapForOCR(bitmap);
+            
+            // Create a temporary file to save the bitmap
+            java.io.File file = new java.io.File(getCacheDir(), "temp_image.jpg");
+            java.io.OutputStream outputStream = new java.io.FileOutputStream(file);
+            
+            // Save with maximum quality
+            enhancedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.close();
+            
+            // Recycle the enhanced bitmap to free memory
+            if (enhancedBitmap != bitmap) {
+                enhancedBitmap.recycle();
+            }
+            
+            return Uri.fromFile(file);
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error getting image URI from bitmap: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    private Bitmap enhanceBitmapForOCR(Bitmap originalBitmap) {
+        try {
+            // Get original dimensions
+            int originalWidth = originalBitmap.getWidth();
+            int originalHeight = originalBitmap.getHeight();
+            
+            // If image is too small, scale it up for better OCR
+            int minWidth = 1200;
+            int minHeight = 1600;
+            
+            if (originalWidth < minWidth || originalHeight < minHeight) {
+                // Calculate scaling factors
+                float scaleX = (float) minWidth / originalWidth;
+                float scaleY = (float) minHeight / originalHeight;
+                float scale = Math.max(scaleX, scaleY);
+                
+                // Create scaled bitmap
+                int newWidth = Math.round(originalWidth * scale);
+                int newHeight = Math.round(originalHeight * scale);
+                
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
+                
+                // Apply contrast enhancement for better text recognition
+                Bitmap enhancedBitmap = enhanceContrast(scaledBitmap);
+                
+                // Recycle scaled bitmap if it's different from original
+                if (scaledBitmap != originalBitmap) {
+                    scaledBitmap.recycle();
+                }
+                
+                return enhancedBitmap;
+            } else {
+                // Image is already large enough, just enhance contrast
+                return enhanceContrast(originalBitmap);
+            }
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error enhancing bitmap: " + e.getMessage());
+            return originalBitmap; // Return original if enhancement fails
+        }
+    }
+    
+    private Bitmap enhanceContrast(Bitmap bitmap) {
+        try {
+            // Create a new bitmap with the same dimensions
+            Bitmap enhancedBitmap = bitmap.copy(bitmap.getConfig(), true);
+            
+            // Get pixel data
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int[] pixels = new int[width * height];
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+            
+            // Apply contrast enhancement
+            for (int i = 0; i < pixels.length; i++) {
+                int pixel = pixels[i];
+                
+                // Extract RGB components
+                int red = (pixel >> 16) & 0xFF;
+                int green = (pixel >> 8) & 0xFF;
+                int blue = pixel & 0xFF;
+                
+                // Convert to grayscale for better text recognition
+                int gray = (int) (0.299 * red + 0.587 * green + 0.114 * blue);
+                
+                // Apply contrast enhancement
+                gray = (int) Math.max(0, Math.min(255, (gray - 128) * 1.5 + 128));
+                
+                // Convert back to RGB
+                int enhancedPixel = (gray << 16) | (gray << 8) | gray;
+                pixels[i] = enhancedPixel;
+            }
+            
+            // Set the enhanced pixels back to the bitmap
+            enhancedBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+            
+            return enhancedBitmap;
+        } catch (Exception e) {
+            Log.e("ScanResume", "Error enhancing contrast: " + e.getMessage());
+            return bitmap; // Return original if enhancement fails
         }
     }
 }
