@@ -1,13 +1,9 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
@@ -20,10 +16,10 @@ import java.util.UUID;
 
 public class StoreProfileActivity extends AppCompatActivity {
     
-    private EditText editTextStoreName, editTextStoreAddress, editTextStoreCity,
-                     editTextStoreState, editTextStoreZipCode, editTextStorePhone, 
-                     editTextStoreEmail, editTextStoreDescription;
-    private Button buttonSave, buttonCancel;
+    private EditText EditTextStoreName, EditTextStoreAddress, EditTextStoreCity,
+            EditTextStoreState, EditTextStoreZipCode, EditTextStorePhone,
+            EditTextStoreEmail, EditTextStoreDescription;
+    private Button ButtonSave, ButtonCancel;
     private DataRepository dataRepository;
 
     @Override
@@ -33,21 +29,21 @@ public class StoreProfileActivity extends AppCompatActivity {
         
         dataRepository = new DataRepository(this);
         
-        editTextStoreName = findViewById(R.id.editTextStoreName);
-        editTextStoreAddress = findViewById(R.id.editTextStoreAddress);
-        editTextStoreCity = findViewById(R.id.editTextStoreCity);
-        editTextStoreState = findViewById(R.id.editTextStoreState);
-        editTextStoreZipCode = findViewById(R.id.editTextStoreZipCode);
-        editTextStorePhone = findViewById(R.id.editTextStorePhone);
-        editTextStoreEmail = findViewById(R.id.editTextStoreEmail);
-        editTextStoreDescription = findViewById(R.id.editTextStoreDescription);
-        buttonSave = findViewById(R.id.buttonSave);
-        buttonCancel = findViewById(R.id.buttonCancel);
+        EditTextStoreName = findViewById(R.id.editTextStoreName);
+        EditTextStoreAddress = findViewById(R.id.editTextStoreAddress);
+        EditTextStoreCity = findViewById(R.id.editTextStoreCity);
+        EditTextStoreState = findViewById(R.id.editTextStoreState);
+        EditTextStoreZipCode = findViewById(R.id.editTextStoreZipCode);
+        EditTextStorePhone = findViewById(R.id.editTextStorePhone);
+        EditTextStoreEmail = findViewById(R.id.editTextStoreEmail);
+        EditTextStoreDescription = findViewById(R.id.editTextStoreDescription);
+        ButtonSave = findViewById(R.id.buttonSave);
+        ButtonCancel = findViewById(R.id.buttonCancel);
         ImageView backButton = findViewById(R.id.backButton);
         
         backButton.setOnClickListener(v -> finish());
-        buttonCancel.setOnClickListener(v -> finish());
-        buttonSave.setOnClickListener(v -> saveStoreProfile());
+        ButtonCancel.setOnClickListener(v -> finish());
+        ButtonSave.setOnClickListener(v -> saveStoreProfile());
         
         loadExistingStoreProfile();
     }
@@ -58,14 +54,14 @@ public class StoreProfileActivity extends AppCompatActivity {
             public void onResult(StoreProfile storeProfile) {
                 if (storeProfile != null) {
                     runOnUiThread(() -> {
-                        editTextStoreName.setText(storeProfile.getStoreName());
-                        editTextStoreAddress.setText(storeProfile.getStoreAddress());
-                        editTextStoreCity.setText(storeProfile.getStoreCity());
-                        editTextStoreState.setText(storeProfile.getStoreState());
-                        editTextStoreZipCode.setText(storeProfile.getStoreZipCode());
-                        editTextStorePhone.setText(storeProfile.getPhone());
-                        editTextStoreEmail.setText(storeProfile.getEmail());
-                        editTextStoreDescription.setText(storeProfile.getDescription());
+                        EditTextStoreName.setText(storeProfile.getStoreName());
+                        EditTextStoreAddress.setText(storeProfile.getStoreAddress());
+                        EditTextStoreCity.setText(storeProfile.getStoreCity());
+                        EditTextStoreState.setText(storeProfile.getStoreState());
+                        EditTextStoreZipCode.setText(storeProfile.getStoreZipCode());
+                        EditTextStorePhone.setText(storeProfile.getPhone());
+                        EditTextStoreEmail.setText(storeProfile.getEmail());
+                        EditTextStoreDescription.setText(storeProfile.getDescription());
                     });
                 }
             }
@@ -73,14 +69,14 @@ public class StoreProfileActivity extends AppCompatActivity {
     }
     
     private void saveStoreProfile() {
-        String storeName = editTextStoreName.getText().toString().trim();
-        String storeAddress = editTextStoreAddress.getText().toString().trim();
-        String storeCity = editTextStoreCity.getText().toString().trim();
-        String storeState = editTextStoreState.getText().toString().trim();
-        String storeZipCode = editTextStoreZipCode.getText().toString().trim();
-        String phone = editTextStorePhone.getText().toString().trim();
-        String email = editTextStoreEmail.getText().toString().trim();
-        String description = editTextStoreDescription.getText().toString().trim();
+        String storeName = EditTextStoreName.getText().toString().trim();
+        String storeAddress = EditTextStoreAddress.getText().toString().trim();
+        String storeCity = EditTextStoreCity.getText().toString().trim();
+        String storeState = EditTextStoreState.getText().toString().trim();
+        String storeZipCode = EditTextStoreZipCode.getText().toString().trim();
+        String phone = EditTextStorePhone.getText().toString().trim();
+        String email = EditTextStoreEmail.getText().toString().trim();
+        String description = EditTextStoreDescription.getText().toString().trim();
         
         if (storeName.isEmpty() || storeAddress.isEmpty() || storeCity.isEmpty() ||
             storeState.isEmpty() || storeZipCode.isEmpty()) {
@@ -94,14 +90,14 @@ public class StoreProfileActivity extends AppCompatActivity {
             phone, email, description
         );
         
-        Snackbar.make(buttonSave, "Saving store profile...", Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(ButtonSave, "Saving store profile...", Snackbar.LENGTH_SHORT).show();
         
         dataRepository.insertStore(storeProfile, new DataRepository.DatabaseCallback<Void>() {
             @Override
             public void onResult(Void result) {
                 runOnUiThread(() -> {
                     Toast.makeText(StoreProfileActivity.this, "Store profile saved successfully!", Toast.LENGTH_SHORT).show();
-                    Snackbar.make(buttonSave, "Store profile updated!", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(ButtonSave, "Store profile updated!", Snackbar.LENGTH_LONG).show();
                     finish();
                 });
             }

@@ -39,7 +39,6 @@ import java.util.UUID;
 
 public class ScanResumeActivity extends AppCompatActivity {
 
-    //here we are creating the varibables
     ImageView backButton;
     Button buttonCamera, buttonUpload;
     TextView textOCRPreview;
@@ -52,17 +51,15 @@ public class ScanResumeActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> cameraLauncher;
 
     Uri selectedImageUri;
-    java.io.File currentPhotoFile; // Store the current photo file
+    java.io.File currentPhotoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_resume);
 
-        // Initialize DataRepository
         dataRepository = new DataRepository(this);
 
-        // Get job details from intent
         Intent intent = getIntent();
         if (intent != null) {
             jobId = intent.getStringExtra("jobId");
@@ -71,26 +68,22 @@ public class ScanResumeActivity extends AppCompatActivity {
             Log.d("ScanResume", "Job ID: " + jobId + ", Title: " + jobTitle);
         }
 
-        // Check if job details are provided
         if (jobId == null || jobTitle == null || jobDescription == null) {
             Toast.makeText(this, "No job selected. Please select a job first.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
-        // here we are declaring the variables for button, camera, and the text for preview
         backButton = findViewById(R.id.backButton);
         buttonCamera = findViewById(R.id.buttonCamera);
         buttonUpload = findViewById(R.id.buttonUpload);
         textOCRPreview = findViewById(R.id.textOCRPreview);
         TextView textJobTitle = findViewById(R.id.textJobTitle);
 
-        // Display the selected job title
         textJobTitle.setText("For: " + jobTitle);
 
         backButton.setOnClickListener(v -> finish());
 
-        //creating the launcher to pick the image
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -100,20 +93,17 @@ public class ScanResumeActivity extends AppCompatActivity {
                     }
                 });
 
-        //creating the launcher for camera
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
-                        // Camera saves the full-resolution image to the file we specified
-                        // We need to find the saved file and process it
+
                         processCameraResult();
                     } else {
                         Toast.makeText(this, "Camera capture cancelled", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-        //setting the onclick listener for this button which helps to upload the image
         buttonUpload.setOnClickListener(v -> {
             Intent intent2 = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent2);
@@ -121,9 +111,8 @@ public class ScanResumeActivity extends AppCompatActivity {
 
         textOCRPreview.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 
-        // Set up camera functionality
+
         buttonCamera.setOnClickListener(v -> {
-            // Check for camera and storage permissions
             if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{
@@ -138,27 +127,23 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private void openCamera() {
         try {
-            // Create a file to store the high-quality image
             currentPhotoFile = createImageFile();
             if (currentPhotoFile == null) {
                 Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Get the URI for the file using FileProvider
-            Uri photoURI = FileProvider.getUriForFile(this, 
+            Uri photoURI = FileProvider.getUriForFile(this,
                 "com.example.resumematch.fileprovider", currentPhotoFile);
 
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             
-            // Request high quality
             cameraIntent.putExtra("android.intent.extras.CAMERA_FACING", 0); // Back camera
             cameraIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 0);
             cameraIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", false);
             cameraIntent.putExtra("android.intent.extras.CAPTURE_STABLE_IMAGE", true);
             
-            // Grant permissions for the camera app
             cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
@@ -175,7 +160,7 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private java.io.File createImageFile() {
         try {
-            // Create an image file name
+
             String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
             String imageFileName = "JPEG_" + timeStamp + "_";
             java.io.File storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
@@ -193,11 +178,10 @@ public class ScanResumeActivity extends AppCompatActivity {
                 // Convert the file to URI
                 selectedImageUri = Uri.fromFile(currentPhotoFile);
                 
-                // Log the file size and dimensions for debugging
+
                 Log.d("ScanResume", "Photo file size: " + currentPhotoFile.length() + " bytes");
                 Log.d("ScanResume", "Photo file path: " + currentPhotoFile.getAbsolutePath());
                 
-                // Process the high-quality image
                 runOCR(selectedImageUri);
             } else {
                 Toast.makeText(this, "Error: Photo file not found", Toast.LENGTH_SHORT).show();
@@ -232,7 +216,6 @@ public class ScanResumeActivity extends AppCompatActivity {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
             }
 
-            // Log image dimensions for debugging
             Log.d("OCR", "Image dimensions: " + bitmap.getWidth() + "x" + bitmap.getHeight());
 
             InputImage image = InputImage.fromBitmap(bitmap, 0);
@@ -271,26 +254,22 @@ public class ScanResumeActivity extends AppCompatActivity {
             return;
         }
 
-        // Show progress dialog
         android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
         progressDialog.setMessage("Analyzing resume with AI...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        // First check if store profile exists
         dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
             @Override
             public void onResult(StoreProfile storeProfile) {
                 if (storeProfile == null) {
                     runOnUiThread(() -> {
                         progressDialog.dismiss();
-                        // Show dialog to redirect to store profile setup
                         showStoreProfileRequiredDialog();
                     });
                     return;
                 }
 
-                // Set a timeout for GPT API call
                 android.os.Handler timeoutHandler = new android.os.Handler();
                 Runnable timeoutRunnable = () -> {
                     runOnUiThread(() -> {
@@ -301,15 +280,13 @@ public class ScanResumeActivity extends AppCompatActivity {
                     });
                 };
 
-                // Set 30 second timeout
                 timeoutHandler.postDelayed(timeoutRunnable, 30000);
 
-                // Use GPT API for analysis
+                // Used GPT API for analysis
                 GPTApiService.analyzeResume(resumeText, jobDescription, storeProfile.getFullAddress(),
                     new GPTApiService.GPTCallback() {
                         @Override
                         public void onSuccess(GPTApiService.GPTResponse gptResponse) {
-                            // Cancel timeout
                             timeoutHandler.removeCallbacks(timeoutRunnable);
 
                             runOnUiThread(() -> {
@@ -320,14 +297,12 @@ public class ScanResumeActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String error) {
-                            // Cancel timeout
                             timeoutHandler.removeCallbacks(timeoutRunnable);
 
                             runOnUiThread(() -> {
                                 progressDialog.dismiss();
                                 Log.e("ScanResume", "GPT API error: " + error);
 
-                                // Show detailed error dialog
                                 android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(ScanResumeActivity.this);
                                 builder.setTitle("AI Analysis Failed")
                                         .setMessage("The AI analysis encountered an error:\n\n" + error + "\n\nWould you like to try the fallback method?")
@@ -348,15 +323,12 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private void processGPTResponse(GPTApiService.GPTResponse gptResponse, String resumeText, android.app.ProgressDialog progressDialog) {
         try {
-            // Create and save resume to database
             String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 
-            // Get store profile for distance calculation
             dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
                 @Override
                 public void onResult(StoreProfile storeProfile) {
-                    // Calculate distance score (25 points max)
                     int distanceScore = 0;
                     double distanceMiles = 0;
                     String distanceDescription = "Distance not available";
