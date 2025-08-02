@@ -93,7 +93,7 @@ public class DataRepository {
         new DeleteAllResumesAsyncTask(resumeDao, callback).execute();
     }
 
-    public void getResumeCount(DatabaseCallback<Integer> callback) {
+    public void getcount(DatabaseCallback<Integer> callback) {
         new GetResumeCountAsyncTask(resumeDao, callback).execute();
     }
 

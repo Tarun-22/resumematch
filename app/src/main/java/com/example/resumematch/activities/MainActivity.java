@@ -24,69 +24,55 @@ import com.example.resumematch.fragments.JobListingsFragment;
 import com.example.resumematch.fragments.ResumeListFragment;
 import com.example.resumematch.fragments.CreateJobFragment;
 import com.example.resumematch.utils.Config;
-import com.example.resumematch.activities.JobSelectionActivity;
-import com.example.resumematch.activities.JobTemplateActivity;
-import com.example.resumematch.activities.StoreProfileActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView ivPostedJobs, ivRecentResumes, ivCreateJob, ivScanResume;
-    private Button btnPostedJobs, btnRecentResumes, btnCreateJob, btnScanResume;
-    private TextView tvPostedJobs, tvRecentResumes, tvCreateJob, tvScanResume;
-    private ProgressBar progressBar;
+    private ImageView jobs, recentresumes, createjob, scanresume;
+    private Button btn1, btn2, btn3, btn4;
+    private TextView jobspost, text_recent, text_create, text_scan;
+    private ProgressBar progress;
     private Toolbar toolbar;
     private DataRepository dataRepository;
     private View fragmentContainer;
-    private View activityListSection;
+    private View activitylistener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        // Initialize Config for API keys
         Config.init(this);
         
-        // Initialize DataRepository
         dataRepository = new DataRepository(this);
         
-        // Initialize toolbar
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         
-        // Initialize navigation icons
-        ivPostedJobs = findViewById(R.id.ivPostedJobs);
-        ivRecentResumes = findViewById(R.id.ivRecentResumes);
-        ivCreateJob = findViewById(R.id.ivCreateJob);
-        ivScanResume = findViewById(R.id.ivScanResume);
+        jobs = findViewById(R.id.ivPostedJobs);
+        recentresumes = findViewById(R.id.ivRecentResumes);
+        createjob = findViewById(R.id.ivCreateJob);
+        scanresume = findViewById(R.id.ivScanResume);
         
-        // Initialize navigation text labels
-        tvPostedJobs = findViewById(R.id.tvPostedJobs);
-        tvRecentResumes = findViewById(R.id.tvRecentResumes);
-        tvCreateJob = findViewById(R.id.tvCreateJob);
-        tvScanResume = findViewById(R.id.tvScanResume);
+        jobspost = findViewById(R.id.tvPostedJobs);
+        text_recent = findViewById(R.id.tvRecentResumes);
+        text_create = findViewById(R.id.tvCreateJob);
+        text_scan = findViewById(R.id.tvScanResume);
         
-        // Initialize main page section buttons
-        btnPostedJobs = findViewById(R.id.btnPostedJobs);
-        btnRecentResumes = findViewById(R.id.btnRecentResumes);
-        btnCreateJob = findViewById(R.id.btnCreateJob);
-        btnScanResume = findViewById(R.id.btnScanResume);
+        btn1 = findViewById(R.id.btnPostedJobs);
+        btn2 = findViewById(R.id.btnRecentResumes);
+        btn3 = findViewById(R.id.btnCreateJob);
+        btn4 = findViewById(R.id.btnScanResume);
         
-        // Initialize progress bar
-        progressBar = findViewById(R.id.progressBar);
+        progress = findViewById(R.id.progressBar);
         
-        // Initialize fragment container and activity list section
         fragmentContainer = findViewById(R.id.fragment_container);
-        activityListSection = findViewById(R.id.activity_list_section);
+        activitylistener = findViewById(R.id.activity_list_section);
         
-        // Set up navigation icon click listeners
-        setupNavigationIcons();
+        setupicons();
         
-        // Set up main page section button click listeners
-        setupMainPageSections();
+        mainpagesetup();
         
-        // Load counts from database
-        loadCountsFromDatabase();
+        countloading();
     }
 
     @Override
@@ -114,90 +100,76 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     
-    private void loadCountsFromDatabase() {
-        // Show progress bar
-        progressBar.setVisibility(View.VISIBLE);
+    private void countloading() {
+        progress.setVisibility(View.VISIBLE);
         
-        // Load job count
         dataRepository.getJobCount(new DataRepository.DatabaseCallback<Integer>() {
             @Override
             public void onResult(Integer jobCount) {
                 runOnUiThread(() -> {
-                    btnPostedJobs.setText("Posted Jobs (" + jobCount + " active)");
+                    btn1.setText("Posted Jobs (" + jobCount + " active)");
                     // Add delay before hiding progress bar
-                    new Handler().postDelayed(() -> hideProgressBar(), 2000);
+                    new Handler().postDelayed(() -> hidebar(), 2000);
                 });
             }
         });
         
-        // Load resume count
-        dataRepository.getResumeCount(new DataRepository.DatabaseCallback<Integer>() {
+        dataRepository.getcount(new DataRepository.DatabaseCallback<Integer>() {
             @Override
             public void onResult(Integer resumeCount) {
                 runOnUiThread(() -> {
-                    btnRecentResumes.setText("Recent Resumes (" + resumeCount + " scanned)");
-                    // Add delay before hiding progress bar
-                    new Handler().postDelayed(() -> hideProgressBar(), 2000);
+                    btn2.setText("Recent Resumes (" + resumeCount + " scanned)");
+                    new Handler().postDelayed(() -> hidebar(), 2000);
                 });
             }
         });
     }
     
-    private void hideProgressBar() {
-        // Hide progress bar after both counts are loaded
-        progressBar.setVisibility(View.GONE);
+    private void hidebar() {
+        progress.setVisibility(View.GONE);
     }
     
-    // Add method to refresh counts
     public void refreshCounts() {
-        loadCountsFromDatabase();
+        countloading();
     }
     
-    private void setupNavigationIcons() {
-        // Posted Jobs
-        ivPostedJobs.setOnClickListener(v -> {
-            highlightNavigationIcon(ivPostedJobs, tvPostedJobs);
+    private void setupicons() {
+        jobs.setOnClickListener(v -> {
+            highlighticons(jobs, jobspost);
             loadFragment(new JobListingsFragment());
         });
         
-        // Recent Resumes
-        ivRecentResumes.setOnClickListener(v -> {
-            highlightNavigationIcon(ivRecentResumes, tvRecentResumes);
+        recentresumes.setOnClickListener(v -> {
+            highlighticons(recentresumes, text_recent);
             loadFragment(new ResumeListFragment());
         });
         
-        // Create Job
-        ivCreateJob.setOnClickListener(v -> {
-            highlightNavigationIcon(ivCreateJob, tvCreateJob);
+        createjob.setOnClickListener(v -> {
+            highlighticons(createjob, text_create);
             loadFragment(new CreateJobFragment());
         });
         
-        // Scan Resume
-        ivScanResume.setOnClickListener(v -> {
-            highlightNavigationIcon(ivScanResume, tvScanResume);
+        scanresume.setOnClickListener(v -> {
+            highlighticons(scanresume, text_scan);
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
     }
     
-    private void setupMainPageSections() {
-        // Posted Jobs
-        btnPostedJobs.setOnClickListener(v -> {
+    private void mainpagesetup() {
+        btn1.setOnClickListener(v -> {
             loadFragment(new JobListingsFragment());
         });
         
-        // Recent Resumes
-        btnRecentResumes.setOnClickListener(v -> {
+        btn2.setOnClickListener(v -> {
             loadFragment(new ResumeListFragment());
         });
         
-        // Create New Job
-        btnCreateJob.setOnClickListener(v -> {
+        btn3.setOnClickListener(v -> {
             loadFragment(new CreateJobFragment());
         });
         
-        // Scan New Resume
-        btnScanResume.setOnClickListener(v -> {
+        btn4.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
@@ -206,9 +178,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadFragment(Fragment fragment) {
         // Show fragment container and hide activity list section
         fragmentContainer.setVisibility(View.VISIBLE);
-        activityListSection.setVisibility(View.GONE);
+        activitylistener.setVisibility(View.GONE);
         
-        // Load the fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
@@ -217,32 +188,27 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void showMainContent() {
-        // Show activity list section and hide fragment container
         fragmentContainer.setVisibility(View.GONE);
-        activityListSection.setVisibility(View.VISIBLE);
+        activitylistener.setVisibility(View.VISIBLE);
     }
     
-    private void highlightNavigationIcon(ImageView selectedIcon, TextView selectedText) {
-        // Reset all icons to default state
+    private void highlighticons(ImageView selectedIcon, TextView selectedText) {
         resetNavigationIcons();
         
-        // Highlight selected icon and text
         selectedIcon.setAlpha(1.0f);
         selectedText.setTextColor(getResources().getColor(R.color.primary_blue));
     }
     
     private void resetNavigationIcons() {
-        // Reset all icons to default state
-        ivPostedJobs.setAlpha(0.6f);
-        ivRecentResumes.setAlpha(0.6f);
-        ivCreateJob.setAlpha(0.6f);
-        ivScanResume.setAlpha(0.6f);
+        jobs.setAlpha(0.6f);
+        recentresumes.setAlpha(0.6f);
+        createjob.setAlpha(0.6f);
+        scanresume.setAlpha(0.6f);
         
-        // Reset all text colors
-        tvPostedJobs.setTextColor(getResources().getColor(android.R.color.black));
-        tvRecentResumes.setTextColor(getResources().getColor(android.R.color.black));
-        tvCreateJob.setTextColor(getResources().getColor(android.R.color.black));
-        tvScanResume.setTextColor(getResources().getColor(android.R.color.black));
+        jobspost.setTextColor(getResources().getColor(android.R.color.black));
+        text_recent.setTextColor(getResources().getColor(android.R.color.black));
+        text_create.setTextColor(getResources().getColor(android.R.color.black));
+        text_scan.setTextColor(getResources().getColor(android.R.color.black));
     }
     
     private void showJobCreationOptions() {
@@ -250,11 +216,9 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("Create New Job")
                 .setItems(new String[]{"Use Template", "Create Custom Job"}, (dialog, which) -> {
                     if (which == 0) {
-                        // Use template
                         Intent intent = new Intent(MainActivity.this, JobTemplateActivity.class);
                         startActivity(intent);
                     } else {
-                        // Create custom job
                         Intent intent = new Intent(MainActivity.this, CreateJobActivity.class);
                         startActivity(intent);
                     }
@@ -291,9 +255,7 @@ public class MainActivity extends AppCompatActivity {
     
     @Override
     public void onBackPressed() {
-        // Check if there are fragments in the back stack
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            // Pop the fragment and show main content
             getSupportFragmentManager().popBackStack();
             showMainContent();
             resetNavigationIcons();
@@ -305,8 +267,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload counts when returning to main activity
-        loadCountsFromDatabase();
+        countloading();
     }
     
     @Override
