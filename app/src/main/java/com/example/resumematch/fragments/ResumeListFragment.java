@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import android.os.Handler;
 
@@ -27,17 +26,16 @@ import com.example.resumematch.adapters.RecentResumeAdapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.ResumeEntity;
 import com.example.resumematch.activities.JobSelectionActivity;
-import com.example.resumematch.activities.MatchScoreActivity;
 import com.example.resumematch.activities.MainActivity;
 
 public class ResumeListFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private ImageView backButton;
-    private TextView titleText;
-    private TextView emptyStateText;
+    private ImageView backbtn;
+    private TextView title;
+    private TextView empty_state;
     private ProgressBar progressBar;
-    private Button buttonScanResume, buttonDeleteAll;
+    private Button scan_button, delete_all;
     private DataRepository dataRepository;
     private List<ResumeEntity> resumeEntities = new ArrayList<>();
     private RecentResumeAdapter resumeAdapter;
@@ -46,57 +44,47 @@ public class ResumeListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_resume_list, container, false);
         
-        // Initialize DataRepository
         dataRepository = new DataRepository(requireContext());
 
-        // Initialize views
-        backButton = view.findViewById(R.id.backButton);
-        titleText = view.findViewById(R.id.titleText);
+        backbtn = view.findViewById(R.id.backButton);
+        title = view.findViewById(R.id.titleText);
         recyclerView = view.findViewById(R.id.recyclerResumes);
-        emptyStateText = view.findViewById(R.id.emptyStateText);
+        empty_state = view.findViewById(R.id.emptyStateText);
         progressBar = view.findViewById(R.id.progressBar);
-        buttonScanResume = view.findViewById(R.id.buttonScanResume);
-        buttonDeleteAll = view.findViewById(R.id.buttonDeleteAll);
+        scan_button = view.findViewById(R.id.buttonScanResume);
+        delete_all = view.findViewById(R.id.buttonDeleteAll);
 
-        // Set title
-        titleText.setText("Recent Resumes");
+        title.setText("Recent Resumes");
 
-        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
         recyclerView.setAdapter(resumeAdapter);
 
-        // Set up delete listener
         resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
-            showIndividualDeleteConfirmationDialog(resume, position);
+            show_delete_individual(resume, position);
         });
 
-        // Set up click listeners
-        backButton.setOnClickListener(v -> {
-            // Navigate back to main content
+        backbtn.setOnClickListener(v -> {
             if (getActivity() != null) {
                 getActivity().onBackPressed();
             }
         });
 
-        buttonScanResume.setOnClickListener(v -> {
-            // Navigate to job selection for scanning
+        scan_button.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), JobSelectionActivity.class);
             startActivity(intent);
         });
 
-        buttonDeleteAll.setOnClickListener(v -> {
-            // Show delete confirmation dialog
-            showDeleteConfirmationDialog();
+        delete_all.setOnClickListener(v -> {
+            show_delete_confirmation();
         });
 
-        // Load resumes from database
-        loadResumesFromDatabase();
+        load_resumes();
         
         return view;
     }
 
-    private void loadResumesFromDatabase() {
+    private void load_resumes() {
         try {
             Log.d("ResumeListFragment", "Starting to load resumes from database");
             progressBar.setVisibility(View.VISIBLE);
@@ -108,16 +96,14 @@ public class ResumeListFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                // Add delay before updating UI and hiding progress bar
                                 new Handler().postDelayed(() -> {
                                     resumeEntities = resumes != null ? resumes : new ArrayList<>();
                                     Log.d("ResumeListFragment", "Loaded " + resumeEntities.size() + " resumes from database");
                                     
-                                    updateResumeAdapter();
-                                    updateEmptyState();
+                                    update_resume_adapter();
+                                    update_empty();
                                     progressBar.setVisibility(View.GONE);
                                     
-                                    // Show success message
                                     if (resumeEntities.size() > 0) {
                                         Snackbar.make(requireView(), "Loaded " + resumeEntities.size() + " resumes", Snackbar.LENGTH_SHORT).show();
                                     }
@@ -138,13 +124,12 @@ public class ResumeListFragment extends Fragment {
         }
     }
 
-    private void updateResumeAdapter() {
+    private void update_resume_adapter() {
         try {
             resumeAdapter = new RecentResumeAdapter(resumeEntities);
             
-            // Set up delete listener
             resumeAdapter.setOnResumeDeleteListener((resume, position) -> {
-                showIndividualDeleteConfirmationDialog(resume, position);
+                show_delete_individual(resume, position);
             });
             
             recyclerView.setAdapter(resumeAdapter);
@@ -155,37 +140,35 @@ public class ResumeListFragment extends Fragment {
         }
     }
 
-    private void updateEmptyState() {
+    private void update_empty() {
         if (resumeEntities.isEmpty()) {
-            emptyStateText.setVisibility(TextView.VISIBLE);
+            empty_state.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
-            buttonDeleteAll.setVisibility(View.GONE);
+            delete_all.setVisibility(View.GONE);
         } else {
-            emptyStateText.setVisibility(TextView.GONE);
+            empty_state.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
-            buttonDeleteAll.setVisibility(View.VISIBLE);
+            delete_all.setVisibility(View.VISIBLE);
         }
     }
 
-    private void showDeleteConfirmationDialog() {
+    private void show_delete_confirmation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Delete All Resumes")
                 .setMessage("Are you sure you want to delete all resumes? This action cannot be undone.")
                 .setPositiveButton("Yes, Delete All", (dialog, which) -> {
-                    deleteAllResumes();
+                    delete_all();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    // Do nothing
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
 
-    private void deleteAllResumes() {
+    private void delete_all() {
         try {
             progressBar.setVisibility(View.VISIBLE);
             
-            // Show progress message
             Snackbar.make(requireView(), "Deleting resumes...", Snackbar.LENGTH_SHORT).show();
             
             dataRepository.deleteAllResumes(new DataRepository.DatabaseCallback<Void>() {
@@ -194,21 +177,17 @@ public class ResumeListFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> {
                             try {
-                                // Add delay before updating UI and hiding progress bar
                                 new Handler().postDelayed(() -> {
                                     progressBar.setVisibility(View.GONE);
                                     
-                                    // Clear local list
                                     resumeEntities.clear();
-                                    updateResumeAdapter();
-                                    updateEmptyState();
+                                    update_resume_adapter();
+                                    update_empty();
                                     
-                                    // Refresh MainActivity counts
                                     if (getActivity() instanceof MainActivity) {
                                         ((MainActivity) getActivity()).refreshCounts();
                                     }
                                     
-                                    // Show success messages
                                     Toast.makeText(requireContext(), "All resumes deleted successfully!", Toast.LENGTH_SHORT).show();
                                     Snackbar.make(requireView(), "All resumes have been deleted", Snackbar.LENGTH_LONG).show();
                                     
@@ -230,7 +209,7 @@ public class ResumeListFragment extends Fragment {
         }
     }
 
-    private void showIndividualDeleteConfirmationDialog(ResumeEntity resume, int position) {
+    private void show_delete_individual(ResumeEntity resume, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Delete Resume")
                 .setMessage("Are you sure you want to delete this resume?")
@@ -238,7 +217,6 @@ public class ResumeListFragment extends Fragment {
                     deleteResume(resume, position);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    // Do nothing
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
@@ -248,7 +226,6 @@ public class ResumeListFragment extends Fragment {
         try {
             progressBar.setVisibility(View.VISIBLE);
             
-            // Show progress message
             Snackbar.make(requireView(), "Deleting resume...", Snackbar.LENGTH_SHORT).show();
             
             dataRepository.deleteResume(resume.getId(), new DataRepository.DatabaseCallback<Void>() {
@@ -259,17 +236,14 @@ public class ResumeListFragment extends Fragment {
                             try {
                                 progressBar.setVisibility(View.GONE);
                                 
-                                // Remove from local list
                                 resumeEntities.remove(position);
-                                updateResumeAdapter();
-                                updateEmptyState();
+                                update_resume_adapter();
+                                update_empty();
                                 
-                                // Refresh MainActivity counts
                                 if (getActivity() instanceof MainActivity) {
                                     ((MainActivity) getActivity()).refreshCounts();
                                 }
                                 
-                                // Show success message
                                 Toast.makeText(requireContext(), "Resume deleted successfully!", Toast.LENGTH_SHORT).show();
                                 Snackbar.make(requireView(), "Resume deleted", Snackbar.LENGTH_LONG).show();
                                 
@@ -293,8 +267,7 @@ public class ResumeListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Reload resumes when returning to this fragment
-        loadResumesFromDatabase();
+        load_resumes();
     }
 
     @Override
