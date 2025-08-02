@@ -17,43 +17,43 @@ import com.example.resumematch.R;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    Button ButtonEnter;
-    ImageView IconImage;
+    Button btnenter;
+    ImageView iconimage;
     TextView appTitle, Apptitle;
-    private static final int Splash_Delay = 3000; // 3secs
+    private static final int splash_delay = 3000; // 3secs
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        ButtonEnter = findViewById(R.id.btnEnterEmployer);
-        IconImage = findViewById(R.id.iconImage);
+        btnenter = findViewById(R.id.btnEnterEmployer);
+        iconimage = findViewById(R.id.iconImage);
         appTitle = findViewById(R.id.appTitle);
         Apptitle = findViewById(R.id.apptitle);
 
-        IconImage.setAlpha(0f);
+        iconimage.setAlpha(0f);
         appTitle.setAlpha(0f);
         Apptitle.setAlpha(0f);
 
-        startSlideUpAnimation();
+        startslideupanimation();
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                navigateToMainActivity();
+                navigatetomainactivity();
             }
-        }, Splash_Delay);
+        }, splash_delay);
 
-        ButtonEnter.setOnClickListener(new View.OnClickListener() {
+        btnenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                navigateToMainActivity();
+                navigatetomainactivity();
             }
         });
     }
 
-    private void startSlideUpAnimation() {
+    private void startslideupanimation() {
         TranslateAnimation slideUp = new TranslateAnimation(
             Animation.RELATIVE_TO_SELF, 0.0f,
             Animation.RELATIVE_TO_SELF, 0.0f,
@@ -66,9 +66,9 @@ public class WelcomeActivity extends AppCompatActivity {
         AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
         fadeIn.setDuration(1000);
         
-        IconImage.startAnimation(slideUp);
-        IconImage.startAnimation(fadeIn);
-        IconImage.setAlpha(1f);
+        iconimage.startAnimation(slideUp);
+        iconimage.startAnimation(fadeIn);
+        iconimage.setAlpha(1f);
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -113,7 +113,7 @@ public class WelcomeActivity extends AppCompatActivity {
         }, 700);
     }
 
-    private void navigateToMainActivity() {
+    private void navigatetomainactivity() {
         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
         startActivity(intent);
         finish();

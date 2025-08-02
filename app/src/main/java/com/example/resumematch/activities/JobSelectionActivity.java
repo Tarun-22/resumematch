@@ -1,9 +1,9 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
+import  android.content.Intent;
+import  android.os.Bundle;
+import  android.widget.ImageView;
+import  android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,72 +20,65 @@ import java.util.List;
 public class JobSelectionActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private ImageView backButton;
-    private TextView titleText;
-    private TextView emptyStateText;
-    private DataRepository dataRepository;
+    private ImageView backBtn;
+    private TextView txt_title;
+    private TextView txt_emptyState;
+    private DataRepository dataRepo;
     private List<JobEntity> jobEntities = new ArrayList<>();
-    private JobSelectionAdapter jobAdapter;
+    private JobSelectionAdapter jobAdapt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_selection);
 
-        // Initialize DataRepository
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
-        // Initialize views
-        backButton = findViewById(R.id.backButton);
-        titleText = findViewById(R.id.titleText);
+        backBtn = findViewById(R.id.backButton);
+        txt_title = findViewById(R.id.titleText);
         recyclerView = findViewById(R.id.recyclerJobs);
-        emptyStateText = findViewById(R.id.emptyStateText);
+        txt_emptyState = findViewById(R.id.emptyStateText);
 
-        // Set title
-        titleText.setText("Select Job for Resume");
+        txt_title.setText("Select Job for Resume");
 
-        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        jobAdapter = new JobSelectionAdapter(new ArrayList<>(), this);
-        recyclerView.setAdapter(jobAdapter);
+        jobAdapt = new JobSelectionAdapter(new ArrayList<>(), this);
+        recyclerView.setAdapter(jobAdapt);
 
-        // Set up click listeners
-        backButton.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> finish());
 
-        // Load jobs from database
-        loadJobsFromDatabase();
+        loadJobsFromdb();
     }
 
-    private void loadJobsFromDatabase() {
-        dataRepository.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+    private void loadJobsFromdb() {
+        dataRepo.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
             @Override
             public void onResult(List<JobEntity> jobs) {
                 runOnUiThread(() -> {
                     jobEntities = jobs;
-                    updateJobAdapter();
-                    updateEmptyState();
+                    updJobAdapt();
+                    updEmptState();
                 });
             }
         });
     }
 
-    private void updateJobAdapter() {
-        jobAdapter = new JobSelectionAdapter(jobEntities, this);
-        recyclerView.setAdapter(jobAdapter);
+    private void updJobAdapt() {
+        jobAdapt = new JobSelectionAdapter(jobEntities, this);
+        recyclerView.setAdapter(jobAdapt);
     }
 
-    private void updateEmptyState() {
+    private void updEmptState() {
         if (jobEntities.isEmpty()) {
-            emptyStateText.setVisibility(TextView.VISIBLE);
+            txt_emptyState.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            emptyStateText.setVisibility(TextView.GONE);
+            txt_emptyState.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
     }
 
     public void onJobSelected(JobEntity job) {
-        // Navigate to ScanResumeActivity with selected job details
         Intent intent = new Intent(JobSelectionActivity.this, ScanResumeActivity.class);
         intent.putExtra("jobId", job.getId());
         intent.putExtra("jobTitle", job.getTitle());
@@ -97,15 +90,14 @@ public class JobSelectionActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload jobs when returning to this activity
-        loadJobsFromDatabase();
+        loadJobsFromdb();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 } 

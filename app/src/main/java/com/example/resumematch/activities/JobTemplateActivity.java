@@ -2,38 +2,33 @@ package com.example.resumematch.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.resumematch.R;
-import com.example.resumematch.activities.CreateJobActivity;
 
 public class JobTemplateActivity extends AppCompatActivity {
 
-    private Button btnCashier, btnSalesAssociate, btnStockClerk, btnManager, btnCustom;
-    private ImageView backButton;
+    private Button btn_Cashier, btn_SalesAssociate, btn_StockClerk, btn_Manager, btn_Custom;
+    private ImageView back_Btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_template);
 
-        // Initialize views
-        backButton = findViewById(R.id.backButton);
-        btnCashier = findViewById(R.id.btnCashier);
-        btnSalesAssociate = findViewById(R.id.btnSalesAssociate);
-        btnStockClerk = findViewById(R.id.btnStockClerk);
-        btnManager = findViewById(R.id.btnManager);
-        btnCustom = findViewById(R.id.btnCustom);
+        back_Btn = findViewById(R.id.backButton);
+        btn_Cashier = findViewById(R.id.btnCashier);
+        btn_SalesAssociate = findViewById(R.id.btnSalesAssociate);
+        btn_StockClerk = findViewById(R.id.btnStockClerk);
+        btn_Manager = findViewById(R.id.btnManager);
+        btn_Custom = findViewById(R.id.btnCustom);
 
-        // Set up click listeners
-        backButton.setOnClickListener(v -> finish());
+        back_Btn.setOnClickListener(v -> finish());
 
-        btnCashier.setOnClickListener(v -> {
+        btn_Cashier.setOnClickListener(v -> {
             Intent intent = new Intent(JobTemplateActivity.this, CreateJobActivity.class);
             intent.putExtra("template", "cashier");
             intent.putExtra("title", "Cashier");
@@ -42,7 +37,7 @@ public class JobTemplateActivity extends AppCompatActivity {
             finish();
         });
 
-        btnSalesAssociate.setOnClickListener(v -> {
+        btn_SalesAssociate.setOnClickListener(v -> {
             Intent intent = new Intent(JobTemplateActivity.this, CreateJobActivity.class);
             intent.putExtra("template", "sales");
             intent.putExtra("title", "Sales Associate");
@@ -51,7 +46,7 @@ public class JobTemplateActivity extends AppCompatActivity {
             finish();
         });
 
-        btnStockClerk.setOnClickListener(v -> {
+        btn_StockClerk.setOnClickListener(v -> {
             Intent intent = new Intent(JobTemplateActivity.this, CreateJobActivity.class);
             intent.putExtra("template", "stock");
             intent.putExtra("title", "Stock Clerk");
@@ -60,7 +55,7 @@ public class JobTemplateActivity extends AppCompatActivity {
             finish();
         });
 
-        btnManager.setOnClickListener(v -> {
+        btn_Manager.setOnClickListener(v -> {
             Intent intent = new Intent(JobTemplateActivity.this, CreateJobActivity.class);
             intent.putExtra("template", "manager");
             intent.putExtra("title", "Store Manager");
@@ -69,7 +64,7 @@ public class JobTemplateActivity extends AppCompatActivity {
             finish();
         });
 
-        btnCustom.setOnClickListener(v -> {
+        btn_Custom.setOnClickListener(v -> {
             Intent intent = new Intent(JobTemplateActivity.this, CreateJobActivity.class);
             startActivity(intent);
             finish();

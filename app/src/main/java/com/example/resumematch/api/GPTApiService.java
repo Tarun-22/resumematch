@@ -4,13 +4,21 @@ package com.example.resumematch.api;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import okhttp3.*;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.MediaType;
+
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import com.example.resumematch.utils.Config;
+//import com.google.android.gms.common.api.Response;
 
 public class GPTApiService {
     
@@ -22,7 +30,7 @@ public class GPTApiService {
             .addInterceptor(chain -> {
                 Request request = chain.request();
                 Log.d("GPTApi", "Making request to: " + request.url());
-                Response response = chain.proceed(request);
+                okhttp3.Response response = chain.proceed(request);
                 Log.d("GPTApi", "Response code: " + response.code());
                 return response;
             })
@@ -232,7 +240,7 @@ public class GPTApiService {
                     
                     callback.onError(errorMessage);
                 }
-                
+
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     Log.d("GPTApi", "Received response: " + response.code());

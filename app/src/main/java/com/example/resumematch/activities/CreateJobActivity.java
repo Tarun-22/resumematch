@@ -17,19 +17,18 @@ import java.util.UUID;
 
 public class CreateJobActivity extends AppCompatActivity {
 
-    private EditText jobInput, jd;
+    private EditText jinp, jd; //jinp = job input
     private Button create, cancel;
     private ImageView back;
-    private DataRepository dataRepository;
+    private DataRepository dataRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_job);
 
-        //connecting with ui elements
-        dataRepository = new DataRepository(this);
-        jobInput = findViewById(R.id.editTextJobTitle);
+        dataRepo = new DataRepository(this);
+        jinp = findViewById(R.id.editTextJobTitle);
         jd = findViewById(R.id.editTextJobDescription);
         create = findViewById(R.id.buttonCreateJob);
         cancel = findViewById(R.id.buttonCancel);
@@ -39,20 +38,19 @@ public class CreateJobActivity extends AppCompatActivity {
         String templateDescription = getIntent().getStringExtra("description");
         
         if (templateTitle != null && templateDescription != null) {
-            jobInput.setText(templateTitle);
+            jinp.setText(templateTitle);
             jd.setText(templateDescription);
         }
 
         back.setImageResource(R.drawable.back_arrow_black);
         back.setOnClickListener(v -> finish());
 
-        //setting all onclick listeners
         cancel.setOnClickListener(v -> {
             showcancel();
         });
 
         create.setOnClickListener(v -> {
-            String title = jobInput.getText().toString().trim();
+            String title = jinp.getText().toString().trim();
             String desc = jd.getText().toString().trim();
 
             if (!title.isEmpty()) {
@@ -68,7 +66,7 @@ public class CreateJobActivity extends AppCompatActivity {
                     System.currentTimeMillis()
                 );
 
-                dataRepository.insertJob(newJob, new DataRepository.DatabaseCallback<Void>() {
+                dataRepo.insertJob(newJob, new DataRepository.DatabaseCallback<Void>() {
                     @Override
                     public void onResult(Void result) {
                         runOnUiThread(() -> {
@@ -82,7 +80,7 @@ public class CreateJobActivity extends AppCompatActivity {
                 });
             } else {
                 Toast.makeText(this, "Job title is required!", Toast.LENGTH_SHORT).show();
-                jobInput.setError("Job title required");
+                jinp.setError("Job title required");
             }
         });
     }
@@ -104,8 +102,8 @@ public class CreateJobActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 }

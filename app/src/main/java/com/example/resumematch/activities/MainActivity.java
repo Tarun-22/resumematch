@@ -27,14 +27,14 @@ import com.example.resumematch.utils.Config;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView jobs, recentresumes, createjob, scanresume;
+    private ImageView jobs, recentresumes, crtjob, scanresume;
     private Button btn1, btn2, btn3, btn4;
-    private TextView jobspost, text_recent, text_create, text_scan;
+    private TextView jobspost, txt_recent, txt_create, txt_scan;
     private ProgressBar progress;
-    private Toolbar toolbar;
-    private DataRepository dataRepository;
-    private View fragmentContainer;
-    private View activitylistener;
+    private Toolbar tool_bar;
+    private DataRepository dataRepo;
+    private View fragCont;
+    private View act_listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,20 +43,20 @@ public class MainActivity extends AppCompatActivity {
         
         Config.init(this);
         
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
         
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        tool_bar = findViewById(R.id.toolbar);
+        setSupportActionBar(tool_bar);
         
         jobs = findViewById(R.id.ivPostedJobs);
         recentresumes = findViewById(R.id.ivRecentResumes);
-        createjob = findViewById(R.id.ivCreateJob);
+        crtjob = findViewById(R.id.ivCreateJob);
         scanresume = findViewById(R.id.ivScanResume);
         
         jobspost = findViewById(R.id.tvPostedJobs);
-        text_recent = findViewById(R.id.tvRecentResumes);
-        text_create = findViewById(R.id.tvCreateJob);
-        text_scan = findViewById(R.id.tvScanResume);
+        txt_recent = findViewById(R.id.tvRecentResumes);
+        txt_create = findViewById(R.id.tvCreateJob);
+        txt_scan = findViewById(R.id.tvScanResume);
         
         btn1 = findViewById(R.id.btnPostedJobs);
         btn2 = findViewById(R.id.btnRecentResumes);
@@ -65,14 +65,14 @@ public class MainActivity extends AppCompatActivity {
         
         progress = findViewById(R.id.progressBar);
         
-        fragmentContainer = findViewById(R.id.fragment_container);
-        activitylistener = findViewById(R.id.activity_list_section);
+        fragCont = findViewById(R.id.fragment_container);
+        act_listener = findViewById(R.id.activity_list_section);
         
         setupicons();
         
         mainpagesetup();
         
-        countloading();
+        cntloading();
     }
 
     @Override
@@ -100,21 +100,20 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     
-    private void countloading() {
+    private void cntloading() {
         progress.setVisibility(View.VISIBLE);
         
-        dataRepository.getJobCount(new DataRepository.DatabaseCallback<Integer>() {
+        dataRepo.getJobCount(new DataRepository.DatabaseCallback<Integer>() {
             @Override
             public void onResult(Integer jobCount) {
                 runOnUiThread(() -> {
                     btn1.setText("Posted Jobs (" + jobCount + " active)");
-                    // Add delay before hiding progress bar
                     new Handler().postDelayed(() -> hidebar(), 2000);
                 });
             }
         });
         
-        dataRepository.getcount(new DataRepository.DatabaseCallback<Integer>() {
+        dataRepo.getcount(new DataRepository.DatabaseCallback<Integer>() {
             @Override
             public void onResult(Integer resumeCount) {
                 runOnUiThread(() -> {
@@ -130,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
     }
     
     public void refreshCounts() {
-        countloading();
+        cntloading();
     }
     
     private void setupicons() {
@@ -140,17 +139,17 @@ public class MainActivity extends AppCompatActivity {
         });
         
         recentresumes.setOnClickListener(v -> {
-            highlighticons(recentresumes, text_recent);
+            highlighticons(recentresumes, txt_recent);
             loadFragment(new ResumeListFragment());
         });
         
-        createjob.setOnClickListener(v -> {
-            highlighticons(createjob, text_create);
+        crtjob.setOnClickListener(v -> {
+            highlighticons(crtjob, txt_create);
             loadFragment(new CreateJobFragment());
         });
         
         scanresume.setOnClickListener(v -> {
-            highlighticons(scanresume, text_scan);
+            highlighticons(scanresume, txt_scan);
             Intent intent = new Intent(MainActivity.this, JobSelectionActivity.class);
             startActivity(intent);
         });
@@ -176,9 +175,8 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void loadFragment(Fragment fragment) {
-        // Show fragment container and hide activity list section
-        fragmentContainer.setVisibility(View.VISIBLE);
-        activitylistener.setVisibility(View.GONE);
+        fragCont.setVisibility(View.VISIBLE);
+        act_listener.setVisibility(View.GONE);
         
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -188,8 +186,8 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void showMainContent() {
-        fragmentContainer.setVisibility(View.GONE);
-        activitylistener.setVisibility(View.VISIBLE);
+        fragCont.setVisibility(View.GONE);
+        act_listener.setVisibility(View.VISIBLE);
     }
     
     private void highlighticons(ImageView selectedIcon, TextView selectedText) {
@@ -202,13 +200,13 @@ public class MainActivity extends AppCompatActivity {
     private void resetNavigationIcons() {
         jobs.setAlpha(0.6f);
         recentresumes.setAlpha(0.6f);
-        createjob.setAlpha(0.6f);
+        crtjob.setAlpha(0.6f);
         scanresume.setAlpha(0.6f);
         
         jobspost.setTextColor(getResources().getColor(android.R.color.black));
-        text_recent.setTextColor(getResources().getColor(android.R.color.black));
-        text_create.setTextColor(getResources().getColor(android.R.color.black));
-        text_scan.setTextColor(getResources().getColor(android.R.color.black));
+        txt_recent.setTextColor(getResources().getColor(android.R.color.black));
+        txt_create.setTextColor(getResources().getColor(android.R.color.black));
+        txt_scan.setTextColor(getResources().getColor(android.R.color.black));
     }
     
     private void showJobCreationOptions() {
@@ -267,14 +265,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        countloading();
+        cntloading();
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 }

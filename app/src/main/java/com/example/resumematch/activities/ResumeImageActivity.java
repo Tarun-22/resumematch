@@ -16,9 +16,9 @@ import java.io.File;
 
 public class ResumeImageActivity extends AppCompatActivity {
 
-    private ImageView imageViewResume;
-    private TextView textViewResumeText;
-    private Button buttonBack, buttonShareImage;
+    private ImageView imgviewresume;
+    private TextView txt_viewresumetxt;
+    private Button btonback, btnshareimg;
     private String photoPath;
 
     @Override
@@ -26,59 +26,53 @@ public class ResumeImageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resume_image);
 
-        // Initialize views
-        imageViewResume = findViewById(R.id.imageViewResume);
-        textViewResumeText = findViewById(R.id.textViewResumeText);
-        buttonBack = findViewById(R.id.buttonBack);
-        buttonShareImage = findViewById(R.id.buttonShareImage);
+        imgviewresume = findViewById(R.id.imageViewResume);
+        txt_viewresumetxt = findViewById(R.id.textViewResumeText);
+        btonback = findViewById(R.id.buttonBack);
+        btnshareimg = findViewById(R.id.buttonShareImage);
 
-        // Set up back button
-        buttonBack.setOnClickListener(v -> finish());
+        btonback.setOnClickListener(v -> finish());
 
-        // Set up share button
-        buttonShareImage.setOnClickListener(v -> shareResumeImage());
+        btnshareimg.setOnClickListener(v -> shareresumeimg());
 
-        // Get data from intent
         Intent intent = getIntent();
         if (intent != null) {
             photoPath = intent.getStringExtra("photoPath");
             String resumeText = intent.getStringExtra("resumeText");
 
-            // Display resume image
             if (photoPath != null && !photoPath.isEmpty()) {
-                displayResumeImage(photoPath);
+                displayresumeimg(photoPath);
             } else {
-                imageViewResume.setImageResource(android.R.drawable.ic_menu_gallery);
+                imgviewresume.setImageResource(android.R.drawable.ic_menu_gallery);
             }
 
-            // Display resume text
             if (resumeText != null && !resumeText.isEmpty()) {
-                textViewResumeText.setText("Extracted Text:\n\n" + resumeText);
+                txt_viewresumetxt.setText("Extracted Text:\n\n" + resumeText);
             } else {
-                textViewResumeText.setText("No text extracted from resume");
+                txt_viewresumetxt.setText("No text extracted from resume");
             }
         }
     }
 
-    private void displayResumeImage(String photoPath) {
+    private void displayresumeimg(String photoPath) {
         try {
             File imageFile = new File(photoPath);
             if (imageFile.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
                 if (bitmap != null) {
-                    imageViewResume.setImageBitmap(bitmap);
+                    imgviewresume.setImageBitmap(bitmap);
                 } else {
-                    imageViewResume.setImageResource(android.R.drawable.ic_menu_gallery);
+                    imgviewresume.setImageResource(android.R.drawable.ic_menu_gallery);
                 }
             } else {
-                imageViewResume.setImageResource(android.R.drawable.ic_menu_gallery);
+                imgviewresume.setImageResource(android.R.drawable.ic_menu_gallery);
             }
         } catch (Exception e) {
-            imageViewResume.setImageResource(android.R.drawable.ic_menu_gallery);
+            imgviewresume.setImageResource(android.R.drawable.ic_menu_gallery);
         }
     }
 
-    private void shareResumeImage() {
+    private void shareresumeimg() {
         if (photoPath == null || photoPath.isEmpty()) {
             return;
         }

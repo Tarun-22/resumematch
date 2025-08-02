@@ -39,13 +39,13 @@ import java.util.UUID;
 
 public class ScanResumeActivity extends AppCompatActivity {
 
-    ImageView backButton;
-    Button buttonCamera, buttonUpload;
-    TextView textOCRPreview;
+    ImageView backbtn;
+    Button btncamera, btnupload;
+    TextView txt_OCRprev;
     String jobId;
-    String jobTitle;
+    String jobtitle;
     String jobDescription;
-    DataRepository dataRepository;
+    DataRepository dataRepo;
 
     ActivityResultLauncher<Intent> imagePickerLauncher;
     ActivityResultLauncher<Intent> cameraLauncher;
@@ -58,31 +58,31 @@ public class ScanResumeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_resume);
 
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
         Intent intent = getIntent();
         if (intent != null) {
             jobId = intent.getStringExtra("jobId");
-            jobTitle = intent.getStringExtra("jobTitle");
+            jobtitle = intent.getStringExtra("jobTitle");
             jobDescription = intent.getStringExtra("jobDescription");
-            Log.d("ScanResume", "Job ID: " + jobId + ", Title: " + jobTitle);
+            Log.d("ScanResume", "Job ID: " + jobId + ", Title: " + jobtitle);
         }
 
-        if (jobId == null || jobTitle == null || jobDescription == null) {
+        if (jobId == null || jobtitle == null || jobDescription == null) {
             Toast.makeText(this, "No job selected. Please select a job first.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
-        backButton = findViewById(R.id.backButton);
-        buttonCamera = findViewById(R.id.buttonCamera);
-        buttonUpload = findViewById(R.id.buttonUpload);
-        textOCRPreview = findViewById(R.id.textOCRPreview);
+        backbtn = findViewById(R.id.backButton);
+        btncamera = findViewById(R.id.buttonCamera);
+        btnupload = findViewById(R.id.buttonUpload);
+        txt_OCRprev = findViewById(R.id.textOCRPreview);
         TextView textJobTitle = findViewById(R.id.textJobTitle);
 
-        textJobTitle.setText("For: " + jobTitle);
+        textJobTitle.setText("For: " + jobtitle);
 
-        backButton.setOnClickListener(v -> finish());
+        backbtn.setOnClickListener(v -> finish());
 
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -104,15 +104,15 @@ public class ScanResumeActivity extends AppCompatActivity {
                     }
                 });
 
-        buttonUpload.setOnClickListener(v -> {
+        btnupload.setOnClickListener(v -> {
             Intent intent2 = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent2);
         });
 
-        textOCRPreview.setMovementMethod(new android.text.method.ScrollingMovementMethod());
+        txt_OCRprev.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 
 
-        buttonCamera.setOnClickListener(v -> {
+        btncamera.setOnClickListener(v -> {
             if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{
@@ -228,8 +228,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                         Log.d("OCR", "Extracted text: " + resumeText.substring(0, Math.min(200, resumeText.length())) + "...");
                         
                         if (resumeText.length() < 50) {
-                            // Text is too short, might be poor quality image
-                            Toast.makeText(ScanResumeActivity.this, 
+                            Toast.makeText(ScanResumeActivity.this,
                                 "Warning: Very little text detected. Please ensure the resume is clearly visible and well-lit.", 
                                 Toast.LENGTH_LONG).show();
                         }
@@ -259,7 +258,7 @@ public class ScanResumeActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
+        dataRepo.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
             @Override
             public void onResult(StoreProfile storeProfile) {
                 if (storeProfile == null) {
@@ -282,7 +281,7 @@ public class ScanResumeActivity extends AppCompatActivity {
 
                 timeoutHandler.postDelayed(timeoutRunnable, 30000);
 
-                // Used GPT API for analysis
+                // GPT API for analysis
                 GPTApiService.analyzeResume(resumeText, jobDescription, storeProfile.getFullAddress(),
                     new GPTApiService.GPTCallback() {
                         @Override
@@ -326,7 +325,7 @@ public class ScanResumeActivity extends AppCompatActivity {
             String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 
-            dataRepository.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
+            dataRepo.getFirstStore(new DataRepository.DatabaseCallback<StoreProfile>() {
                 @Override
                 public void onResult(StoreProfile storeProfile) {
                     int distanceScore = 0;
@@ -334,7 +333,7 @@ public class ScanResumeActivity extends AppCompatActivity {
                     String distanceDescription = "Distance not available";
                     
                     if (storeProfile != null && !gptResponse.getAddress().isEmpty()) {
-                        // Calculate distance using Google Maps
+                        //  Google Maps
                         GoogleMapsDistanceCalculator.calculateDistance(ScanResumeActivity.this, 
                             gptResponse.getAddress(), storeProfile.getFullAddress(),
                             new GoogleMapsDistanceCalculator.DistanceCallback() {
@@ -351,15 +350,13 @@ public class ScanResumeActivity extends AppCompatActivity {
                                           ", Distance Score: " + calculatedDistanceScore + 
                                           ", Final Score: " + finalOverallScore);
                                     
-                                    // Save resume with final score
-                                    saveResumeWithScore(resumeId, currentDate, finalOverallScore, resumeText, 
+                                    saveResumeWithScore(resumeId, currentDate, finalOverallScore, resumeText,
                                         gptResponse, calculatedDistanceScore, distance, calculatedDistanceDescription);
                                 }
                                 
                                 @Override
                                 public void onError(String error) {
                                     Log.e("ScanResume", "Distance calculation error: " + error);
-                                    // Use default distance score
                                     int defaultDistanceScore = 12; // Default 12/25 points
                                     int finalOverallScore = gptResponse.getOverallScore() + defaultDistanceScore;
                                     
@@ -371,7 +368,6 @@ public class ScanResumeActivity extends AppCompatActivity {
                                 }
                             });
                     } else {
-                        // No store profile or address, use default distance score
                         int defaultDistanceScore = 12; // Default 12/25 points
                         int finalOverallScore = gptResponse.getOverallScore() + defaultDistanceScore;
                         
@@ -395,16 +391,14 @@ public class ScanResumeActivity extends AppCompatActivity {
                                    GPTApiService.GPTResponse gptResponse, int distanceScore, double distanceMiles, String distanceDescription) {
         String matchScore = finalOverallScore + "%";
 
-        // Save resume photo
         String photoPath = saveResumePhoto(selectedImageUri, resumeId);
 
-        // Convert GPT response to JSON for storage
         String extractedDataJson = convertGPTResponseToJson(gptResponse);
 
         ResumeEntity newResume = new ResumeEntity(
             resumeId,
             jobId,
-            jobTitle,
+                jobtitle,
             currentDate,
             matchScore,
             resumeText,
@@ -413,24 +407,20 @@ public class ScanResumeActivity extends AppCompatActivity {
         newResume.setPhotoPath(photoPath);
         newResume.setExtractedDataJson(extractedDataJson);
 
-        // Save to database
-        dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+        dataRepo.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
             @Override
             public void onResult(Void result) {
                 runOnUiThread(() -> {
-                    // Update job resume count in database
                     updateJobResumeCount();
 
                     Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
 
-                    // Navigate to match score screen with GPT data
                     Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
                     intent.putExtra("resumeId", resumeId);
                     intent.putExtra("matchScore", finalOverallScore);
                     intent.putExtra("resumeText", resumeText);
-                    intent.putExtra("photoPath", photoPath); // Add photo path to intent
+                    intent.putExtra("photoPath", photoPath);
 
-                    // Add GPT extracted data
                     intent.putExtra("candidateName", gptResponse.getCandidateName());
                     intent.putExtra("candidateEmail", gptResponse.getEmail());
                     intent.putExtra("candidatePhone", gptResponse.getPhone());
@@ -453,18 +443,16 @@ public class ScanResumeActivity extends AppCompatActivity {
                     intent.putExtra("languages", gptResponse.getLanguages());
                     intent.putExtra("certifications", gptResponse.getCertifications());
 
-                    // Add category scores from GPT (out of 75 total)
                     intent.putExtra("skillScore", gptResponse.getSkillScore());
                     intent.putExtra("experienceScore", gptResponse.getExperienceScore());
                     intent.putExtra("availabilityScore", gptResponse.getAvailabilityScore());
                     intent.putExtra("educationScore", gptResponse.getEducationScore());
                     
-                    // Add distance score (out of 25 total)
                     intent.putExtra("distanceScore", distanceScore);
                     intent.putExtra("distanceMiles", distanceMiles);
                     intent.putExtra("distanceDescription", distanceDescription);
 
-                    // Add feedback and recommendations from GPT
+                    // Added feedback and recommendations from GPT
                     intent.putExtra("feedback", gptResponse.getFeedback());
                     intent.putExtra("recommendations", gptResponse.getRecommendations());
 
@@ -479,24 +467,20 @@ public class ScanResumeActivity extends AppCompatActivity {
         // Fallback to old method if GPT fails
         ResumeDataExtractor.extractDataWithMLKit(this, resumeText, extractedData -> {
             try {
-                // Calculate enhanced match score with store profile
                 EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData, storeProfile);
 
-                // Create and save resume to database
                 String resumeId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
                 String currentDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
                 String matchScore = scoringResult.getOverallScore() + "%";
 
-                // Save resume photo
                 String photoPath = saveResumePhoto(selectedImageUri, resumeId);
 
-                // Convert extracted data to JSON for manual editing
                 String extractedDataJson = convertExtractedDataToJson(extractedData);
 
                 ResumeEntity newResume = new ResumeEntity(
                     resumeId,
                     jobId,
-                    jobTitle,
+                        jobtitle,
                     currentDate,
                     matchScore,
                     resumeText,
@@ -505,26 +489,22 @@ public class ScanResumeActivity extends AppCompatActivity {
                 newResume.setPhotoPath(photoPath);
                 newResume.setExtractedDataJson(extractedDataJson);
 
-                // Save to database
-                dataRepository.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
+                dataRepo.insertResume(newResume, new DataRepository.DatabaseCallback<Void>() {
                     @Override
                     public void onResult(Void result) {
                         runOnUiThread(() -> {
-                            // Update job resume count in database
                             updateJobResumeCount();
 
                             Log.d("ScanResume", "Resume saved to database: " + resumeId + " with score: " + matchScore);
 
-                            // Navigate to match score screen with enhanced data
                             Intent intent = new Intent(ScanResumeActivity.this, MatchScoreActivity.class);
                             intent.putExtra("resumeId", resumeId);
                             intent.putExtra("matchScore", scoringResult.getOverallScore());
                             intent.putExtra("matchedKeywords", scoringResult.getMatchedSkills().toArray(new String[0]));
                             intent.putExtra("missingKeywords", scoringResult.getMissingSkills().toArray(new String[0]));
                             intent.putExtra("resumeText", resumeText);
-                            intent.putExtra("photoPath", photoPath); // Add photo path to intent
+                            intent.putExtra("photoPath", photoPath);
 
-                            // Add extracted data
                             intent.putExtra("candidateName", extractedData.getName());
                             intent.putExtra("candidateEmail", extractedData.getEmail());
                             intent.putExtra("candidatePhone", extractedData.getPhone());
@@ -547,7 +527,6 @@ public class ScanResumeActivity extends AppCompatActivity {
                             intent.putExtra("languages", extractedData.getLanguages());
                             intent.putExtra("certifications", extractedData.getCertifications());
 
-                            // Add category scores
                             intent.putExtra("skillScore", scoringResult.getSkillMatchScore());
                             intent.putExtra("experienceScore", scoringResult.getExperienceScore());
                             intent.putExtra("availabilityScore", scoringResult.getAvailabilityScore());
@@ -556,7 +535,6 @@ public class ScanResumeActivity extends AppCompatActivity {
                             intent.putExtra("distanceMiles", scoringResult.getDistanceMiles());
                             intent.putExtra("distanceDescription", scoringResult.getDistanceDescription());
 
-                            // Add recommendations
                             intent.putExtra("recommendations", scoringResult.getRecommendations().toArray(new String[0]));
 
                             startActivity(intent);
@@ -589,10 +567,8 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private String saveResumePhoto(Uri imageUri, String resumeId) {
         try {
-            // Create a unique filename for the resume photo
             String fileName = "resume_" + resumeId + ".jpg";
             
-            // Get the app's internal storage directory
             java.io.File storageDir = new java.io.File(getFilesDir(), "resume_photos");
             if (!storageDir.exists()) {
                 storageDir.mkdirs();
@@ -600,7 +576,6 @@ public class ScanResumeActivity extends AppCompatActivity {
             
             java.io.File photoFile = new java.io.File(storageDir, fileName);
             
-            // Copy the image to internal storage
             java.io.InputStream inputStream = getContentResolver().openInputStream(imageUri);
             java.io.FileOutputStream outputStream = new java.io.FileOutputStream(photoFile);
             
@@ -624,8 +599,6 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private String convertExtractedDataToJson(ResumeDataExtractor.ExtractedData data) {
         try {
-            // Create a simple JSON representation of the extracted data
-            // In a real app, you might use a JSON library like Gson
             StringBuilder json = new StringBuilder();
             json.append("{");
             json.append("\"name\":\"").append(data.getName()).append("\",");
@@ -667,7 +640,6 @@ public class ScanResumeActivity extends AppCompatActivity {
         Log.d("KeywordMatching", "Job keywords: " + jobKeywords);
         Log.d("KeywordMatching", "Resume keywords: " + resumeKeywords);
         
-        // Find matched and missing keywords
         List<String> matchedKeywords = new ArrayList<>();
         List<String> missingKeywords = new ArrayList<>();
         
@@ -682,8 +654,7 @@ public class ScanResumeActivity extends AppCompatActivity {
         Log.d("KeywordMatching", "Matched keywords: " + matchedKeywords);
         Log.d("KeywordMatching", "Missing keywords: " + missingKeywords);
         
-        // Calculate match percentage
-        double matchPercentage = jobKeywords.isEmpty() ? 0 : 
+        double matchPercentage = jobKeywords.isEmpty() ? 0 :
             (double) matchedKeywords.size() / jobKeywords.size() * 100;
         
         Log.d("KeywordMatching", "Match percentage: " + matchPercentage + "%");
@@ -692,7 +663,6 @@ public class ScanResumeActivity extends AppCompatActivity {
     }
 
     private List<String> extractKeywords(String text) {
-        // Common job-related keywords to look for
         List<String> commonKeywords = Arrays.asList(
             "java", "python", "javascript", "react", "angular", "vue", "node.js", "spring",
             "android", "ios", "swift", "kotlin", "sql", "mongodb", "mysql", "postgresql",
@@ -717,17 +687,15 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private void updateJobResumeCount() {
         if (jobId != null) {
-            // Get current resume count for this job
-            dataRepository.getResumeCountForJob(jobId, new DataRepository.DatabaseCallback<Integer>() {
+            dataRepo.getResumeCountForJob(jobId, new DataRepository.DatabaseCallback<Integer>() {
                 @Override
                 public void onResult(Integer resumeCount) {
-                    // Update the job's resume count in database
-                    dataRepository.get_job_id(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
+                    dataRepo.get_job_id(jobId, new DataRepository.DatabaseCallback<JobEntity>() {
                         @Override
                         public void onResult(JobEntity jobEntity) {
                             if (jobEntity != null) {
                                 jobEntity.setResumeCount(resumeCount);
-                                dataRepository.update_Job(jobEntity, null);
+                                dataRepo.update_Job(jobEntity, null);
                             }
                         }
                     });
@@ -755,8 +723,8 @@ public class ScanResumeActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 
@@ -800,18 +768,14 @@ public class ScanResumeActivity extends AppCompatActivity {
 
     private Uri getImageUriFromBitmap(Bitmap bitmap) {
         try {
-            // Enhance the bitmap for better OCR
             Bitmap enhancedBitmap = enhanceBitmapForOCR(bitmap);
             
-            // Create a temporary file to save the bitmap
             java.io.File file = new java.io.File(getCacheDir(), "temp_image.jpg");
             java.io.OutputStream outputStream = new java.io.FileOutputStream(file);
             
-            // Save with maximum quality
             enhancedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
             outputStream.close();
             
-            // Recycle the enhanced bitmap to free memory
             if (enhancedBitmap != bitmap) {
                 enhancedBitmap.recycle();
             }
@@ -825,83 +789,68 @@ public class ScanResumeActivity extends AppCompatActivity {
     
     private Bitmap enhanceBitmapForOCR(Bitmap originalBitmap) {
         try {
-            // Get original dimensions
             int originalWidth = originalBitmap.getWidth();
             int originalHeight = originalBitmap.getHeight();
             
-            // If image is too small, scale it up for better OCR
             int minWidth = 1200;
             int minHeight = 1600;
             
             if (originalWidth < minWidth || originalHeight < minHeight) {
-                // Calculate scaling factors
                 float scaleX = (float) minWidth / originalWidth;
                 float scaleY = (float) minHeight / originalHeight;
                 float scale = Math.max(scaleX, scaleY);
                 
-                // Create scaled bitmap
                 int newWidth = Math.round(originalWidth * scale);
                 int newHeight = Math.round(originalHeight * scale);
                 
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
                 
-                // Apply contrast enhancement for better text recognition
                 Bitmap enhancedBitmap = enhanceContrast(scaledBitmap);
                 
-                // Recycle scaled bitmap if it's different from original
                 if (scaledBitmap != originalBitmap) {
                     scaledBitmap.recycle();
                 }
                 
                 return enhancedBitmap;
             } else {
-                // Image is already large enough, just enhance contrast
                 return enhanceContrast(originalBitmap);
             }
         } catch (Exception e) {
             Log.e("ScanResume", "Error enhancing bitmap: " + e.getMessage());
-            return originalBitmap; // Return original if enhancement fails
+            return originalBitmap;
         }
     }
     
     private Bitmap enhanceContrast(Bitmap bitmap) {
         try {
-            // Create a new bitmap with the same dimensions
             Bitmap enhancedBitmap = bitmap.copy(bitmap.getConfig(), true);
             
-            // Get pixel data
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
             int[] pixels = new int[width * height];
             bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
             
-            // Apply contrast enhancement
             for (int i = 0; i < pixels.length; i++) {
                 int pixel = pixels[i];
                 
-                // Extract RGB components
                 int red = (pixel >> 16) & 0xFF;
                 int green = (pixel >> 8) & 0xFF;
                 int blue = pixel & 0xFF;
                 
-                // Convert to grayscale for better text recognition
                 int gray = (int) (0.299 * red + 0.587 * green + 0.114 * blue);
                 
-                // Apply contrast enhancement
                 gray = (int) Math.max(0, Math.min(255, (gray - 128) * 1.5 + 128));
                 
-                // Convert back to RGB
                 int enhancedPixel = (gray << 16) | (gray << 8) | gray;
                 pixels[i] = enhancedPixel;
             }
             
-            // Set the enhanced pixels back to the bitmap
             enhancedBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
             
             return enhancedBitmap;
         } catch (Exception e) {
             Log.e("ScanResume", "Error enhancing contrast: " + e.getMessage());
-            return bitmap; // Return original if enhancement fails
+            return bitmap;
         }
     }
 }

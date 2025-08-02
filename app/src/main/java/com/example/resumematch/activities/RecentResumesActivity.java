@@ -1,14 +1,9 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,8 +12,6 @@ import com.example.resumematch.R;
 import com.example.resumematch.adapters.RecentResumeAdapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.ResumeEntity;
-import com.example.resumematch.activities.JobSelectionActivity;
-import com.example.resumematch.activities.MatchScoreActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,66 +19,60 @@ import java.util.List;
 public class RecentResumesActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private ImageView backButton;
-    private TextView titleText;
-    private TextView emptyStateText;
-    private DataRepository dataRepository;
+    private ImageView backBtn;
+    private TextView txt_title;
+    private TextView txt_emptyState;
+    private DataRepository dataRepo;
     private List<ResumeEntity> resumeEntities = new ArrayList<>();
-    private RecentResumeAdapter resumeAdapter;
+    private RecentResumeAdapter resumeAdapt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recent_resumes);
 
-        // Initialize DataRepository
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
-        // Initialize views
-        backButton = findViewById(R.id.backButton);
-        titleText = findViewById(R.id.titleText);
+        backBtn = findViewById(R.id.backButton);
+        txt_title = findViewById(R.id.titleText);
         recyclerView = findViewById(R.id.recyclerResumes);
-        emptyStateText = findViewById(R.id.emptyStateText);
+        txt_emptyState = findViewById(R.id.emptyStateText);
 
-        // Set title
-        titleText.setText("Recent Resumes");
+        txt_title.setText("Recent Resumes");
 
-        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
-        recyclerView.setAdapter(resumeAdapter);
+        resumeAdapt = new RecentResumeAdapter(new ArrayList<>());
+        recyclerView.setAdapter(resumeAdapt);
 
-        // Set up click listeners
-        backButton.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> finish());
 
-        // Load resumes from database
-        loadResumesFromDatabase();
+        loadResumesFromdb();
     }
 
-    private void loadResumesFromDatabase() {
-        dataRepository.getAllResumes(new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
+    private void loadResumesFromdb() {
+        dataRepo.getAllResumes(new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
             @Override
             public void onResult(List<ResumeEntity> resumes) {
                 runOnUiThread(() -> {
                     resumeEntities = resumes;
-                    updateResumeAdapter();
-                    updateEmptyState();
+                    updateResumeAdapt();
+                    updEmptyState();
                 });
             }
         });
     }
 
-    private void updateResumeAdapter() {
-        resumeAdapter = new RecentResumeAdapter(resumeEntities);
-        recyclerView.setAdapter(resumeAdapter);
+    private void updateResumeAdapt() {
+        resumeAdapt = new RecentResumeAdapter(resumeEntities);
+        recyclerView.setAdapter(resumeAdapt);
     }
 
-    private void updateEmptyState() {
+    private void updEmptyState() {
         if (resumeEntities.isEmpty()) {
-            emptyStateText.setVisibility(TextView.VISIBLE);
+            txt_emptyState.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            emptyStateText.setVisibility(TextView.GONE);
+            txt_emptyState.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
     }
@@ -93,15 +80,14 @@ public class RecentResumesActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload resumes when returning to this activity
-        loadResumesFromDatabase();
+        loadResumesFromdb();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 } 

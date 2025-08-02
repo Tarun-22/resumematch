@@ -22,10 +22,10 @@ import java.util.List;
 public class EmployerHomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private Button buttonCreateJob;
-    private job_post_adapter jobAdapter;
-    private TextView text_state;
-    private DataRepository dataRepository;
+    private Button btnCreateJob;
+    private job_post_adapter jobAdapt;
+    private TextView txt_state;
+    private DataRepository dataRepo;
     private List<JobEntity> jobEntities = new ArrayList<>();
 
     @Override
@@ -34,33 +34,30 @@ public class EmployerHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_employer_home);
 
         try {
-            dataRepository = new DataRepository(this);
+            dataRepo = new DataRepository(this);
 
             recyclerView = findViewById(R.id.recyclerJobPosts);
-            buttonCreateJob = findViewById(R.id.buttonCreateJob);
-            text_state = findViewById(R.id.textEmptyState);
+            btnCreateJob = findViewById(R.id.buttonCreateJob);
+            txt_state = findViewById(R.id.textEmptyState);
 
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             
-            jobAdapter = new job_post_adapter(new ArrayList<>());
-            recyclerView.setAdapter(jobAdapter);
+            jobAdapt = new job_post_adapter(new ArrayList<>());
+            recyclerView.setAdapter(jobAdapt);
 
-            // backButton.setOnClickListener(v -> finish());
 
-            // Load jobs from database
             loadJobsFromDatabase();
 
-            buttonCreateJob.setOnClickListener(v -> {
+            btnCreateJob.setOnClickListener(v -> {
                 Intent intent = new Intent(EmployerHomeActivity.this, CreateJobActivity.class);
                 startActivity(intent);
             });
         } catch (Exception e) {
             Log.e("EmployerHome", "Error in onCreate: " + e.getMessage());
             e.printStackTrace();
-            // Show empty state if there's an error
-            if (text_state != null) {
-                text_state.setVisibility(TextView.VISIBLE);
-                text_state.setText("Error loading jobs. Please try again.");
+            if (txt_state != null) {
+                txt_state.setVisibility(TextView.VISIBLE);
+                txt_state.setText("Error loading jobs. Please try again.");
             }
         }
     }
@@ -68,7 +65,7 @@ public class EmployerHomeActivity extends AppCompatActivity {
     private void loadJobsFromDatabase() {
         try {
             Log.d("EmployerHome", "Starting to load jobs from database");
-            dataRepository.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
+            dataRepo.get_all_jobs(new DataRepository.DatabaseCallback<List<JobEntity>>() {
                 @Override
                 public void onResult(List<JobEntity> jobs) {
                     Log.d("EmployerHome", "Database callback received, jobs: " + (jobs != null ? jobs.size() : "null"));
@@ -77,7 +74,6 @@ public class EmployerHomeActivity extends AppCompatActivity {
                             jobEntities = jobs != null ? jobs : new ArrayList<>();
                             Log.d("EmployerHome", "Loaded " + jobEntities.size() + " jobs from database");
                             
-                            // If no jobs, add a test job to see if the UI works
                             if (jobEntities.isEmpty()) {
                                 Log.d("EmployerHome", "No jobs found, adding test job");
                                 JobEntity testJob = new JobEntity(
@@ -108,23 +104,22 @@ public class EmployerHomeActivity extends AppCompatActivity {
 
     private void updateJobAdapter() {
         try {
-            // Convert JobEntity to JobPost for the adapter
             List<JobPost> jobPosts = new ArrayList<>();
             for (JobEntity jobEntity : jobEntities) {
                 JobPost jobPost = new JobPost(
                     jobEntity.getId(),
                     jobEntity.getTitle(),
-                    jobEntity.getDescription(), // Pass the description
-                    new ArrayList<>(), // keywords (empty for now)
-                    new ArrayList<>()  // resumes (empty for now)
+                    jobEntity.getDescription(),
+                    new ArrayList<>(),
+                    new ArrayList<>()
                 );
                 jobPost.setResumeCount(jobEntity.getResumeCount());
                 jobPosts.add(jobPost);
             }
             
             Log.d("EmployerHome", "Created " + jobPosts.size() + " JobPost objects");
-            jobAdapter = new job_post_adapter(jobPosts);
-            recyclerView.setAdapter(jobAdapter);
+            jobAdapt = new job_post_adapter(jobPosts);
+            recyclerView.setAdapter(jobAdapt);
         } catch (Exception e) {
             Log.e("EmployerHome", "Error updating job adapter: " + e.getMessage());
             e.printStackTrace();
@@ -133,10 +128,10 @@ public class EmployerHomeActivity extends AppCompatActivity {
 
     private void updateEmptyState() {
         if (jobEntities.isEmpty()) {
-            text_state.setVisibility(TextView.VISIBLE);
+            txt_state.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            text_state.setVisibility(TextView.GONE);
+            txt_state.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
     }
@@ -150,8 +145,8 @@ public class EmployerHomeActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -14,58 +13,50 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.example.resumematch.R;
 import com.example.resumematch.adapters.RecentResumeAdapter;
 import com.example.resumematch.database.DataRepository;
 import com.example.resumematch.models.ResumeEntity;
-import com.example.resumematch.activities.MatchScoreActivity;
 
 public class JobApplicationsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private TextView textEmptyState;
-    private Toolbar toolbar;
-    private DataRepository dataRepository;
+    private TextView txtEmptyState;
+    private Toolbar tool_bar;
+    private DataRepository dataRepo;
     private List<ResumeEntity> resumeEntities = new ArrayList<>();
-    private RecentResumeAdapter resumeAdapter;
+    private RecentResumeAdapter resumeAdapt;
     private String jobId;
-    private String jobTitle;
-    private String currentSortBy = "score"; // "score", "distance", or "date"
+    private String job_title;
+    private String currentSortBy = "score";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_applications);
 
-        // Get job details from intent
         jobId = getIntent().getStringExtra("jobId");
-        jobTitle = getIntent().getStringExtra("jobTitle");
+        job_title = getIntent().getStringExtra("jobTitle");
 
-        // Initialize DataRepository
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
-        // Initialize views
-        toolbar = findViewById(R.id.toolbar);
+        tool_bar = findViewById(R.id.toolbar);
         recyclerView = findViewById(R.id.recyclerApplications);
-        textEmptyState = findViewById(R.id.textEmptyState);
+        txtEmptyState = findViewById(R.id.textEmptyState);
 
-        // Set up toolbar
-        setSupportActionBar(toolbar);
+        setSupportActionBar(tool_bar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Applications for " + jobTitle);
+            getSupportActionBar().setTitle("Applications for " + job_title);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
         }
 
-        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        resumeAdapter = new RecentResumeAdapter(new ArrayList<>());
-        recyclerView.setAdapter(resumeAdapter);
+        resumeAdapt = new RecentResumeAdapter(new ArrayList<>());
+        recyclerView.setAdapter(resumeAdapt);
 
-        // Load resumes for this specific job
         loadResumesForJob();
     }
 
@@ -75,7 +66,7 @@ public class JobApplicationsActivity extends AppCompatActivity {
             return;
         }
 
-        dataRepository.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
+        dataRepo.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
             @Override
             public void onResult(List<ResumeEntity> resumes) {
                 runOnUiThread(() -> {
@@ -93,7 +84,6 @@ public class JobApplicationsActivity extends AppCompatActivity {
 
         switch (currentSortBy) {
             case "score":
-                // Sort by score (highest first)
                 Collections.sort(resumeEntities, (r1, r2) -> {
                     int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
                     int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
@@ -102,9 +92,7 @@ public class JobApplicationsActivity extends AppCompatActivity {
                 break;
                 
             case "distance":
-                // Sort by distance (closest first)
-                // For now, we'll sort by score as a proxy since distance isn't stored separately
-                // In a real app, you'd store distance in the ResumeEntity
+
                 Collections.sort(resumeEntities, (r1, r2) -> {
                     int score1 = Integer.parseInt(r1.getMatchScore().replace("%", ""));
                     int score2 = Integer.parseInt(r2.getMatchScore().replace("%", ""));
@@ -113,7 +101,6 @@ public class JobApplicationsActivity extends AppCompatActivity {
                 break;
                 
             case "date":
-                // Sort by date added (newest first)
                 Collections.sort(resumeEntities, (r1, r2) -> {
                     return Long.compare(r2.getCreatedAt(), r1.getCreatedAt()); // Descending order
                 });
@@ -122,15 +109,15 @@ public class JobApplicationsActivity extends AppCompatActivity {
     }
 
     private void updateResumeAdapter() {
-        resumeAdapter.updateResumeList(resumeEntities);
+        resumeAdapt.updateResumeList(resumeEntities);
     }
 
     private void updateEmptyState() {
         if (resumeEntities.isEmpty()) {
-            textEmptyState.setVisibility(TextView.VISIBLE);
+            txtEmptyState.setVisibility(TextView.VISIBLE);
             recyclerView.setVisibility(RecyclerView.GONE);
         } else {
-            textEmptyState.setVisibility(TextView.GONE);
+            txtEmptyState.setVisibility(TextView.GONE);
             recyclerView.setVisibility(RecyclerView.VISIBLE);
         }
     }
@@ -179,15 +166,14 @@ public class JobApplicationsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload resumes when returning to this activity
         loadResumesForJob();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 } 

@@ -8,8 +8,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,40 +19,35 @@ import java.util.List;
 import com.example.resumematch.R;
 import com.example.resumematch.adapters.ResumeAdapter;
 import com.example.resumematch.database.DataRepository;
-import com.example.resumematch.models.Resume;
 import com.example.resumematch.models.ResumeEntity;
-import com.example.resumematch.activities.JobSelectionActivity;
-import com.example.resumematch.activities.MatchScoreActivity;
 
 public class ResumeListActivity extends AppCompatActivity {
 
-    ImageView backArrow;
-    Button buttonAddResume;
-    TextView textJobTitle;
+    ImageView backarrow;
+    Button btnaddresume;
+    TextView txt_jobtitle;
     RecyclerView recyclerView;
     LinearLayout emptyStateLayout;
-    ResumeAdapter resumeAdapter;
+    ResumeAdapter resumeAdapt;
     ArrayList<ResumeEntity> resumeList;
     String jobId;
     String jobDescription;
-    DataRepository dataRepository;
+    DataRepository dataRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resume_list);
 
-        // Initialize data
         resumeList = new ArrayList<>();
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
-        backArrow = findViewById(R.id.backArrow);
-        buttonAddResume = findViewById(R.id.buttonAddResume);
-        textJobTitle = findViewById(R.id.textJobTitle);
+        backarrow = findViewById(R.id.backArrow);
+        btnaddresume = findViewById(R.id.buttonAddResume);
+        txt_jobtitle = findViewById(R.id.textJobTitle);
         recyclerView = findViewById(R.id.recyclerResumes);
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
 
-        // Get job details from intent
         Intent intent = getIntent();
         if (intent != null) {
             jobId = intent.getStringExtra("jobId");
@@ -62,28 +55,26 @@ public class ResumeListActivity extends AppCompatActivity {
             jobDescription = intent.getStringExtra("jobDescription");
             Log.d("ResumeListActivity", "Received jobId: " + jobId + ", jobTitle: " + jobTitle);
             if (jobTitle != null) {
-                textJobTitle.setText("  " + jobTitle);
+                txt_jobtitle.setText("  " + jobTitle);
             }
         }
 
-        backArrow.setOnClickListener(v -> finish());
+        backarrow.setOnClickListener(v -> finish());
 
-        // Add resume button click listener
-        buttonAddResume.setOnClickListener(v -> {
+        btnaddresume.setOnClickListener(v -> {
             Intent scanIntent = new Intent(ResumeListActivity.this, ScanResumeActivity.class);
             scanIntent.putExtra("jobId", jobId);
-            scanIntent.putExtra("jobTitle", textJobTitle.getText().toString().trim());
+            scanIntent.putExtra("jobTitle", txt_jobtitle.getText().toString().trim());
             scanIntent.putExtra("jobDescription", jobDescription);
             startActivity(scanIntent);
         });
 
-        // Load resumes from database
-        loadResumesForJob();
+        loadresumesforjob();
     }
 
-    private void loadResumesForJob() {
+    private void loadresumesforjob() {
         if (jobId != null) {
-            dataRepository.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
+            dataRepo.getResumesForJob(jobId, new DataRepository.DatabaseCallback<List<ResumeEntity>>() {
                 @Override
                 public void onResult(List<ResumeEntity> resumeEntities) {
                     runOnUiThread(() -> {
@@ -91,16 +82,14 @@ public class ResumeListActivity extends AppCompatActivity {
                         
                         Log.d("ResumeListActivity", "Loaded " + resumeList.size() + " resumes for job: " + jobId);
                         
-                        // Log each resume for debugging
                         for (ResumeEntity entity : resumeList) {
                             Log.d("ResumeListActivity", "Resume: " + entity.getId() + " - " + entity.getMatchScore() + " - " + entity.getDate());
                         }
 
-                        resumeAdapter = new ResumeAdapter(resumeEntities);
+                        resumeAdapt = new ResumeAdapter(resumeEntities);
                         recyclerView.setLayoutManager(new LinearLayoutManager(ResumeListActivity.this));
-                        recyclerView.setAdapter(resumeAdapter);
+                        recyclerView.setAdapter(resumeAdapt);
 
-                        // Show/hide empty state
                         updateEmptyState();
                         
                         Log.d("ResumeListActivity", "RecyclerView setup complete with " + resumeList.size() + " resumes");
@@ -111,9 +100,9 @@ public class ResumeListActivity extends AppCompatActivity {
             resumeList = new ArrayList<>();
             Log.d("ResumeListActivity", "No jobId provided, using empty list");
             
-            resumeAdapter = new ResumeAdapter(resumeList);
+            resumeAdapt = new ResumeAdapter(resumeList);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(resumeAdapter);
+            recyclerView.setAdapter(resumeAdapt);
             updateEmptyState();
         }
     }
@@ -138,15 +127,14 @@ public class ResumeListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload resumes when returning from scan activity
-        loadResumesForJob();
+        loadresumesforjob();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 }

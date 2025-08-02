@@ -1,8 +1,6 @@
 package com.example.resumematch.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -10,86 +8,76 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.resumematch.R;
 import com.example.resumematch.database.DataRepository;
-import com.example.resumematch.models.ResumeEntity;
 
 public class ResumeDetailsActivity extends AppCompatActivity {
 
-    private TextView textResumeId, textResumeDate, textJobTitle, textMatchScore;
-    private TextView textResumeContent, textMatchedKeywords, textMissingKeywords;
-    private Button buttonBack, buttonContact, buttonSchedule;
-    private ImageView backButton;
-    private DataRepository dataRepository;
+    private TextView txt_resumeId, txt_resumeDate, txt_jobtitle, txt_matchscore;
+    private TextView txt_resumeCont, txt_matchedkeywords, txt_missingkeywords;
+    private Button btnBack, btnContact, btnSchedule;
+    private ImageView backBtn;
+    private DataRepository dataRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resume_details);
 
-        // Initialize DataRepository
-        dataRepository = new DataRepository(this);
+        dataRepo = new DataRepository(this);
 
-        // Get resume details from intent
         String resumeId = getIntent().getStringExtra("resumeId");
-        String jobTitle = getIntent().getStringExtra("jobTitle");
-        String resumeDate = getIntent().getStringExtra("resumeDate");
-        String matchScore = getIntent().getStringExtra("matchScore");
-        String resumeContent = getIntent().getStringExtra("resumeContent");
-        String[] matchedKeywords = getIntent().getStringArrayExtra("matchedKeywords");
-        String[] missingKeywords = getIntent().getStringArrayExtra("missingKeywords");
+        String jobtitle = getIntent().getStringExtra("jobtitle");
+        String resumedate = getIntent().getStringExtra("resumedate");
+        String matchscore = getIntent().getStringExtra("matchscore");
+        String resumeCont = getIntent().getStringExtra("resumeCont");
+        String[] matchedkeywords = getIntent().getStringArrayExtra("matchedkeywords");
+        String[] missingkeywords = getIntent().getStringArrayExtra("missingkeywords");
 
-        // Initialize views
-        backButton = findViewById(R.id.backButton);
-        textResumeId = findViewById(R.id.textResumeId);
-        textResumeDate = findViewById(R.id.textResumeDate);
-        textJobTitle = findViewById(R.id.textJobTitle);
-        textMatchScore = findViewById(R.id.textMatchScore);
-        textResumeContent = findViewById(R.id.textResumeContent);
-        textMatchedKeywords = findViewById(R.id.textMatchedKeywords);
-        textMissingKeywords = findViewById(R.id.textMissingKeywords);
-        buttonBack = findViewById(R.id.buttonBack);
-        buttonContact = findViewById(R.id.buttonContact);
-        buttonSchedule = findViewById(R.id.buttonSchedule);
+        backBtn = findViewById(R.id.backButton);
+        txt_resumeId = findViewById(R.id.textResumeId);
+        txt_resumeDate = findViewById(R.id.textResumeDate);
+        txt_jobtitle = findViewById(R.id.textJobTitle);
+        txt_matchscore = findViewById(R.id.textMatchScore);
+        txt_resumeCont = findViewById(R.id.textResumeContent);
+        txt_matchedkeywords = findViewById(R.id.textMatchedKeywords);
+        txt_missingkeywords = findViewById(R.id.textMissingKeywords);
+        btnBack = findViewById(R.id.buttonBack);
+        btnContact = findViewById(R.id.buttonContact);
+        btnSchedule = findViewById(R.id.buttonSchedule);
 
-        // Set up data
-        textResumeId.setText("Resume ID: " + resumeId);
-        textResumeDate.setText("Date: " + resumeDate);
-        textJobTitle.setText("Applied for: " + jobTitle);
-        textMatchScore.setText("Match Score: " + matchScore);
-        textResumeContent.setText("Resume Content:\n\n" + resumeContent);
+        txt_resumeId.setText("Resume ID: " + resumeId);
+        txt_resumeDate.setText("Date: " + resumedate);
+        txt_jobtitle.setText("Applied for: " + jobtitle);
+        txt_matchscore.setText("Match Score: " + matchscore);
+        txt_resumeCont.setText("Resume Content:\n\n" + resumeCont);
 
-        // Set matched keywords
-        if (matchedKeywords != null && matchedKeywords.length > 0) {
+        if (matchedkeywords != null && matchedkeywords.length > 0) {
             StringBuilder matched = new StringBuilder("Matched Keywords:\n");
-            for (String keyword : matchedKeywords) {
+            for (String keyword : matchedkeywords) {
                 matched.append("• ").append(keyword).append("\n");
             }
-            textMatchedKeywords.setText(matched.toString());
+            txt_matchedkeywords.setText(matched.toString());
         } else {
-            textMatchedKeywords.setText("No keywords matched");
+            txt_matchedkeywords.setText("No keywords matched");
         }
 
-        // Set missing keywords
-        if (missingKeywords != null && missingKeywords.length > 0) {
+        if (missingkeywords != null && missingkeywords.length > 0) {
             StringBuilder missing = new StringBuilder("Missing Keywords:\n");
-            for (String keyword : missingKeywords) {
+            for (String keyword : missingkeywords) {
                 missing.append("• ").append(keyword).append("\n");
             }
-            textMissingKeywords.setText(missing.toString());
+            txt_missingkeywords.setText(missing.toString());
         } else {
-            textMissingKeywords.setText("All keywords found!");
+            txt_missingkeywords.setText("All keywords found!");
         }
 
-        // Set up click listeners
-        backButton.setOnClickListener(v -> finish());
-        buttonBack.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> finish());
         
-        buttonContact.setOnClickListener(v -> {
-            // TODO: Implement contact functionality
+        btnContact.setOnClickListener(v -> {
             android.widget.Toast.makeText(this, "Contact feature coming soon!", android.widget.Toast.LENGTH_SHORT).show();
         });
         
-        buttonSchedule.setOnClickListener(v -> {
-            // TODO: Implement interview scheduling
+        btnSchedule.setOnClickListener(v -> {
             android.widget.Toast.makeText(this, "Interview scheduling coming soon!", android.widget.Toast.LENGTH_SHORT).show();
         });
     }
@@ -97,8 +85,8 @@ public class ResumeDetailsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dataRepository != null) {
-            dataRepository.shutdown();
+        if (dataRepo != null) {
+            dataRepo.shutdown();
         }
     }
 } 

@@ -15,11 +15,11 @@ import com.example.resumematch.R;
 
 public class ResumePhotoViewerActivity extends AppCompatActivity {
     
-    private ImageView imageViewResume;
-    private TextView textViewResumeId;
-    private TextView textViewJobTitle;
-    private TextView textViewDate;
-    private TextView textViewMatchScore;
+    private ImageView imgviewresume;
+    private TextView txt_viewresumeId;
+    private TextView txt_viewjobTitle;
+    private TextView txt_viewdate;
+    private TextView txt_viewmatchscore;
     private String photoPath;
 
     @Override
@@ -27,31 +27,27 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resume_photo_viewer);
         
-        // Initialize views
-        imageViewResume = findViewById(R.id.imageViewResume);
-        textViewResumeId = findViewById(R.id.textViewResumeId);
-        textViewJobTitle = findViewById(R.id.textViewJobTitle);
-        textViewDate = findViewById(R.id.textViewDate);
-        textViewMatchScore = findViewById(R.id.textViewMatchScore);
+        imgviewresume = findViewById(R.id.imageViewResume);
+        txt_viewresumeId = findViewById(R.id.textViewResumeId);
+        txt_viewjobTitle = findViewById(R.id.textViewJobTitle);
+        txt_viewdate = findViewById(R.id.textViewDate);
+        txt_viewmatchscore = findViewById(R.id.textViewMatchScore);
         
-        // Get data from intent
         String resumeId = getIntent().getStringExtra("resumeId");
         String jobTitle = getIntent().getStringExtra("jobTitle");
         String date = getIntent().getStringExtra("date");
         String matchScore = getIntent().getStringExtra("matchScore");
         photoPath = getIntent().getStringExtra("photoPath");
         
-        // Display resume information
-        if (resumeId != null) textViewResumeId.setText("Resume ID: " + resumeId);
-        if (jobTitle != null) textViewJobTitle.setText("Job: " + jobTitle);
-        if (date != null) textViewDate.setText("Date: " + date);
-        if (matchScore != null) textViewMatchScore.setText("Match Score: " + matchScore);
+        if (resumeId != null) txt_viewresumeId.setText("Resume ID: " + resumeId);
+        if (jobTitle != null) txt_viewjobTitle.setText("Job: " + jobTitle);
+        if (date != null) txt_viewdate.setText("Date: " + date);
+        if (matchScore != null) txt_viewmatchscore.setText("Match Score: " + matchScore);
         
-        // Load and display the resume photo
         if (photoPath != null && !photoPath.isEmpty()) {
             loadResumePhoto(photoPath);
         } else {
-            textViewResumeId.setText("No photo available");
+            txt_viewresumeId.setText("No photo available");
         }
         findViewById(R.id.buttonShareResumeImage).setOnClickListener(v -> shareResumeImage());
     }
@@ -62,15 +58,15 @@ public class ResumePhotoViewerActivity extends AppCompatActivity {
             if (photoFile.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
                 if (bitmap != null) {
-                    imageViewResume.setImageBitmap(bitmap);
+                    imgviewresume.setImageBitmap(bitmap);
                 } else {
-                    textViewResumeId.setText("Error loading photo");
+                    txt_viewresumeId.setText("Error loading photo");
                 }
             } else {
-                textViewResumeId.setText("Photo file not found");
+                txt_viewresumeId.setText("Photo file not found");
             }
         } catch (Exception e) {
-            textViewResumeId.setText("Error: " + e.getMessage());
+            txt_viewresumeId.setText("Error: " + e.getMessage());
         }
     }
 
