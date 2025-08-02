@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,7 +44,6 @@
 
     </LinearLayout>
 
-    <!-- Resume Information -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -89,7 +87,6 @@
 
     </LinearLayout>
 
-    <!-- Photo Container -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -120,7 +117,6 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Instructions -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +33,6 @@
 
     </LinearLayout>
 
-    <!-- Empty state message -->
     <TextView
         android:id="@+id/emptyStateText"
         android:layout_width="match_parent"
@@ -47,7 +45,6 @@
         android:layout_marginTop="32dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- Resumes RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerResumes"
         android:layout_width="match_parent"

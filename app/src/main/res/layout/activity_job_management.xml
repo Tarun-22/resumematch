@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +33,6 @@
 
     </LinearLayout>
 
-    <!-- Job Management Options -->
     <Button
         android:id="@+id/btnCreateJob"
         android:layout_width="match_parent"

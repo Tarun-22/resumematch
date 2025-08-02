@@ -42,7 +42,6 @@
         android:backgroundTint="#1976D2"
         android:layout_marginBottom="16dp" />
 
-    <!-- Empty State Layout -->
     <LinearLayout
         android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"

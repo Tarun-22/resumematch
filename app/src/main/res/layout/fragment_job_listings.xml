@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +51,6 @@
 
     </LinearLayout>
 
-    <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -61,7 +59,6 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp" />
 
-    <!-- ListView for requirement -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,7 +77,6 @@
         android:dividerHeight="1dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- Job Posts RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerJobPosts"
         android:layout_width="match_parent"
@@ -89,7 +85,6 @@
         android:padding="8dp"
         android:clipToPadding="false" />
 
-    <!-- Empty State -->
     <TextView
         android:id="@+id/textEmptyState"
         android:layout_width="match_parent"

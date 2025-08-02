@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,13 +31,11 @@
             android:textColor="#000000" />
     </LinearLayout>
 
-    <!-- Template Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Cashier Template -->
         <Button
             android:id="@+id/btnCashier"
             android:layout_width="match_parent"
@@ -54,7 +51,6 @@
             android:drawablePadding="16dp"
             android:drawableTint="#FFFFFF" />
 
-        <!-- Sales Associate Template -->
         <Button
             android:id="@+id/btnSalesAssociate"
             android:layout_width="match_parent"
@@ -70,7 +66,6 @@
             android:drawablePadding="16dp"
             android:drawableTint="#FFFFFF" />
 
-        <!-- Stock Clerk Template -->
         <Button
             android:id="@+id/btnStockClerk"
             android:layout_width="match_parent"
@@ -86,7 +81,6 @@
             android:drawablePadding="16dp"
             android:drawableTint="#FFFFFF" />
 
-        <!-- Manager Template -->
         <Button
             android:id="@+id/btnManager"
             android:layout_width="match_parent"
@@ -102,7 +96,6 @@
             android:drawablePadding="16dp"
             android:drawableTint="#FFFFFF" />
 
-        <!-- Custom Template -->
         <Button
             android:id="@+id/btnCustom"
             android:layout_width="match_parent"
@@ -118,7 +111,6 @@
             android:drawableTint="#FFFFFF" />
     </LinearLayout>
 
-    <!-- Info Text -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

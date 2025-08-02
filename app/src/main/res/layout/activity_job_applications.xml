@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -17,7 +16,6 @@
         app:title="Applications"
         app:titleTextColor="#FFFFFF" />
 
-    <!-- Applications RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerApplications"
         android:layout_width="match_parent"
@@ -26,7 +24,6 @@
         android:padding="16dp"
         android:clipToPadding="false" />
 
-    <!-- Empty State -->
     <TextView
         android:id="@+id/textEmptyState"
         android:layout_width="match_parent"

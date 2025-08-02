@@ -34,7 +34,6 @@
                 android:textColor="#000000" />
         </LinearLayout>
 
-        <!-- Job Title Display -->
         <TextView
             android:id="@+id/textJobTitle"
             android:layout_width="match_parent"
@@ -56,7 +55,6 @@
             android:textColor="#777777"
             android:layout_marginBottom="16dp" />
 
-        <!-- Camera Tips -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

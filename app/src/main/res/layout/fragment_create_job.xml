@@ -30,7 +30,6 @@
             android:textColor="#000000" />
     </LinearLayout>
 
-    <!-- Progress Bar and Status -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -92,7 +91,6 @@
         android:padding="12dp"
         android:layout_marginTop="4dp" />
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

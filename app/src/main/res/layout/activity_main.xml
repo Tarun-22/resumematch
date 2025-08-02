@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -17,14 +16,12 @@
         app:title="ResumeMatch"
         app:titleTextColor="#FFFFFF" />
 
-    <!-- Main Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Top Navigation Icons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +29,6 @@
             android:gravity="center"
             android:layout_marginBottom="24dp">
 
-            <!-- Posted Jobs -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -61,7 +57,6 @@
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
-            <!-- Recent Resumes -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -90,7 +85,6 @@
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
-            <!-- Create Job -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -119,7 +113,6 @@
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
-            <!-- Scan Resume -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -149,7 +142,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Section Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -159,7 +151,6 @@
             android:textColor="#000000"
             android:layout_marginBottom="16dp" />
 
-        <!-- Progress Bar -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -168,7 +159,6 @@
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
 
-        <!-- Fragment Container (Initially hidden) -->
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
@@ -176,7 +166,6 @@
             android:layout_weight="1"
             android:visibility="gone" />
 
-        <!-- Action Buttons Section -->
         <LinearLayout
             android:id="@+id/activity_list_section"
             android:layout_width="match_parent"

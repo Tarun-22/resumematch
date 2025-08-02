@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:padding="24dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,7 +32,6 @@
 
     </LinearLayout>
 
-    <!-- Job Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,7 +51,6 @@
         android:background="@android:drawable/editbox_background_normal"
         android:layout_marginBottom="16dp" />
 
-    <!-- Job Description -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -75,14 +72,12 @@
         android:background="@android:drawable/editbox_background_normal"
         android:layout_marginBottom="24dp" />
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="16dp">
 
-        <!-- Update Button -->
         <Button
             android:id="@+id/buttonUpdateJob"
             android:layout_width="match_parent"
@@ -94,7 +89,6 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- Delete Button -->
         <Button
             android:id="@+id/buttonDeleteJob"
             android:layout_width="match_parent"
@@ -106,7 +100,6 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- Cancel Button -->
         <Button
             android:id="@+id/buttonCancel"
             android:layout_width="match_parent"

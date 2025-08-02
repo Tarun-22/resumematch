@@ -6,7 +6,6 @@
     android:padding="16dp"
     android:background="#F5F5F5">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,7 +41,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Store Information Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,7 +142,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Distance Calculation Info -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -189,7 +186,6 @@
 
     </ScrollView>
 
-    <!-- Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
