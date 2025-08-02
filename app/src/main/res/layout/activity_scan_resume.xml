@@ -92,6 +92,7 @@
                 android:textColor="#1976D2"
                 android:backgroundTint="#EEEEEE" />
         </LinearLayout>
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
