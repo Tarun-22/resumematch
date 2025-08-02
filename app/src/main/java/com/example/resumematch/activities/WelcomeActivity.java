@@ -14,13 +14,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.resumematch.R;
-import com.example.resumematch.activities.MainActivity;
 
 public class WelcomeActivity extends AppCompatActivity {
 
     Button btnEnter;
     ImageView iconImage;
-    TextView appTitle, appSubtitle;
+    TextView appTitle, apptitle;
     private static final int SPLASH_DELAY = 3000; // 3 seconds
 
     @Override
@@ -32,12 +31,12 @@ public class WelcomeActivity extends AppCompatActivity {
         btnEnter = findViewById(R.id.btnEnterEmployer);
         iconImage = findViewById(R.id.iconImage);
         appTitle = findViewById(R.id.appTitle);
-        appSubtitle = findViewById(R.id.appSubtitle);
+        apptitle = findViewById(R.id.apptitle);
 
         // Set initial alpha to 0 for fade-in effect
         iconImage.setAlpha(0f);
         appTitle.setAlpha(0f);
-        appSubtitle.setAlpha(0f);
+        apptitle.setAlpha(0f);
 
         // Start slide-up and fade-in animation
         startSlideUpAnimation();
@@ -116,9 +115,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 AlphaAnimation subtitleFadeIn = new AlphaAnimation(0.0f, 1.0f);
                 subtitleFadeIn.setDuration(800);
                 
-                appSubtitle.startAnimation(subtitleSlideUp);
-                appSubtitle.startAnimation(subtitleFadeIn);
-                appSubtitle.setAlpha(1f);
+                apptitle.startAnimation(subtitleSlideUp);
+                apptitle.startAnimation(subtitleFadeIn);
+                apptitle.setAlpha(1f);
             }
         }, 700);
     }
