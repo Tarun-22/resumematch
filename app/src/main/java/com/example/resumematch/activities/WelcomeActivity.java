@@ -17,40 +17,35 @@ import com.example.resumematch.R;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    Button btnEnter;
-    ImageView iconImage;
-    TextView appTitle, apptitle;
-    private static final int SPLASH_DELAY = 3000; // 3 seconds
+    Button ButtonEnter;
+    ImageView IconImage;
+    TextView appTitle, Apptitle;
+    private static final int Splash_Delay = 3000; // 3secs
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        // Initialize views
-        btnEnter = findViewById(R.id.btnEnterEmployer);
-        iconImage = findViewById(R.id.iconImage);
+        ButtonEnter = findViewById(R.id.btnEnterEmployer);
+        IconImage = findViewById(R.id.iconImage);
         appTitle = findViewById(R.id.appTitle);
-        apptitle = findViewById(R.id.apptitle);
+        Apptitle = findViewById(R.id.apptitle);
 
-        // Set initial alpha to 0 for fade-in effect
-        iconImage.setAlpha(0f);
+        IconImage.setAlpha(0f);
         appTitle.setAlpha(0f);
-        apptitle.setAlpha(0f);
+        Apptitle.setAlpha(0f);
 
-        // Start slide-up and fade-in animation
         startSlideUpAnimation();
 
-        // Set up automatic navigation after delay
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 navigateToMainActivity();
             }
-        }, SPLASH_DELAY);
+        }, Splash_Delay);
 
-        // Manual button click (optional - user can skip the delay)
-        btnEnter.setOnClickListener(new View.OnClickListener() {
+        ButtonEnter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 navigateToMainActivity();
@@ -59,7 +54,6 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void startSlideUpAnimation() {
-        // Slide up and fade in the logo
         TranslateAnimation slideUp = new TranslateAnimation(
             Animation.RELATIVE_TO_SELF, 0.0f,
             Animation.RELATIVE_TO_SELF, 0.0f,
@@ -72,12 +66,10 @@ public class WelcomeActivity extends AppCompatActivity {
         AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
         fadeIn.setDuration(1000);
         
-        // Combine slide up and fade in for logo
-        iconImage.startAnimation(slideUp);
-        iconImage.startAnimation(fadeIn);
-        iconImage.setAlpha(1f);
+        IconImage.startAnimation(slideUp);
+        IconImage.startAnimation(fadeIn);
+        IconImage.setAlpha(1f);
 
-        // Slide up and fade in the title after a short delay
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -99,7 +91,6 @@ public class WelcomeActivity extends AppCompatActivity {
             }
         }, 400);
 
-        // Slide up and fade in the subtitle after title
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -115,9 +106,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 AlphaAnimation subtitleFadeIn = new AlphaAnimation(0.0f, 1.0f);
                 subtitleFadeIn.setDuration(800);
                 
-                apptitle.startAnimation(subtitleSlideUp);
-                apptitle.startAnimation(subtitleFadeIn);
-                apptitle.setAlpha(1f);
+                Apptitle.startAnimation(subtitleSlideUp);
+                Apptitle.startAnimation(subtitleFadeIn);
+                Apptitle.setAlpha(1f);
             }
         }, 700);
     }
@@ -125,6 +116,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private void navigateToMainActivity() {
         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
         startActivity(intent);
-        finish(); // Close the welcome activity so user can't go back
+        finish();
     }
 }

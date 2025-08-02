@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class StoreProfileActivity extends AppCompatActivity {
     
-    private EditText editTextStoreName, editTextStoreAddress, editTextStoreCity, 
+    private EditText editTextStoreName, editTextStoreAddress, editTextStoreCity,
                      editTextStoreState, editTextStoreZipCode, editTextStorePhone, 
                      editTextStoreEmail, editTextStoreDescription;
     private Button buttonSave, buttonCancel;
@@ -33,7 +33,6 @@ public class StoreProfileActivity extends AppCompatActivity {
         
         dataRepository = new DataRepository(this);
         
-        // Initialize views
         editTextStoreName = findViewById(R.id.editTextStoreName);
         editTextStoreAddress = findViewById(R.id.editTextStoreAddress);
         editTextStoreCity = findViewById(R.id.editTextStoreCity);
@@ -46,12 +45,10 @@ public class StoreProfileActivity extends AppCompatActivity {
         buttonCancel = findViewById(R.id.buttonCancel);
         ImageView backButton = findViewById(R.id.backButton);
         
-        // Set click listeners
         backButton.setOnClickListener(v -> finish());
         buttonCancel.setOnClickListener(v -> finish());
         buttonSave.setOnClickListener(v -> saveStoreProfile());
         
-        // Load existing store profile if available
         loadExistingStoreProfile();
     }
     
@@ -85,21 +82,18 @@ public class StoreProfileActivity extends AppCompatActivity {
         String email = editTextStoreEmail.getText().toString().trim();
         String description = editTextStoreDescription.getText().toString().trim();
         
-        // Validate required fields
-        if (storeName.isEmpty() || storeAddress.isEmpty() || storeCity.isEmpty() || 
+        if (storeName.isEmpty() || storeAddress.isEmpty() || storeCity.isEmpty() ||
             storeState.isEmpty() || storeZipCode.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
             return;
         }
         
-        // Create store profile
         String storeId = "STORE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         StoreProfile storeProfile = new StoreProfile(
             storeId, storeName, storeAddress, storeCity, storeState, storeZipCode,
             phone, email, description
         );
         
-        // Save to database
         Snackbar.make(buttonSave, "Saving store profile...", Snackbar.LENGTH_SHORT).show();
         
         dataRepository.insertStore(storeProfile, new DataRepository.DatabaseCallback<Void>() {
