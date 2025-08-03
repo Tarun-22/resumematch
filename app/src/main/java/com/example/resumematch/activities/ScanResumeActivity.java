@@ -175,7 +175,6 @@ public class ScanResumeActivity extends AppCompatActivity {
     private void processCameraResult() {
         try {
             if (currentPhotoFile != null && currentPhotoFile.exists()) {
-                // Convert the file to URI
                 selectedImageUri = Uri.fromFile(currentPhotoFile);
                 
 
@@ -464,7 +463,7 @@ public class ScanResumeActivity extends AppCompatActivity {
     }
 
     private void processWithFallback(String resumeText, StoreProfile storeProfile) {
-        // Fallback to old method if GPT fails
+        // Fallback to old method if the GPT fails
         ResumeDataExtractor.extractDataWithMLKit(this, resumeText, extractedData -> {
             try {
                 EnhancedScoringSystem.ScoringResult scoringResult = EnhancedScoringSystem.calculateEnhancedScore(jobDescription, extractedData, storeProfile);

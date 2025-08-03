@@ -31,7 +31,6 @@ public class EnhancedScoringSystem {
             this.categoryScores = new HashMap<>();
         }
         
-        // Getters and Setters
         public int getOverallScore() { return overallScore; }
         public void setOverallScore(int overallScore) { this.overallScore = overallScore; }
         

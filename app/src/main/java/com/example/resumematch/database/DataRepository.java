@@ -1,6 +1,6 @@
 package com.example.resumematch.database;
 //we used genAI on how to perfectly setup the data repository
-//we created our strucuture, and asked genAI to properly strucuture,
+//we created our structure, and asked genAI to properly structure,
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
