@@ -40,7 +40,7 @@ public class Config {
     public static String getOpenAIApiKey() {
         if (preferences != null) {
             String userKey = preferences.getString(KEY_OPENAI_API_KEY, null);
-            if (userKey != null && !userKey.equals(DEFAULT_OPENAI_API_KEY)) {
+            if (userKey != null && !userKey.equals(DEFAULT_OPENAI_API_KEY) && userKey.startsWith("sk-")) {
                 Log.d("Config", "Using OpenAI API key from SharedPreferences");
                 return userKey;
             }
@@ -49,17 +49,17 @@ public class Config {
         if (envProperties != null) {
             String envKey = envProperties.getProperty("OPENAI_API_KEY");
             Log.d("Config", "Environment file loaded, checking OpenAI key: " + (envKey != null ? "found" : "not found"));
-            if (envKey != null && !envKey.equals("your-openai-api-key-here")) {
+            if (envKey != null && !envKey.equals("your-openai-api-key-here") && envKey.startsWith("sk-")) {
                 Log.d("Config", "Using OpenAI API key from environment file");
                 return envKey;
             } else {
-                Log.w("Config", "OpenAI API key in environment file is placeholder or invalid");
+                Log.w("Config", "OpenAI API key in environment file is placeholder or invalid format");
             }
         } else {
             Log.w("Config", "Environment properties not loaded");
         }
 
-        Log.w("Config", "Using default OpenAI API key. Please configure your API key.");
+        Log.w("Config", "Using default OpenAI API key. Please configure your API key in env.properties file.");
         return DEFAULT_OPENAI_API_KEY;
     }
 

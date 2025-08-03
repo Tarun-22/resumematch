@@ -168,9 +168,11 @@ public class GPTApiService {
             Log.d("GPTApi", "Store address: " + storeAddress);
             
             String apiKey = Config.getOpenAIApiKey();
-            if (apiKey == null || apiKey.isEmpty() || apiKey.equals("your-openai-api-key-here")) {
-                Log.e("GPTApi", "Invalid API key");
-                callback.onError("Invalid API key. Please check the configuration.");
+            if (apiKey == null || apiKey.isEmpty() || 
+                apiKey.equals("your-openai-api-key-here") || 
+                !apiKey.startsWith("sk-")) {
+                Log.e("GPTApi", "Invalid API key: " + (apiKey != null ? apiKey.substring(0, Math.min(10, apiKey.length())) + "..." : "null"));
+                callback.onError("Invalid OpenAI API key. Please check the configuration in env.properties file.");
                 return;
             }
             
