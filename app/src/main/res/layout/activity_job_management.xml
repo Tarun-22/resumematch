@@ -30,7 +30,6 @@
             android:textStyle="bold"
             android:textColor="#000000"
             android:gravity="center" />
-
     </LinearLayout>
 
     <Button
@@ -68,4 +67,4 @@
         android:textColor="#FFFFFF"
         android:backgroundTint="#F44336" />
 
-</LinearLayout> 
+</LinearLayout>

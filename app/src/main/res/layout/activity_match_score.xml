@@ -73,7 +73,6 @@
             android:orientation="vertical"
             android:layout_marginBottom="16dp" />
 
-        <!-- Missing Keywords -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
