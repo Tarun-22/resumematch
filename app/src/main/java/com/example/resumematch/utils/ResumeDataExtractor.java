@@ -26,11 +26,11 @@ public class ResumeDataExtractor {
         private String education;
         private List<String> skills;
         private String availability;
-        private String availabilityDetails; // "Mon-Fri 9-5, Sat 10-3"
-        private String transportation; // "Car", "Public Transit", "Walking"
+        private String availabilityDetails; // Mon to Fri 9-5, Sat 10-3
+        private String transportation; // Car, Public Transport, Walking
         private String expectedSalary;
         private String startDate;
-        private String workAuthorization; // "US Citizen", "Work Visa", etc.
+        private String workAuthorization; // USA citizen, Work Visa
         private String emergencyContact;
         private String emergencyPhone;
         private String references;
